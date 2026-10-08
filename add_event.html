@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>간편 일정 등록 - SubjectPlan</title>
+  
+  <!-- Supabase JS SDK & Client Layer -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabaseClient.js"></script>
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-sub: #162032;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #10b981;
+      --danger: #ef4444;
+      --accent: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    /* 헤더 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px;
+    }
+    .header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .icon-btn:hover {
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* 탭 메뉴 */
+    .tabs {
+      display: flex;
+      background: var(--card-sub);
+      border-radius: 12px;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--accent);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* 카드 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* 카테고리 칩 */
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--card-sub);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip.active {
+      background: rgba(79, 70, 229, 0.2);
+      color: #818cf8;
+      border-color: var(--primary);
+    }
+
+    /* 텍스트 입력 */
+    textarea {
+      width: 100%;
+      height: 110px;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      resize: none;
+      outline: none;
+      line-height: 1.4;
+    }
+    textarea:focus {
+      border-color: var(--primary);
+    }
+
+    /* 제출 버튼 */
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+    .btn-submit:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+
+    /* 결과 피드백 */
+    .result-box {
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 0.88rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .result-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      color: #34d399;
+    }
+    .result-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: #f87171;
+    }
+
+    /* 모달 */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal input {
+      width: 100%;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .spinner {
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 헤더 -->
+    <div class="header">
+      <a href="./index.html" class="icon-btn" title="플래너 홈">←</a>
+      <h1>📅 간편 일정 등록</h1>
+      <div class="header-btns">
+        <button class="icon-btn" onclick="openApiKeyModal()" title="Gemini API Key 설정">🔑</button>
+      </div>
+    </div>
+
+    <!-- 입력 폼 카드 -->
+    <div class="card">
+      <!-- 1. 일정 구분 -->
+      <div>
+        <div class="section-label" style="margin-bottom: 6px;">일정 구분</div>
+        <div class="chips" id="catChips">
+          <div class="chip active" onclick="selectCat('진도계획')">진도계획</div>
+          <div class="chip" onclick="selectCat('학원일정')">학원일정</div>
+          <div class="chip" onclick="selectCat('자습')">자습</div>
+          <div class="chip" onclick="selectCat('복습')">복습</div>
+          <div class="chip" onclick="selectCat('시험')">시험</div>
+        </div>
+      </div>
+
+      <!-- 2. 과목 선택 -->
+      <div>
+        <div class="section-label" style="margin-bottom: 6px;">과목 선택</div>
+        <div class="chips" id="subjChips">
+          <div class="chip active" onclick="selectSubj('영어')">영어</div>
+          <div class="chip" onclick="selectSubj('국어')">국어</div>
+          <div class="chip" onclick="selectSubj('통합사회')">통합사회</div>
+          <div class="chip" onclick="selectSubj('수학')">수학</div>
+          <div class="chip" onclick="selectSubj('공통')">공통</div>
+        </div>
+      </div>
+
+      <!-- 3. 일정 내용 입력 -->
+      <div>
+        <div class="section-label" style="margin-bottom: 6px;">일정 내용 입력</div>
+        <textarea id="textInput" placeholder="예: 내일 영어 3과 본문 워크북 10p 풀기&#10;또는: 이번주 금요일 통합사회 인권 단원 인강 수강"></textarea>
+      </div>
+
+      <!-- 제출 버튼 -->
+      <button class="btn-submit" id="submitBtn" onclick="submitSchedule()">
+        <span class="spinner" id="submitSpinner"></span>
+        <span id="submitText">Supabase에 즉시 등록</span>
+      </button>
+
+      <!-- 결과 메시지 -->
+      <div id="resultBox" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- API Key 모달 -->
+  <div class="modal-backdrop" id="apiModal">
+    <div class="modal">
+      <h3 style="font-size: 1.1rem; color: #fff;">🔑 Gemini API 키 설정</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+        자연어 문장("내일 2시 영어 학원")을 AI로 정교하게 분석하려면 Google AI Studio의 Gemini API 키를 입력하세요. 미입력 시 내장 한국어 규칙 파서가 작동합니다.
+      </p>
+      <input type="password" id="apiKeyInput" placeholder="AIzaSy...">
+      <div style="display: flex; gap: 8px;">
+        <button onclick="closeApiKeyModal()" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer;">취소</button>
+        <button onclick="saveApiKey()" style="flex:1; padding: 10px; border-radius: 8px; border: none; background: var(--primary); color: #fff; font-weight: 700; cursor: pointer;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedCategory = '진도계획';
+    let selectedSubject = '영어';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSubjectsFromSupabase();
+    });
+
+    async function loadSubjectsFromSupabase() {
+      try {
+        const client = SupabaseService.getClient();
+        if (!client) return;
+
+        const { data: subjs } = await client.from('subjects').select('name');
+        if (subjs && subjs.length > 0) {
+          const container = document.getElementById('subjChips');
+          container.innerHTML = '';
+          subjs.forEach((s, idx) => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${idx === 0 ? 'active' : ''}`;
+            chip.textContent = s.name;
+            chip.onclick = () => selectSubj(s.name);
+            container.appendChild(chip);
+            if (idx === 0) selectedSubject = s.name;
+          });
+        }
+      } catch (e) {
+        console.warn('과목 로드 생략:', e);
+      }
+    }
+
+    function selectCat(cat) {
+      selectedCategory = cat;
+      document.querySelectorAll('#catChips .chip').forEach(c => {
+        c.classList.toggle('active', c.textContent.trim() === cat);
+      });
+    }
+
+    function selectSubj(subj) {
+      selectedSubject = subj;
+      document.querySelectorAll('#subjChips .chip').forEach(c => {
+        c.classList.toggle('active', c.textContent.trim() === subj);
+      });
+    }
+
+    async function submitSchedule() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) {
+        showResult(false, '등록할 일정 내용을 입력해주세요.');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const submitSpinner = document.getElementById('submitSpinner');
+      const submitText = document.getElementById('submitText');
+
+      submitBtn.disabled = true;
+      submitSpinner.style.display = 'inline-block';
+      submitText.textContent = '일정 분석 및 Supabase 등록 중...';
+      hideResult();
+
+      try {
+        const apiKey = localStorage.getItem('SP_GEMINI_KEY') || '';
+        let events = [];
+
+        // 1. API Key가 있으면 Gemini API 호출 시도
+        if (apiKey) {
+          try {
+            events = await callGeminiAPI(text, apiKey, selectedCategory, selectedSubject);
+          } catch (aiErr) {
+            console.warn('Gemini 호출 실패, 로컬 규칙 파서로 대체:', aiErr);
+            events = parseTextLocally(text, selectedCategory, selectedSubject);
+          }
+        } else {
+          // 2. 미입력 시 내장 한국어 날짜/일정 파서
+          events = parseTextLocally(text, selectedCategory, selectedSubject);
+        }
+
+        if (!events || events.length === 0) {
+          throw new Error('일정 분석에 실패했습니다. 내용을 조금 더 구체적으로 적어주세요.');
+        }
+
+        // 3. Supabase에 직접 INSERT
+        await SupabaseService.insertSchedules(events);
+
+        showResult(true, `✅ ${events.length}건의 일정이 Supabase에 성공적으로 등록되었습니다!<br>• 날짜: ${events[0].date}<br>• 과목: ${events[0].subject}<br>• 제목: ${events[0].title}`);
+        document.getElementById('textInput').value = '';
+      } catch (err) {
+        console.error('등록 실패:', err);
+        showResult(false, '등록 오류: ' + (err.message || err));
+      } finally {
+        submitBtn.disabled = false;
+        submitSpinner.style.display = 'none';
+        submitText.textContent = 'Supabase에 즉시 등록';
+      }
+    }
+
+    // 내장 한국어 규칙 기반 파서
+    function parseTextLocally(rawText, defaultCat, defaultSubj) {
+      const now = new Date();
+      let targetDate = new Date();
+
+      if (rawText.includes('그저께') || rawText.includes('그제')) targetDate.setDate(now.getDate() - 2);
+      else if (rawText.includes('어제')) targetDate.setDate(now.getDate() - 1);
+      else if (rawText.includes('모레')) targetDate.setDate(now.getDate() + 2);
+      else if (rawText.includes('내일')) targetDate.setDate(now.getDate() + 1);
+      else {
+        const mMatch = rawText.match(/(\d{1,2})[월/.]\s*(\d{1,2})[일]?/);
+        if (mMatch) {
+          targetDate.setMonth(parseInt(mMatch[1], 10) - 1);
+          targetDate.setDate(parseInt(mMatch[2], 10));
+        }
+      }
+
+      const yyyy = targetDate.getFullYear();
+      const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(targetDate.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+
+      // 과목 감지
+      let subj = defaultSubj;
+      ['영어', '국어', '통합사회', '수학', '과학', '한국사'].forEach(s => {
+        if (rawText.includes(s)) subj = s;
+      });
+
+      // 일정 제목 정제
+      let title = rawText
+        .replace(/(오늘|내일|어제|모레|그제|그저께)/g, '')
+        .replace(/(\d{1,2}[월/.])\s*\d{1,2}[일]?/g, '')
+        .replace(new RegExp(subj, 'g'), '')
+        .trim();
+
+      if (!title) title = rawText;
+
+      return [{
+        date: dateStr,
+        category: defaultCat,
+        subject: subj,
+        title: title,
+        detail: '',
+        durationSec: 0,
+        completed: false
+      }];
+    }
+
+    // Gemini API 호출
+    async function callGeminiAPI(text, apiKey, defaultCat, defaultSubj) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const prompt = `당신은 스터디 플래너 일정 파서입니다.
+오늘 날짜: ${todayStr}
+입력 텍스트: "${text}"
+기본 과목: "${defaultSubj}", 기본 카테고리: "${defaultCat}"
+
+다음 JSON 배열 형식으로만 응답하세요(코드블록 없이 순수 JSON):
+[
+  {
+    "date": "YYYY-MM-DD",
+    "category": "진도계획|학원일정|자습|복습|시험",
+    "subject": "과목명",
+    "title": "구체적인 일정 제목",
+    "detail": ""
+  }
+]`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json' }
+        })
+      });
+
+      if (!res.ok) throw new Error('Gemini API 응답 오류: ' + res.status);
+      const data = await res.json();
+      const rawJson = data.candidates[0].content.parts[0].text;
+      return JSON.parse(rawJson);
+    }
+
+    function showResult(isSuccess, html) {
+      const box = document.getElementById('resultBox');
+      box.style.display = 'block';
+      box.className = `result-box ${isSuccess ? 'result-success' : 'result-error'}`;
+      box.innerHTML = html;
+    }
+
+    function hideResult() {
+      document.getElementById('resultBox').style.display = 'none';
+    }
+
+    function openApiKeyModal() {
+      document.getElementById('apiKeyInput').value = localStorage.getItem('SP_GEMINI_KEY') || '';
+      document.getElementById('apiModal').style.display = 'flex';
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('apiModal').style.display = 'none';
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key) localStorage.setItem('SP_GEMINI_KEY', key);
+      else localStorage.removeItem('SP_GEMINI_KEY');
+      closeApiKeyModal();
+      alert('Gemini API 키가 저장되었습니다.');
+    }
+  </script>
+</body>
+</html>

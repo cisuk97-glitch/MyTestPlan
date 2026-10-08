@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubjectPlan - 시험 성과 아카이브 및 공부 추이 분석</title>
+  
+  <!-- Tailwind CSS & Lucide Icons & Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Supabase JS SDK & Client Layer -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabaseClient.js"></script>
+
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #F0F4F8;
+      color: #1e293b;
+    }
+
+    .neu-card {
+      background: #F0F4F8;
+      box-shadow: 6px 6px 14px rgba(209, 217, 230, 0.7), -6px -6px 14px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+    .neu-card-sm {
+      background: #F0F4F8;
+      box-shadow: 3px 3px 8px rgba(209, 217, 230, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .neu-inset {
+      background: #E8EEF5;
+      box-shadow: inset 3px 3px 6px rgba(209, 217, 230, 0.7), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(209, 217, 230, 0.3);
+    }
+    .neu-btn {
+      background: #F0F4F8;
+      box-shadow: 4px 4px 10px rgba(209, 217, 230, 0.7), -4px -4px 10px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .neu-btn:hover {
+      box-shadow: 2px 2px 5px rgba(209, 217, 230, 0.7), -2px -2px 5px rgba(255, 255, 255, 0.9);
+      transform: translateY(1px);
+    }
+    .neu-btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 4px 4px 12px rgba(37, 99, 235, 0.3), -2px -2px 8px rgba(255, 255, 255, 0.8);
+      color: white;
+      transition: all 0.2s ease;
+    }
+    .neu-btn-primary:hover {
+      box-shadow: 2px 2px 6px rgba(37, 99, 235, 0.4);
+      transform: translateY(1px);
+    }
+    .neu-tab-active {
+      background: #F0F4F8;
+      box-shadow: inset 2px 2px 5px rgba(209, 217, 230, 0.7), inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+      color: #2563eb;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20 flex flex-col">
+
+  <!-- 토스트 알림 컨테이너 -->
+  <div id="toast-container" class="fixed bottom-8 right-8 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 상단 헤더 -->
+  <header class="h-16 bg-[#F0F4F8] border-b border-white/80 shadow-[0_4px_16px_rgba(209,217,230,0.5)] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <a href="./index.html" title="메인 플래너로 이동" class="w-10 h-10 rounded-2xl neu-card flex items-center justify-center text-blue-600 font-extrabold shadow-sm hover:text-blue-700 transition">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+      </a>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-extrabold text-base sm:text-lg text-slate-800 tracking-tight">시험 성과 아카이브 & 통계 추이 분석</h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">Supabase 통계 아카이브</span>
+        </div>
+        <p class="text-[11px] text-slate-500 font-medium">과목별·단원별 공부시간, 회차별 점수 추이 및 최종 지필고사 결과 분석</p>
+      </div>
+    </div>
+
+    <!-- 시험 선택 셀렉터 & 메인 플래너 버튼 -->
+    <div class="flex items-center gap-2.5">
+      <div class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-2xl neu-inset">
+        <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
+        <select id="select-archive-exam" onchange="onExamArchiveSelected(this.value)" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer pr-2 max-w-[200px] sm:max-w-xs truncate">
+          <option value="">불러오는 중...</option>
+        </select>
+      </div>
+
+      <a href="./index.html" class="neu-btn-primary flex items-center gap-1.5 text-xs py-2 px-3.5 rounded-xl font-bold shadow-md">
+        <i data-lucide="home" class="w-4 h-4"></i>
+        <span class="hidden sm:inline">메인 플래너로 가기</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- 메인 대시보드 -->
+  <main class="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- 1. 안내 배너 -->
+    <div class="neu-card p-5 sm:p-6 rounded-3xl relative overflow-hidden border-l-4 border-l-blue-500 space-y-2">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl neu-card-sm flex items-center justify-center text-blue-600 font-bold">💡</span>
+          <h2 class="text-base font-extrabold text-slate-800" id="banner-exam-title">시험 성과 리포트</h2>
+          <span id="banner-status-badge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700">📦 통계 보존 스냅샷</span>
+        </div>
+        <div class="text-xs text-slate-500 font-mono font-semibold" id="banner-exam-period">기간: -</div>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+        시험 마감 시점에 영구 보존된 <strong>과목별 총 학습시간</strong>, <strong>카테고리별 비중</strong>, <strong>단원별 회차별 성적 추이(score_trend)</strong> 및 <strong>최종 지필고사 성적</strong>을 종합 시각화합니다.
+      </p>
+    </div>
+
+    <!-- 2. 핵심 4대 요약 메트릭 카드 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- 총 공부시간 & 비율 -->
+      <div class="neu-card p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> 총 누적 학습시간
+          </div>
+          <div class="text-2xl sm:text-3xl font-extrabold font-mono text-slate-800" id="metric-total-hours">0시간 0분</div>
+        </div>
+        <div class="pt-3 border-t border-slate-200/60 mt-3 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-bold">
+            <span class="text-amber-600" id="metric-acad-summary">학원: 0시간 (0%)</span>
+            <span class="text-blue-600" id="metric-self-summary">자습: 0시간 (0%)</span>
+          </div>
+          <div class="w-full neu-inset p-0.5 rounded-full overflow-hidden flex h-2.5">
+            <div id="metric-bar-acad" style="width: 50%" class="bg-amber-400 h-full rounded-full transition-all duration-300"></div>
+            <div id="metric-bar-self" style="width: 50%" class="bg-blue-500 h-full rounded-full transition-all duration-300"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 단원 학습 & 테스트 현황 -->
+      <div class="neu-card p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+            <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-500"></i> 단원 학습 & 테스트
+          </div>
+          <div class="flex items-baseline justify-between gap-2">
+            <div class="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-600" id="metric-lesson-count">0개 단원</div>
+          </div>
+        </div>
+        <div class="pt-3 border-t border-slate-200/60 mt-3 flex items-center justify-between text-xs text-slate-500 font-medium">
+          <span>총 테스트 응시 회차:</span>
+          <strong class="text-slate-800 font-mono font-bold" id="metric-test-count">0회</strong>
+        </div>
+      </div>
+
+      <!-- 카테고리별 최다 학습 -->
+      <div class="neu-card p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+            <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-indigo-500"></i> 최다 공부 카테고리
+          </div>
+          <div class="text-2xl sm:text-3xl font-extrabold text-slate-800 truncate" id="metric-top-category">-</div>
+        </div>
+        <div class="pt-3 border-t border-slate-200/60 mt-3 text-xs text-slate-500 font-medium truncate" id="metric-category-sub">
+          카테고리별 시간 분할 집계
+        </div>
+      </div>
+
+      <!-- 최종 실제 시험 평균 성적 -->
+      <div class="neu-card p-5 rounded-3xl flex flex-col justify-between">
+        <div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+            <i data-lucide="award" class="w-3.5 h-3.5 text-rose-500"></i> 실제 시험 평균 성적
+          </div>
+          <div class="text-2xl sm:text-3xl font-extrabold font-mono text-rose-600" id="metric-avg-score">- 점</div>
+        </div>
+        <div class="pt-3 border-t border-slate-200/60 mt-3 text-xs text-slate-500 font-medium flex items-center justify-between">
+          <span id="metric-score-label">과목별 성적:</span>
+          <strong class="text-slate-800 font-mono font-bold truncate max-w-[150px]" id="metric-score-summary">-</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 핵심 비교 분석 그래프 영역 (2열) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- 그래프 1: 주차별 누적 학습시간 추이 -->
+      <div class="neu-card p-5 sm:p-6 rounded-3xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base text-slate-800 flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-4 h-4 text-blue-500"></i>
+              주차별 학습시간 페이스 추이
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">D-4주부터 D-Day까지 주차별 공부시간 변화 추이를 확인합니다.</p>
+          </div>
+        </div>
+        <div class="h-64 relative">
+          <canvas id="chartWeeklyPace"></canvas>
+        </div>
+      </div>
+
+      <!-- 그래프 2: 과목별 학습시간 배분 비교 -->
+      <div class="neu-card p-5 sm:p-6 rounded-3xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base text-slate-800 flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-amber-500"></i>
+              과목별 학습시간 투자 밸런스
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">과목별로 공부시간이 균형 있게 배분되었는지 확인합니다.</p>
+          </div>
+        </div>
+        <div class="h-64 relative">
+          <canvas id="chartSubjectBalance"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 과목별 실제 성적 및 공부시간 카드 섹션 -->
+    <div class="neu-card p-5 sm:p-6 rounded-3xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-extrabold text-sm sm:text-base text-slate-800 flex items-center gap-2">
+            <i data-lucide="book-open" class="w-4 h-4 text-indigo-500"></i>
+            과목별 최종 결과 & 학습시간 분석
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">실제 시험 결과 점수와 목표점수, 학원 vs 자습 소요시간을 비교합니다.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="subject-cards-container">
+        <!-- JS 렌더링 -->
+      </div>
+    </div>
+
+    <!-- 5. 단원별 회차별 점수 추이 (score_trend) & 테스트 분석 섹션 -->
+    <div class="neu-card p-5 sm:p-6 rounded-3xl space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 class="font-extrabold text-sm sm:text-base text-slate-800 flex items-center gap-2">
+            <i data-lucide="line-chart" class="w-4 h-4 text-emerald-500"></i>
+            단원별 회차별 점수 성장 추이 (Score Trend)
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">단원별로 치러진 단어/문항 테스트의 회차별(1회차 -> 2회차...) 점수 변화 곡선을 확인합니다.</p>
+        </div>
+        <!-- 단원 필터 셀렉터 -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500">단원 선택:</span>
+          <select id="select-lesson-filter" onchange="renderLessonTrendChart(this.value)" class="text-xs font-bold px-3 py-1.5 rounded-xl neu-inset outline-none bg-transparent">
+            <!-- JS 동적 생성 -->
+          </select>
+        </div>
+      </div>
+
+      <!-- 단원 추이 꺾은선 차트 -->
+      <div class="h-64 relative">
+        <canvas id="chartLessonTrend"></canvas>
+      </div>
+
+      <!-- 단원별 상세 통계 카드 리스트 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2" id="lesson-cards-container">
+        <!-- JS 렌더링 -->
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentArchiveDetail = null;
+    let chartWeeklyPaceInstance = null;
+    let chartSubjectBalanceInstance = null;
+    let chartLessonTrendInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      loadArchiveExamList();
+    });
+
+    async function loadArchiveExamList() {
+      const select = document.getElementById('select-archive-exam');
+      select.innerHTML = '<option value="">시험 목록 불러오는 중...</option>';
+
+      try {
+        const list = await SupabaseService.getExamArchiveList();
+        select.innerHTML = '';
+
+        if (!list || list.length === 0) {
+          select.innerHTML = '<option value="">보존된 지난 시험이 없습니다</option>';
+          showToast('보존된 지난 시험 아카이브가 없습니다.', 'info');
+          return;
+        }
+
+        list.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.id;
+          opt.textContent = `📦 ${item.title} (${item.dday || 'D-Day'})`;
+          select.appendChild(opt);
+        });
+
+        // 첫 번째 시험 자동 선택 로드
+        if (list.length > 0) {
+          loadArchiveDetail(list[0].id);
+        }
+      } catch (err) {
+        console.error('목록 로드 오류:', err);
+        select.innerHTML = '<option value="">Supabase 연결 필요</option>';
+        showToast('Supabase 연동을 확인해주세요.', 'error');
+      }
+    }
+
+    function onExamArchiveSelected(examId) {
+      if (!examId) return;
+      loadArchiveDetail(examId);
+    }
+
+    async function loadArchiveDetail(examId) {
+      try {
+        const detail = await SupabaseService.getExamArchiveDetail(examId);
+        if (!detail || !detail.meta) {
+          showToast('아카이브 상세 정보를 불러올 수 없습니다.', 'error');
+          return;
+        }
+        currentArchiveDetail = detail;
+        renderArchiveView(detail);
+        showToast('시험 통계 데이터를 불러왔습니다.', 'info');
+      } catch (e) {
+        console.error('상세 로드 오류:', e);
+        showToast('상세 로드 실패: ' + e.message, 'error');
+      }
+    }
+
+    function renderArchiveView(detail) {
+      const meta = detail.meta || {};
+      const subjects = detail.subjects || [];
+      const lessons = detail.lessons || [];
+
+      // 1. 배너 바인딩
+      document.getElementById('banner-exam-title').textContent = meta.title || '시험 성과 리포트';
+      document.getElementById('banner-exam-period').textContent = `대비 기간: ${meta.start_date || '시작일'} ~ ${meta.dday || 'D-Day'}`;
+
+      // 2. 상단 4대 메트릭 카드 바인딩
+      // (1) 총 학습시간
+      const totalSec = Number(meta.total_duration_sec) || 0;
+      const totalH = Math.floor(totalSec / 3600);
+      const totalM = Math.floor((totalSec % 3600) / 60);
+      document.getElementById('metric-total-hours').textContent = `${totalH}시간 ${totalM}분`;
+
+      const catTimes = meta.category_times || {};
+      let acadSec = catTimes['학원일정'] || catTimes['학원'] || 0;
+      let selfSec = totalSec - acadSec;
+      if (selfSec < 0) selfSec = 0;
+
+      const acadPct = totalSec > 0 ? Math.round((acadSec / totalSec) * 100) : 0;
+      const selfPct = 100 - acadPct;
+      document.getElementById('metric-acad-summary').textContent = `학원: ${(acadSec / 3600).toFixed(1)}h (${acadPct}%)`;
+      document.getElementById('metric-self-summary').textContent = `자습: ${(selfSec / 3600).toFixed(1)}h (${selfPct}%)`;
+      document.getElementById('metric-bar-acad').style.width = acadPct + '%';
+      document.getElementById('metric-bar-self').style.width = selfPct + '%';
+
+      // (2) 단원 수 & 테스트 응시 수
+      document.getElementById('metric-lesson-count').textContent = `${lessons.length}개 단원`;
+      const totalTests = lessons.reduce((sum, l) => sum + (Number(l.test_count) || 0), 0);
+      document.getElementById('metric-test-count').textContent = `${totalTests}회`;
+
+      // (3) 최다 공부 카테고리
+      let topCat = '-';
+      let topCatSec = 0;
+      Object.keys(catTimes).forEach(cat => {
+        if (catTimes[cat] > topCatSec) {
+          topCatSec = catTimes[cat];
+          topCat = cat;
+        }
+      });
+      document.getElementById('metric-top-category').textContent = topCat;
+      document.getElementById('metric-category-sub').textContent = topCat !== '-' 
+        ? `${(topCatSec / 3600).toFixed(1)}시간 (${totalSec > 0 ? Math.round(topCatSec / totalSec * 100) : 0}%)`
+        : '집계 데이터 없음';
+
+      // (4) 실제 시험 평균 성적
+      const avgScore = meta.actual_avg_score !== null && meta.actual_avg_score !== undefined 
+        ? Number(meta.actual_avg_score).toFixed(1) + '점' 
+        : '- 점';
+      document.getElementById('metric-avg-score').textContent = avgScore;
+      document.getElementById('metric-score-summary').textContent = meta.final_scores_text || '-';
+
+      // 3. 차트 렌더링
+      renderWeeklyPaceChart(meta.weekly_pace || {});
+      renderSubjectBalanceChart(subjects);
+
+      // 4. 과목별 카드 렌더링
+      renderSubjectCards(subjects);
+
+      // 5. 단원별 셀렉터 & 점수 추이 차트 렌더링
+      setupLessonSelector(lessons);
+      if (lessons.length > 0) {
+        renderLessonTrendChart(lessons[0].unit_name);
+      }
+      renderLessonCards(lessons);
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 주차별 페이스 차트 (ChartWeeklyPace)
+    function renderWeeklyPaceChart(weeklyPace) {
+      const ctx = document.getElementById('chartWeeklyPace').getContext('2d');
+      if (chartWeeklyPaceInstance) chartWeeklyPaceInstance.destroy();
+
+      const labels = Object.keys(weeklyPace);
+      const dataValues = Object.values(weeklyPace);
+
+      chartWeeklyPaceInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length > 0 ? labels : ['D-4주', 'D-3주', 'D-2주', 'D-1주', 'D-Day'],
+          datasets: [{
+            label: '주간 공부시간 (시간)',
+            data: dataValues.length > 0 ? dataValues : [0, 0, 0, 0, 0],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 3,
+            pointBackgroundColor: '#2563eb',
+            pointRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // 과목별 학습시간 배분 도넛 차트
+    function renderSubjectBalanceChart(subjects) {
+      const ctx = document.getElementById('chartSubjectBalance').getContext('2d');
+      if (chartSubjectBalanceInstance) chartSubjectBalanceInstance.destroy();
+
+      const labels = subjects.map(s => s.subject_name);
+      const hours = subjects.map(s => Number((Number(s.total_duration_sec) / 3600).toFixed(1)));
+      const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#64748b'];
+
+      chartSubjectBalanceInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.length > 0 ? labels : ['과목 없음'],
+          datasets: [{
+            data: hours.length > 0 ? hours : [1],
+            backgroundColor: colors.slice(0, Math.max(labels.length, 1)),
+            borderWidth: 2,
+            borderColor: '#F0F4F8'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { font: { family: 'Pretendard', size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // 과목 카드 렌더링
+    function renderSubjectCards(subjects) {
+      const container = document.getElementById('subject-cards-container');
+      container.innerHTML = '';
+
+      if (!subjects || subjects.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 p-4">과목별 통계가 없습니다.</div>';
+        return;
+      }
+
+      subjects.forEach(s => {
+        const totalH = (Number(s.total_duration_sec) / 3600).toFixed(1);
+        const acadH = (Number(s.acad_duration_sec) / 3600).toFixed(1);
+        const selfH = (Number(s.self_duration_sec) / 3600).toFixed(1);
+        const finalScore = s.final_score !== null && s.final_score !== undefined ? `${s.final_score}점` : '미입력';
+
+        const card = document.createElement('div');
+        card.className = 'neu-card-sm p-4 rounded-2xl space-y-3';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-sm text-slate-800">${s.subject_name}</span>
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+              목표 ${s.target_score}점
+            </span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs text-slate-500">실제 지필고사 성적:</span>
+            <span class="text-xl font-extrabold font-mono text-rose-600">${finalScore}</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200/50 space-y-1 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>총 공부시간:</span>
+              <strong class="font-mono">${totalH}시간</strong>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500">
+              <span>학원 ${acadH}h / 자습 ${selfH}h</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 단원 셀렉터 설정
+    function setupLessonSelector(lessons) {
+      const select = document.getElementById('select-lesson-filter');
+      select.innerHTML = '';
+
+      if (!lessons || lessons.length === 0) {
+        select.innerHTML = '<option value="">단원 없음</option>';
+        return;
+      }
+
+      lessons.forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.unit_name;
+        opt.textContent = `[${l.subject_name}] ${l.unit_name}`;
+        select.appendChild(opt);
+      });
+    }
+
+    // 단원별 회차별 점수 성장 곡선 렌더링 (score_trend)
+    function renderLessonTrendChart(unitName) {
+      const ctx = document.getElementById('chartLessonTrend').getContext('2d');
+      if (chartLessonTrendInstance) chartLessonTrendInstance.destroy();
+
+      if (!currentArchiveDetail || !currentArchiveDetail.lessons) return;
+      const lesson = currentArchiveDetail.lessons.find(l => l.unit_name === unitName);
+      if (!lesson) return;
+
+      const scoreTrend = Array.isArray(lesson.score_trend) ? lesson.score_trend : [];
+      const labels = scoreTrend.map((t, idx) => `${t.round || (idx + 1)}회차 (${t.category || 'TEST'})`);
+      const dataPoints = scoreTrend.map(t => Number(t.score) || 0);
+
+      chartLessonTrendInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length > 0 ? labels : ['응시 내역 없음'],
+          datasets: [{
+            label: `${lesson.unit_name} 회차별 시험 점수`,
+            data: dataPoints.length > 0 ? dataPoints : [0],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 3,
+            pointBackgroundColor: '#059669',
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // 단원별 카드 리스트 렌더링
+    function renderLessonCards(lessons) {
+      const container = document.getElementById('lesson-cards-container');
+      container.innerHTML = '';
+
+      if (!lessons || lessons.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 p-4">단원별 통계가 없습니다.</div>';
+        return;
+      }
+
+      lessons.forEach(l => {
+        const avg = l.avg_score !== null && l.avg_score !== undefined ? `${l.avg_score}점` : '-';
+        const hours = (Number(l.study_duration_sec) / 3600).toFixed(1);
+        const catMap = l.category_scores || {};
+        const catBadges = Object.keys(catMap).map(k => `${k}: ${catMap[k]}점`).join(' · ');
+
+        const card = document.createElement('div');
+        card.className = 'neu-card-sm p-3.5 rounded-2xl space-y-2 cursor-pointer hover:border-emerald-300 transition';
+        card.onclick = () => {
+          document.getElementById('select-lesson-filter').value = l.unit_name;
+          renderLessonTrendChart(l.unit_name);
+        };
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">${l.subject_name}</span>
+            <span class="text-xs font-mono font-bold text-emerald-600">평균 ${avg}</span>
+          </div>
+          <div class="font-extrabold text-xs text-slate-800 truncate" title="${l.unit_name}">${l.unit_name}</div>
+          <div class="text-[11px] text-slate-500 flex justify-between pt-1 border-t border-slate-200/50">
+            <span>공부시간: ${hours}h</span>
+            <span>응시: ${l.test_count || 0}회</span>
+          </div>
+          ${catBadges ? `<div class="text-[10px] text-indigo-600 font-mono font-medium truncate">${catBadges}</div>` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-2xl neu-card text-xs font-bold text-slate-800 shadow-md transition-all duration-300';
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
