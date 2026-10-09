@@ -10,8 +10,16 @@ CREATE TABLE IF NOT EXISTS subjects (
     dday TEXT,
     target_score INTEGER DEFAULT 100,
     color TEXT DEFAULT 'indigo',
+    academy_name TEXT DEFAULT '',
+    chapters JSONB DEFAULT '[]'::jsonb,
+    mock_tests JSONB DEFAULT '[]'::jsonb,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 기존 subjects 테이블에 컬럼이 없는 경우 마이그레이션 구문
+ALTER TABLE subjects ADD COLUMN IF NOT EXISTS academy_name TEXT DEFAULT '';
+ALTER TABLE subjects ADD COLUMN IF NOT EXISTS chapters JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE subjects ADD COLUMN IF NOT EXISTS mock_tests JSONB DEFAULT '[]'::jsonb;
 
 -- 2. 현재 활성 일정 관리 테이블 (lessons 공유 테이블 연동)
 CREATE TABLE IF NOT EXISTS schedules (

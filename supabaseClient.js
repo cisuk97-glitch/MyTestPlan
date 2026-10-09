@@ -63,9 +63,20 @@
     async testConnection() {
       const client = this.getClient();
       if (!client) throw new Error('Supabase URL 및 Anon Key가 설정되지 않았습니다.');
-      // Simple probe query
-      const { data, error } = await client.from('lessons').select('id').limit(1);
-      if (error) throw error;
+      
+      const errors = [];
+      const { error: lessonErr } = await client.from('lessons').select('id').limit(1);
+      if (lessonErr) errors.push(`[lessons 테이블] ${lessonErr.message} (코드: ${lessonErr.code || ''})`);
+
+      const { error: subjErr } = await client.from('subjects').select('name').limit(1);
+      if (subjErr) errors.push(`[subjects 테이블] ${subjErr.message} (코드: ${subjErr.code || ''})`);
+
+      const { error: schedErr } = await client.from('schedules').select('id').limit(1);
+      if (schedErr) errors.push(`[schedules 테이블] ${schedErr.message} (코드: ${schedErr.code || ''})`);
+
+      if (errors.length > 0) {
+        throw new Error('테이블 접근 실패:\n' + errors.join('\n'));
+      }
       return true;
     },
 
@@ -86,16 +97,25 @@
           client.from('app_settings').select('*')
         ]);
 
-        if (subjRes.error) console.warn('subjects 조회 알림:', subjRes.error.message);
-        if (lessonRes.error) console.warn('lessons 조회 알림:', lessonRes.error.message);
-        if (testRes.error) console.warn('test_records 조회 알림:', testRes.error.message);
-        if (schedRes.error) console.warn('schedules 조회 알림:', schedRes.error.message);
+        const queryErrors = [];
+        if (subjRes.error) queryErrors.push(`[subjects 테이블] ${subjRes.error.message} (코드: ${subjRes.error.code || ''})`);
+        if (schedRes.error) queryErrors.push(`[schedules 테이블] ${schedRes.error.message} (코드: ${schedRes.error.code || ''})`);
+        if (lessonRes.error) queryErrors.push(`[lessons 테이블] ${lessonRes.error.message} (코드: ${lessonRes.error.code || ''})`);
+        if (testRes.error) queryErrors.push(`[test_records 테이블] ${testRes.error.message} (코드: ${testRes.error.code || ''})`);
+
+        if (queryErrors.length > 0) {
+          const errMsg = 'Supabase 테이블 조회 실패:\n' + queryErrors.join('\n');
+          console.error(errMsg, { subjRes, schedRes, lessonRes, testRes });
+          throw new Error(errMsg);
+        }
 
         const rawSubjects = subjRes.data || [];
         const rawLessons = lessonRes.data || [];
         const rawTests = testRes.data || [];
         const rawSchedules = schedRes.data || [];
         const rawSettings = settingRes.data || [];
+
+        console.log(`[Supabase 로드 성공] 과목: ${rawSubjects.length}건, 일정: ${rawSchedules.length}건, 단원: ${rawLessons.length}건, 성적: ${rawTests.length}건`);
 
         // 1. 단원별 test_records 매핑 (성적 추이 & 최신 점수)
         const testsByLessonId = {};
@@ -129,46 +149,127 @@
           lessonsBySubject[l.subject_name].push(lessonObj);
         });
 
-        // 2. 과목 구조화
+        // 2. 과목 구조화 (lessons 테이블 데이터를 바탕으로 chapters 매핑 및 보존)
         const subjects = rawSubjects.map(s => {
+          let chapters = [];
+          if (Array.isArray(s.chapters)) {
+            chapters = s.chapters;
+          } else if (typeof s.chapters === 'string') {
+            try { chapters = JSON.parse(s.chapters); } catch (e) { chapters = []; }
+          }
+
+          // 소단원 중첩 구조가 남아있는 경우 대단원 단일 구조로 정규화
+          chapters = chapters.map(ch => {
+            if (ch.subunits && Array.isArray(ch.subunits) && ch.subunits.length > 0) {
+              const firstScored = ch.subunits.find(su => su.unitScore !== '' && su.unitScore !== undefined);
+              const scoreHist = [];
+              ch.subunits.forEach(su => {
+                if (Array.isArray(su.scoreHistory)) scoreHist.push(...su.scoreHistory);
+              });
+              return {
+                id: ch.id || ('ch-' + Date.now()),
+                title: ch.title || '',
+                inScope: ch.inScope !== false,
+                unitScore: ch.unitScore !== undefined ? ch.unitScore : (firstScored ? firstScored.unitScore : ''),
+                scoreHistory: Array.isArray(ch.scoreHistory) && ch.scoreHistory.length > 0 ? ch.scoreHistory : scoreHist
+              };
+            }
+            return {
+              id: ch.id || ('ch-' + Date.now()),
+              title: ch.title || '',
+              inScope: ch.inScope !== false,
+              unitScore: ch.unitScore !== undefined ? ch.unitScore : '',
+              scoreHistory: Array.isArray(ch.scoreHistory) ? ch.scoreHistory : []
+            };
+          });
+
+          // lessons 테이블에 등록된 단원이 있는 경우, lessons를 Source of Truth로 하여 chapters 구성
+          const sLessons = lessonsBySubject[s.name] || [];
+          if (sLessons.length > 0) {
+            chapters = sLessons.map(l => {
+              const matched = chapters.find(c => String(c.id) === String(l.id) || c.title === l.unitName);
+              const hist = Array.isArray(l.tests) ? l.tests.map(t => Number(t.score)).filter(n => !isNaN(n)) : [];
+              return {
+                id: String(l.id),
+                title: l.unitName,
+                inScope: matched ? matched.inScope !== false : true,
+                unitScore: l.latestScore !== null && l.latestScore !== undefined ? l.latestScore : (matched ? matched.unitScore : ''),
+                scoreHistory: hist.length > 0 ? hist : (matched && matched.scoreHistory ? matched.scoreHistory : [])
+              };
+            });
+          }
+
+          let mockTests = [];
+          if (Array.isArray(s.mock_tests)) {
+            mockTests = s.mock_tests;
+          } else if (typeof s.mock_tests === 'string') {
+            try { mockTests = JSON.parse(s.mock_tests); } catch (e) { mockTests = []; }
+          }
           return {
             id: 'subj-' + encodeURIComponent(s.name),
             name: s.name,
             dday: s.dday || '',
-            targetScore: s.target_score || 100,
+            targetScore: s.target_score !== undefined ? s.target_score : 100,
             color: s.color || 'indigo',
-            lessons: lessonsBySubject[s.name] || []
+            academyName: s.academy_name || '',
+            chapters: chapters,
+            mockTests: mockTests,
+            lessons: sLessons
           };
         });
 
         // 3. lessons에 등록된 과목명이 subjects에 없으면 자동 합성
         Object.keys(lessonsBySubject).forEach(sName => {
           if (!subjects.find(s => s.name === sName)) {
+            const sLessons = lessonsBySubject[sName] || [];
+            const synChapters = sLessons.map(l => {
+              const hist = Array.isArray(l.tests) ? l.tests.map(t => Number(t.score)).filter(n => !isNaN(n)) : [];
+              return {
+                id: String(l.id),
+                title: l.unitName,
+                inScope: true,
+                unitScore: l.latestScore !== null && l.latestScore !== undefined ? l.latestScore : '',
+                scoreHistory: hist
+              };
+            });
             subjects.push({
               id: 'subj-' + encodeURIComponent(sName),
               name: sName,
               dday: '',
               targetScore: 100,
               color: 'emerald',
-              lessons: lessonsBySubject[sName]
+              academyName: '',
+              chapters: synChapters,
+              mockTests: [],
+              lessons: sLessons
             });
           }
         });
 
         // 4. 스케줄 정규화
-        const schedules = rawSchedules.map(sch => ({
-          id: sch.id,
-          lessonId: sch.lesson_id,
-          subject: sch.subject,
-          date: sch.date,
-          category: sch.category || '진도계획',
-          title: sch.title,
-          detail: sch.detail || '',
-          progress: sch.progress || 0,
-          score: sch.score || '',
-          durationSec: sch.duration_sec || 0,
-          completed: Boolean(sch.completed)
-        }));
+        const schedules = rawSchedules.map(sch => {
+          let startTime = '';
+          if (sch.detail) {
+            const timeMatch = sch.detail.match(/(\d{1,2}:\d{2})/);
+            if (timeMatch) startTime = timeMatch[1];
+          }
+          return {
+            id: sch.id,
+            lessonId: sch.lesson_id,
+            subject: sch.subject,
+            date: String(sch.date || '').trim(),
+            category: sch.category || '진도계획',
+            title: sch.title,
+            detail: sch.detail || '',
+            startTime: startTime,
+            progress: Number(sch.progress) || 0,
+            score: sch.score ? String(sch.score) : '',
+            durationSec: Number(sch.duration_sec) || 0,
+            completed: Boolean(sch.completed),
+            subunitIds: sch.subunit_ids || [],
+            completedSubunits: sch.completed_subunits || []
+          };
+        });
 
         // 5. 전역 설정 파싱
         const settingsMap = {};
@@ -212,6 +313,35 @@
       return true;
     },
 
+    async updateLesson(lessonId, unitName) {
+      const client = this.getClient();
+      if (!client) throw new Error('Supabase 미연결');
+      const { data, error } = await client
+        .from('lessons')
+        .update({ unit_name: unitName.trim() })
+        .eq('id', lessonId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async bulkAddLessons(subjectName, unitNames) {
+      const client = this.getClient();
+      if (!client) throw new Error('Supabase 미연결');
+      const rows = unitNames.map(u => ({
+        subject_name: subjectName.trim(),
+        unit_name: u.trim()
+      })).filter(r => r.unit_name.length > 0);
+      if (rows.length === 0) return [];
+      const { data, error } = await client
+        .from('lessons')
+        .insert(rows)
+        .select();
+      if (error) throw error;
+      return data;
+    },
+
     // ----------------------------------------------------
     // 4. 성적 (test_records) 추가
     // ----------------------------------------------------
@@ -249,6 +379,9 @@
         dday: s.dday || '',
         target_score: s.targetScore || 100,
         color: s.color || 'indigo',
+        academy_name: s.academyName || '',
+        chapters: s.chapters || [],
+        mock_tests: s.mockTests || [],
         updated_at: new Date().toISOString()
       }));
 
@@ -344,14 +477,31 @@
       const curExam = archivePayload.curExam || {};
       const nextExam = archivePayload.nextExam || {};
       const summary = archivePayload.summary || {};
-      const actualScores = curExam.actualScores || {}; // { '영어': 95, '국어': 92 }
+      const actualScores = curExam.actualScores || {}; // { '영어': 95, '국어': 92, 'subj-...': 95 }
 
-      // 1. 현재 시험 통계 데이터 계산
+      // 1. 과목 데이터 확보 (payload 루트 -> payload.summary.subjects -> DB subjects 직접 조회 Fallback)
+      let archiveSubjects = archivePayload.subjects || archivePayload.summary?.subjects || [];
+      if (!Array.isArray(archiveSubjects) || archiveSubjects.length === 0) {
+        try {
+          const { data: dbSubjects } = await client.from('subjects').select('*');
+          if (dbSubjects && dbSubjects.length > 0) {
+            archiveSubjects = dbSubjects.map(s => ({
+              id: 'subj-' + encodeURIComponent(s.name),
+              name: s.name,
+              targetScore: s.target_score || 100,
+              chapters: Array.isArray(s.chapters) ? s.chapters : []
+            }));
+          }
+        } catch (dbSubErr) {
+          console.warn('DB subjects 직접 조회 폴백 오류:', dbSubErr);
+        }
+      }
+
       // (1) 카테고리별 시간 집계
       const categoryTimes = {};
       let totalDurationSec = 0;
       (archivePayload.curSchedules || []).forEach(s => {
-        const sec = Number(s.durationSec) || 0;
+        const sec = Number(s.durationSec) || (Number(s.duration_sec) || 0);
         const cat = s.category || '진도계획';
         categoryTimes[cat] = (categoryTimes[cat] || 0) + sec;
         totalDurationSec += sec;
@@ -359,13 +509,13 @@
 
       // (2) 과목별 통계 산출
       const subjectStatsRows = [];
-      (archivePayload.subjects || []).forEach(subj => {
+      archiveSubjects.forEach(subj => {
         let sTotalSec = 0;
         let sAcadSec = 0;
         let sSelfSec = 0;
 
         (archivePayload.curSchedules || []).filter(sch => sch.subject === subj.name).forEach(sch => {
-          const sec = Number(sch.durationSec) || 0;
+          const sec = Number(sch.durationSec) || (Number(sch.duration_sec) || 0);
           sTotalSec += sec;
           if (sch.category === '학원일정' || (sch.category && sch.category.includes('학원'))) {
             sAcadSec += sec;
@@ -376,7 +526,9 @@
 
         const finalScore = actualScores[subj.name] !== undefined && actualScores[subj.name] !== '' 
           ? Number(actualScores[subj.name]) 
-          : null;
+          : (subj.id && actualScores[subj.id] !== undefined && actualScores[subj.id] !== ''
+              ? Number(actualScores[subj.id])
+              : (subj.actualScore !== undefined && subj.actualScore !== '' ? Number(subj.actualScore) : null));
 
         subjectStatsRows.push({
           exam_id: examId,
@@ -389,59 +541,85 @@
         });
       });
 
-      // (3) 단원별 통계 및 회차별 점수 추이 (score_trend) 산출
-      // lessons 테이블에서 현재 단원 목록 조회
-      const { data: currentLessons } = await client.from('lessons').select('*');
-      const { data: allTestRecords } = await client.from('test_records').select('*').order('round', { ascending: true });
-
-      const testsByLessonId = {};
-      (allTestRecords || []).forEach(t => {
-        if (!testsByLessonId[t.lesson_id]) testsByLessonId[t.lesson_id] = [];
-        testsByLessonId[t.lesson_id].push(t);
-      });
-
+      // (3) 대단원별 통계 및 회차별 점수 추이 (score_trend) 산출
+      // subjects의 chapters를 기준으로 archive_lesson_stats 구성 (대단원 단일화 반영)
       const lessonStatsRows = [];
-      (currentLessons || []).forEach(l => {
-        // 단원별 공부시간
-        let lSec = 0;
-        (archivePayload.curSchedules || []).filter(sch => sch.lessonId === l.id).forEach(sch => {
-          lSec += Number(sch.durationSec) || 0;
-        });
+      const handledUnits = new Set();
 
-        const lTests = testsByLessonId[l.id] || [];
-        const scoreTrend = lTests.map(t => ({
-          round: t.round,
-          score: t.score,
-          category: t.test_category,
-          date: t.test_date || t.completed_at
-        }));
+      archiveSubjects.forEach(subj => {
+        const chapters = subj.chapters || [];
+        chapters.forEach(ch => {
+          let chSec = 0;
+          (archivePayload.curSchedules || []).filter(sch => 
+            sch.subject === subj.name && (sch.title?.includes(ch.title) || sch.chapterTitle === ch.title || sch.chapterId === ch.id)
+          ).forEach(sch => {
+            chSec += Number(sch.durationSec) || 0;
+          });
 
-        const scores = lTests.map(t => Number(t.score)).filter(s => !isNaN(s));
-        const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+          const scores = Array.isArray(ch.scoreHistory) ? ch.scoreHistory.map(Number).filter(n => !isNaN(n)) : [];
+          if (ch.unitScore !== '' && ch.unitScore !== null && ch.unitScore !== undefined && !isNaN(Number(ch.unitScore)) && scores.length === 0) {
+            scores.push(Number(ch.unitScore));
+          }
 
-        // 카테고리별 평균점수 (VOCAB, UNIT, WRITING)
-        const catMap = {};
-        lTests.forEach(t => {
-          if (!catMap[t.test_category]) catMap[t.test_category] = [];
-          catMap[t.test_category].push(Number(t.score));
-        });
-        const categoryScores = {};
-        Object.keys(catMap).forEach(cat => {
-          const arr = catMap[cat].filter(s => !isNaN(s));
-          categoryScores[cat] = arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
-        });
+          const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+          const scoreTrend = scores.map((sc, idx) => ({
+            round: idx + 1,
+            score: sc,
+            category: '단원테스트'
+          }));
 
-        lessonStatsRows.push({
-          exam_id: examId,
-          subject_name: l.subject_name,
-          unit_name: l.unit_name, // 외래키 없이 독립 문자열 보관 (lessons 삭제에도 안전)
-          study_duration_sec: lSec,
-          avg_score: avgScore,
-          score_trend: scoreTrend,
-          category_scores: categoryScores,
-          test_count: lTests.length
+          lessonStatsRows.push({
+            exam_id: examId,
+            subject_name: subj.name,
+            unit_name: ch.title,
+            study_duration_sec: chSec,
+            avg_score: avgScore,
+            score_trend: scoreTrend,
+            category_scores: { '단원테스트': avgScore },
+            test_count: scores.length
+          });
+          handledUnits.add(`${subj.name}::${ch.title}`);
         });
       });
+
+      // lessons 테이블에 독립 단원이 남아있는 경우 보존
+      const { data: currentLessons } = await client.from('lessons').select('*');
+      if (currentLessons && currentLessons.length > 0) {
+        const { data: allTestRecords } = await client.from('test_records').select('*').order('round', { ascending: true });
+        const testsByLessonId = {};
+        (allTestRecords || []).forEach(t => {
+          if (!testsByLessonId[t.lesson_id]) testsByLessonId[t.lesson_id] = [];
+          testsByLessonId[t.lesson_id].push(t);
+        });
+
+        currentLessons.forEach(l => {
+          if (handledUnits.has(`${l.subject_name}::${l.unit_name}`)) return;
+          let lSec = 0;
+          (archivePayload.curSchedules || []).filter(sch => sch.lessonId === l.id).forEach(sch => {
+            lSec += Number(sch.durationSec) || 0;
+          });
+          const lTests = testsByLessonId[l.id] || [];
+          const scoreTrend = lTests.map(t => ({
+            round: t.round,
+            score: t.score,
+            category: t.test_category,
+            date: t.test_date || t.completed_at
+          }));
+          const scores = lTests.map(t => Number(t.score)).filter(s => !isNaN(s));
+          const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+
+          lessonStatsRows.push({
+            exam_id: examId,
+            subject_name: l.subject_name,
+            unit_name: l.unit_name,
+            study_duration_sec: lSec,
+            avg_score: avgScore,
+            score_trend: scoreTrend,
+            category_scores: {},
+            test_count: lTests.length
+          });
+        });
+      }
 
       // 2. 아카이브 종합 테이블에 저장
       const examArchivePayload = {

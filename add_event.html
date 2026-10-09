@@ -22,6 +22,7 @@
       --success: #10b981;
       --danger: #ef4444;
       --accent: #38bdf8;
+      --shortcuts-bg: linear-gradient(135deg, #ec4899, #8b5cf6);
     }
 
     * {
@@ -45,7 +46,7 @@
 
     .container {
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       display: flex;
       flex-direction: column;
       gap: 14px;
@@ -60,7 +61,7 @@
       padding: 4px;
     }
     .header h1 {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #fff;
       display: flex;
@@ -91,7 +92,19 @@
       border-color: var(--accent);
     }
 
-    /* 탭 메뉴 */
+    /* 카드 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    /* 탭 전환 */
     .tabs {
       display: flex;
       background: var(--card-sub);
@@ -101,11 +114,11 @@
     }
     .tab-btn {
       flex: 1;
-      padding: 9px;
+      padding: 8px;
       border: none;
       background: transparent;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       border-radius: 8px;
       cursor: pointer;
@@ -114,37 +127,43 @@
     .tab-btn.active {
       background: var(--card-bg);
       color: var(--accent);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    /* 카드 */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* 카테고리 칩 */
+    /* 섹션 제목 */
     .section-label {
       font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+    .detector-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .detector-badge.academy {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+
+    /* 칩 컨테이너 */
     .chips {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
     }
-    .chip {
+    .chip-btn {
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       background: var(--card-sub);
       color: var(--text-muted);
@@ -152,16 +171,16 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .chip.active {
-      background: rgba(79, 70, 229, 0.2);
-      color: #818cf8;
+    .chip-btn.active {
+      background: var(--primary);
       border-color: var(--primary);
+      color: #fff;
     }
 
-    /* 텍스트 입력 */
+    /* 입력 영역 */
     textarea {
       width: 100%;
-      height: 110px;
+      height: 115px;
       background: var(--card-sub);
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -170,97 +189,179 @@
       font-size: 0.95rem;
       resize: none;
       outline: none;
-      line-height: 1.4;
+      line-height: 1.45;
     }
     textarea:focus {
-      border-color: var(--primary);
+      border-color: var(--accent);
     }
 
-    /* 제출 버튼 */
-    .btn-submit {
+    .academy-input-box {
       width: 100%;
-      background: var(--primary);
-      color: white;
-      border: none;
+      padding: 10px 12px;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px;
-      font-size: 1rem;
+      color: var(--text);
+      font-size: 0.88rem;
+      outline: none;
+      font-weight: 600;
+    }
+    .academy-input-box:focus {
+      border-color: var(--accent);
+    }
+
+    /* 이미지 드롭존 */
+    .image-dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 26px 16px;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.4);
+      cursor: pointer;
+      gap: 8px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .image-dropzone:hover {
+      border-color: var(--accent);
+    }
+    .image-preview-wrap {
+      position: relative;
+      width: 100%;
+      display: none;
+    }
+    .image-preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .remove-img-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    /* 등록 버튼 */
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      border: none;
+      border-radius: 13px;
+      color: #fff;
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+      transition: all 0.2s;
     }
-    .btn-submit:hover {
-      background: var(--primary-hover);
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
     }
-    .btn-submit:active {
+    .submit-btn:active:not(:disabled) {
       transform: scale(0.98);
     }
-    .btn-submit:disabled {
-      background: #475569;
-      cursor: not-allowed;
-    }
 
-    /* 결과 피드백 */
+    /* 결과 피드백 박스 */
     .result-box {
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 0.88rem;
       display: none;
-      line-height: 1.5;
-    }
-    .result-success {
-      background: rgba(16, 185, 129, 0.1);
+      padding: 13px 15px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
       border: 1px solid var(--success);
-      color: #34d399;
+      font-size: 0.88rem;
+      color: #a7f3d0;
+      line-height: 1.45;
     }
-    .result-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--danger);
-      color: #f87171;
+    .result-box.error {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--danger);
+      color: #fca5a5;
     }
 
     /* 모달 */
-    .modal-backdrop {
+    .modal {
+      display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      justify-content: center;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
       align-items: center;
+      justify-content: center;
+      padding: 20px;
       z-index: 100;
-      padding: 16px;
     }
-    .modal {
+    .modal-content {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 20px;
+      padding: 22px;
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
-    .modal input {
+    .modal-content input {
       width: 100%;
-      background: var(--card-sub);
+      padding: 11px;
+      background: #0f172a;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
+      border-radius: 10px;
+      color: #fff;
       font-size: 0.9rem;
       outline: none;
     }
+    .modal-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .modal-btn {
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-btn.confirm {
+      background: var(--primary);
+      color: #fff;
+    }
+    .modal-btn.cancel {
+      background: var(--card-sub);
+      color: var(--text-muted);
+    }
+
     .spinner {
       border: 2px solid rgba(255,255,255,0.3);
       border-top-color: white;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       animation: spin 0.8s linear infinite;
       display: none;
     }
@@ -274,182 +375,664 @@
   <div class="container">
     <!-- 헤더 -->
     <div class="header">
-      <a href="./index.html" class="icon-btn" title="플래너 홈">←</a>
       <h1>📅 간편 일정 등록</h1>
       <div class="header-btns">
+        <a href="./index.html" class="icon-btn" title="플래너 홈">🏠</a>
         <button class="icon-btn" onclick="openApiKeyModal()" title="Gemini API Key 설정">🔑</button>
       </div>
     </div>
 
-    <!-- 입력 폼 카드 -->
+    <!-- 등록 카드 -->
     <div class="card">
-      <!-- 1. 일정 구분 -->
-      <div>
-        <div class="section-label" style="margin-bottom: 6px;">일정 구분</div>
-        <div class="chips" id="catChips">
-          <div class="chip active" onclick="selectCat('진도계획')">진도계획</div>
-          <div class="chip" onclick="selectCat('학원일정')">학원일정</div>
-          <div class="chip" onclick="selectCat('자습')">자습</div>
-          <div class="chip" onclick="selectCat('복습')">복습</div>
-          <div class="chip" onclick="selectCat('시험')">시험</div>
+      <!-- 1. 탭 전환 (텍스트 vs 이미지) -->
+      <div class="tabs">
+        <button type="button" class="tab-btn active" id="tabTextBtn" onclick="switchTab('text')">✏️ 텍스트 / 음성 입력</button>
+        <button type="button" class="tab-btn" id="tabImgBtn" onclick="switchTab('image')">📷 사진 / 시간표 캡처</button>
+      </div>
+
+      <!-- 2. 일정 내용 입력 영역 (최상단) -->
+      <div id="sectionText" style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="section-label">일정 내용 입력</div>
+        <textarea id="textInput" oninput="handleTextInputChange()"
+          placeholder="예: 내일 영어 3과 본문 워크북 풀기&#10;또는: 이번주 금요일 18:40 큰뜻국어 수업"></textarea>
+      </div>
+
+      <!-- 3. 이미지 업로드 영역 -->
+      <div id="sectionImage" style="display: none; flex-direction: column; gap: 6px;">
+        <div class="section-label">시간표 또는 알림장 이미지</div>
+        <div class="image-dropzone" id="dropzone" onclick="document.getElementById('imageInput').click()">
+          <span style="font-size: 1.8rem;">📸</span>
+          <div style="font-size: 0.85rem; color: #fff; font-weight: 600;">사진 촬영 또는 이미지 파일 선택</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">학원 시간표, 주간 계획표, 문제집 목차 사진</div>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageSelected(event)">
+        
+        <div class="image-preview-wrap" id="previewWrap">
+          <img id="imagePreview" class="image-preview" src="">
+          <button type="button" class="remove-img-btn" onclick="clearSelectedImage()">✕</button>
         </div>
       </div>
 
-      <!-- 2. 과목 선택 -->
-      <div>
-        <div class="section-label" style="margin-bottom: 6px;">과목 선택</div>
-        <div class="chips" id="subjChips">
-          <div class="chip active" onclick="selectSubj('영어')">영어</div>
-          <div class="chip" onclick="selectSubj('국어')">국어</div>
-          <div class="chip" onclick="selectSubj('통합사회')">통합사회</div>
-          <div class="chip" onclick="selectSubj('수학')">수학</div>
-          <div class="chip" onclick="selectSubj('공통')">공통</div>
+      <!-- 4. 학원일정 담당 학원명 입력 (시간 또는 학원 감지 시 자동 표시) -->
+      <div id="sectionAcademyName" style="display: none;">
+        <div class="section-label" style="margin-bottom: 6px;">
+          <span>담당 학원명</span>
+          <span class="detector-badge academy">🏫 시간 감지됨</span>
         </div>
+        <input type="text" id="inputAcademyName" placeholder="예: 큰뜻국어, 과외하는수학, 프로토피아 영어"
+          class="academy-input-box" oninput="this.dataset.manual = this.value ? 'true' : 'false'" onchange="onAcademyNameChanged(this.value)">
       </div>
 
-      <!-- 3. 일정 내용 입력 -->
-      <div>
-        <div class="section-label" style="margin-bottom: 6px;">일정 내용 입력</div>
-        <textarea id="textInput" placeholder="예: 내일 영어 3과 본문 워크북 10p 풀기&#10;또는: 이번주 금요일 통합사회 인권 단원 인강 수강"></textarea>
-      </div>
-
-      <!-- 제출 버튼 -->
-      <button class="btn-submit" id="submitBtn" onclick="submitSchedule()">
+      <!-- 5. 등록 실행 버튼 (입력창 바로 아래) -->
+      <button class="submit-btn" id="submitBtn" onclick="submitSchedule()">
         <span class="spinner" id="submitSpinner"></span>
-        <span id="submitText">Supabase에 즉시 등록</span>
+        <span id="submitText">일정등록하기</span>
       </button>
 
-      <!-- 결과 메시지 -->
-      <div id="resultBox" class="result-box"></div>
+      <!-- 결과 알림 박스 -->
+      <div class="result-box" id="resultBox"></div>
+
+      <!-- 6. 일정 구분 (선택 옵션) -->
+      <div style="margin-top: 6px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.08);">
+        <div class="section-label" style="margin-bottom: 6px;">
+          <span>일정 구분 (선택)</span>
+          <span id="detectorBadge" class="detector-badge">⚡ 자동 감지 중</span>
+        </div>
+        <div class="chips">
+          <button type="button" class="chip-btn active" id="chipAuto" onclick="selectCategory('auto')">⚡ 자동</button>
+          <button type="button" class="chip-btn" id="chipAcademy" onclick="selectCategory('학원일정')">🏫 학원일정</button>
+          <button type="button" class="chip-btn" id="chipPlan" onclick="selectCategory('진도계획')">📖 진도계획</button>
+          <button type="button" class="chip-btn" id="chipSubunit" onclick="selectCategory('단원테스트')">📝 단원테스트</button>
+          <button type="button" class="chip-btn" id="chipFull" onclick="selectCategory('전체테스트')">🎯 전체테스트</button>
+        </div>
+      </div>
+
+      <!-- 7. 과목 선택 (선택 옵션) -->
+      <div>
+        <div class="section-label" style="margin-bottom: 6px;">
+          <span>과목 선택 (선택)</span>
+          <span id="subjDetectorBadge" class="detector-badge">⚡ 자동</span>
+        </div>
+        <div class="chips" id="subjectChipsContainer">
+          <button type="button" class="chip-btn active" id="subjChip-auto" onclick="selectSubject('auto')">⚡ 자동</button>
+          <button type="button" class="chip-btn" id="subjChip-국어" onclick="selectSubject('국어')">국어</button>
+          <button type="button" class="chip-btn" id="subjChip-수학" onclick="selectSubject('수학')">수학</button>
+          <button type="button" class="chip-btn" id="subjChip-영어" onclick="selectSubject('영어')">영어</button>
+          <button type="button" class="chip-btn" id="subjChip-통합사회" onclick="selectSubject('통합사회')">통합사회</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- API Key 모달 -->
-  <div class="modal-backdrop" id="apiModal">
-    <div class="modal">
+  <!-- Gemini API 키 설정 모달 -->
+  <div class="modal" id="apiModal">
+    <div class="modal-content">
       <h3 style="font-size: 1.1rem; color: #fff;">🔑 Gemini API 키 설정</h3>
-      <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
-        자연어 문장("내일 2시 영어 학원")을 AI로 정교하게 분석하려면 Google AI Studio의 Gemini API 키를 입력하세요. 미입력 시 내장 한국어 규칙 파서가 작동합니다.
+      <p style="font-size: 0.8rem; color: var(--text-muted);">
+        Google AI Studio에서 발급받은 무료 Gemini API 키를 입력하시면 이미지 분석(시간표 사진 추출)이 활성화됩니다.
+        (텍스트 일정 등록은 API 키 없이도 한국어 파서로 즉시 동작합니다)
       </p>
       <input type="password" id="apiKeyInput" placeholder="AIzaSy...">
-      <div style="display: flex; gap: 8px;">
-        <button onclick="closeApiKeyModal()" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer;">취소</button>
-        <button onclick="saveApiKey()" style="flex:1; padding: 10px; border-radius: 8px; border: none; background: var(--primary); color: #fff; font-weight: 700; cursor: pointer;">저장</button>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" onclick="closeApiKeyModal()">닫기</button>
+        <button class="modal-btn confirm" onclick="saveApiKey()">저장하기</button>
       </div>
     </div>
   </div>
 
   <script>
-    let selectedCategory = '진도계획';
-    let selectedSubject = '영어';
+    let currentTab = 'text';
+    let base64Image = null;
+    let selectedCategory = 'auto';
+    let selectedSubject = 'auto';
+    let registeredSubjects = ['국어', '수학', '영어', '통합사회'];
+    let subjectAcademyMap = {
+      '국어': '큰뜻국어',
+      '수학': '과외하는수학',
+      '영어': '프로토피아 영어'
+    };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadSubjectsFromSupabase();
+    // ========================================================
+    // 1. 초기 로드 및 Supabase 과목/학원 연동
+    // ========================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      const savedKey = localStorage.getItem('SP_GEMINI_KEY') || '';
+      document.getElementById('apiKeyInput').value = savedKey;
+
+      await loadSubjectsFromSupabase();
     });
 
     async function loadSubjectsFromSupabase() {
       try {
-        const client = SupabaseService.getClient();
-        if (!client) return;
-
-        const { data: subjs } = await client.from('subjects').select('name');
-        if (subjs && subjs.length > 0) {
-          const container = document.getElementById('subjChips');
-          container.innerHTML = '';
-          subjs.forEach((s, idx) => {
-            const chip = document.createElement('div');
-            chip.className = `chip ${idx === 0 ? 'active' : ''}`;
-            chip.textContent = s.name;
-            chip.onclick = () => selectSubj(s.name);
-            container.appendChild(chip);
-            if (idx === 0) selectedSubject = s.name;
-          });
+        if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+          const client = SupabaseService.getClient();
+          if (client) {
+            const { data: subjs } = await client.from('subjects').select('name, academy_name');
+            if (Array.isArray(subjs) && subjs.length > 0) {
+              registeredSubjects = subjs.map(s => s.name).filter(Boolean);
+              subjs.forEach(s => {
+                if (s.name && s.academy_name) {
+                  subjectAcademyMap[s.name] = s.academy_name;
+                }
+              });
+              renderSubjectChips(registeredSubjects);
+            }
+          }
         }
       } catch (e) {
-        console.warn('과목 로드 생략:', e);
+        console.warn('과목 로드 오류 (기본 과목 사용):', e);
       }
     }
 
-    function selectCat(cat) {
+    function renderSubjectChips(list) {
+      const container = document.getElementById('subjectChipsContainer');
+      if (!container) return;
+      if (Array.isArray(list) && list.length > 0) {
+        registeredSubjects = list;
+      }
+      
+      let html = `<button type="button" class="chip-btn ${selectedSubject === 'auto' ? 'active' : ''}" id="subjChip-auto" onclick="selectSubject('auto')">⚡ 자동</button>`;
+      registeredSubjects.forEach(s => {
+        const isActive = (selectedSubject === s);
+        html += `<button type="button" class="chip-btn ${isActive ? 'active' : ''}" id="subjChip-${s}" onclick="selectSubject('${s}')">${s}</button>`;
+      });
+      container.innerHTML = html;
+      updateSubjectBadge();
+    }
+
+    // ========================================================
+    // 2. 카테고리 & 과목 칩 선택
+    // ========================================================
+    function selectCategory(cat) {
       selectedCategory = cat;
-      document.querySelectorAll('#catChips .chip').forEach(c => {
-        c.classList.toggle('active', c.textContent.trim() === cat);
+      const chips = {
+        'auto': document.getElementById('chipAuto'),
+        '학원일정': document.getElementById('chipAcademy'),
+        '진도계획': document.getElementById('chipPlan'),
+        '단원테스트': document.getElementById('chipSubunit'),
+        '전체테스트': document.getElementById('chipFull')
+      };
+      Object.keys(chips).forEach(k => {
+        if (chips[k]) chips[k].classList.remove('active');
       });
+      if (chips[cat]) chips[cat].classList.add('active');
+
+      updateCategoryBadge();
+      checkAcademyFieldVisibility();
     }
 
-    function selectSubj(subj) {
+    function selectSubject(subj) {
       selectedSubject = subj;
-      document.querySelectorAll('#subjChips .chip').forEach(c => {
-        c.classList.toggle('active', c.textContent.trim() === subj);
-      });
+      const container = document.getElementById('subjectChipsContainer');
+      if (container) {
+        const btns = container.querySelectorAll('.chip-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        const targetBtn = document.getElementById('subjChip-' + subj);
+        if (targetBtn) targetBtn.classList.add('active');
+      }
+      updateSubjectBadge();
+      checkAcademyFieldVisibility();
     }
 
-    async function submitSchedule() {
-      const text = document.getElementById('textInput').value.trim();
-      if (!text) {
-        showResult(false, '등록할 일정 내용을 입력해주세요.');
+    function handleTextInputChange() {
+      if (selectedCategory === 'auto') {
+        updateCategoryBadge();
+      }
+      if (selectedSubject === 'auto') {
+        updateSubjectBadge();
+      }
+      checkAcademyFieldVisibility();
+    }
+
+    function updateCategoryBadge() {
+      const badge = document.getElementById('detectorBadge');
+      if (!badge) return;
+
+      if (selectedCategory !== 'auto') {
+        badge.className = 'detector-badge' + (selectedCategory === '학원일정' ? ' academy' : '');
+        badge.innerHTML = `📌 지정됨: <b>${selectedCategory}</b>`;
         return;
       }
 
-      const submitBtn = document.getElementById('submitBtn');
-      const submitSpinner = document.getElementById('submitSpinner');
-      const submitText = document.getElementById('submitText');
+      const text = (document.getElementById('textInput').value || '').trim();
+      const timeInfo = extractTimeInfo(text);
+      const hasTime = Boolean(timeInfo.startTime);
+      const isAcademy = hasTime || /(학원|과외|수업|특강|클리닉)/.test(text);
+      const isSubunitTest = /(단원\s*테스트|단원\s*평가|쪽지\s*시험|퀴즈|소단원\s*테스트|주간\s*테스트|복습\s*테스트)/.test(text);
+      const isFullTest = /(모의고사|학평|모평|수능|중간고사|기말고사|전체\s*테스트|정기\s*고사)/.test(text);
 
-      submitBtn.disabled = true;
-      submitSpinner.style.display = 'inline-block';
-      submitText.textContent = '일정 분석 및 Supabase 등록 중...';
-      hideResult();
-
-      try {
-        const apiKey = localStorage.getItem('SP_GEMINI_KEY') || '';
-        let events = [];
-
-        // 1. API Key가 있으면 Gemini API 호출 시도
-        if (apiKey) {
-          try {
-            events = await callGeminiAPI(text, apiKey, selectedCategory, selectedSubject);
-          } catch (aiErr) {
-            console.warn('Gemini 호출 실패, 로컬 규칙 파서로 대체:', aiErr);
-            events = parseTextLocally(text, selectedCategory, selectedSubject);
-          }
-        } else {
-          // 2. 미입력 시 내장 한국어 날짜/일정 파서
-          events = parseTextLocally(text, selectedCategory, selectedSubject);
-        }
-
-        if (!events || events.length === 0) {
-          throw new Error('일정 분석에 실패했습니다. 내용을 조금 더 구체적으로 적어주세요.');
-        }
-
-        // 3. Supabase에 직접 INSERT
-        await SupabaseService.insertSchedules(events);
-
-        showResult(true, `✅ ${events.length}건의 일정이 Supabase에 성공적으로 등록되었습니다!<br>• 날짜: ${events[0].date}<br>• 과목: ${events[0].subject}<br>• 제목: ${events[0].title}`);
-        document.getElementById('textInput').value = '';
-      } catch (err) {
-        console.error('등록 실패:', err);
-        showResult(false, '등록 오류: ' + (err.message || err));
-      } finally {
-        submitBtn.disabled = false;
-        submitSpinner.style.display = 'none';
-        submitText.textContent = 'Supabase에 즉시 등록';
+      if (isAcademy) {
+        badge.className = 'detector-badge academy';
+        badge.innerHTML = hasTime ? `🏫 시간 감지됨 (${timeInfo.startTime}) → <b>학원일정</b>` : `🏫 학원 감지됨 → <b>학원일정</b>`;
+      } else if (isSubunitTest) {
+        badge.className = 'detector-badge';
+        badge.innerHTML = `📝 단원 감지됨 → <b>단원테스트</b>`;
+      } else if (isFullTest) {
+        badge.className = 'detector-badge';
+        badge.innerHTML = `🎯 시험 감지됨 → <b>전체테스트</b>`;
+      } else {
+        badge.className = 'detector-badge';
+        badge.innerHTML = `⚡ 자동 감지 중`;
       }
     }
 
-    // 내장 한국어 규칙 기반 파서
-    function parseTextLocally(rawText, defaultCat, defaultSubj) {
-      const now = new Date();
-      let targetDate = new Date();
+    function updateSubjectBadge() {
+      const badge = document.getElementById('subjDetectorBadge');
+      if (!badge) return;
 
-      if (rawText.includes('그저께') || rawText.includes('그제')) targetDate.setDate(now.getDate() - 2);
-      else if (rawText.includes('어제')) targetDate.setDate(now.getDate() - 1);
-      else if (rawText.includes('모레')) targetDate.setDate(now.getDate() + 2);
-      else if (rawText.includes('내일')) targetDate.setDate(now.getDate() + 1);
+      if (selectedSubject !== 'auto') {
+        badge.innerHTML = `📌 지정됨: <b>${selectedSubject}</b>`;
+        return;
+      }
+
+      const text = (document.getElementById('textInput').value || '').trim();
+      const detectedSubj = matchPlannerSubject(text, registeredSubjects);
+      if (detectedSubj && detectedSubj !== '일반') {
+        badge.innerHTML = `🎯 감지됨: <b>${detectedSubj}</b>`;
+      } else {
+        badge.innerHTML = `⚡ 자동`;
+      }
+    }
+
+    function checkAcademyFieldVisibility() {
+      const text = (document.getElementById('textInput').value || '').trim();
+      const timeInfo = extractTimeInfo(text);
+      const hasTime = Boolean(timeInfo.startTime);
+      const isAcad = (selectedCategory === '학원일정') || 
+        (selectedCategory === 'auto' && (hasTime || /(학원|과외|수업|특강|클리닉)/.test(text)));
+
+      const sec = document.getElementById('sectionAcademyName');
+      if (!sec) return;
+
+      if (isAcad) {
+        sec.style.display = 'block';
+        const curSubj = selectedSubject !== 'auto' ? selectedSubject : matchPlannerSubject(text, registeredSubjects);
+        const input = document.getElementById('inputAcademyName');
+        if (input && input.dataset.manual !== 'true') {
+          // subjects 테이블에서 로드된 academy_name 우선 반영
+          const acadFromDb = subjectAcademyMap[curSubj];
+          if (acadFromDb) {
+            input.value = acadFromDb;
+          } else {
+            const detectedTitle = getAcademyTitle(curSubj, text);
+            input.value = (detectedTitle && detectedTitle !== '학원일정') ? detectedTitle : '';
+          }
+        }
+      } else {
+        sec.style.display = 'none';
+        const input = document.getElementById('inputAcademyName');
+        if (input && input.dataset.manual !== 'true') {
+          input.value = '';
+        }
+      }
+    }
+
+    function onAcademyNameChanged(val) {
+      const input = document.getElementById('inputAcademyName');
+      if (input) {
+        input.dataset.manual = val ? 'true' : 'false';
+      }
+      const text = (document.getElementById('textInput').value || '').trim();
+      const curSubj = selectedSubject !== 'auto' ? selectedSubject : matchPlannerSubject(text, registeredSubjects);
+      if (curSubj && curSubj !== '일반' && val) {
+        subjectAcademyMap[curSubj] = val.trim();
+      }
+    }
+
+    // ========================================================
+    // 3. 탭 전환 & 이미지 처리
+    // ========================================================
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabText = document.getElementById('tabTextBtn');
+      const tabImg = document.getElementById('tabImgBtn');
+      const secText = document.getElementById('sectionText');
+      const secImg = document.getElementById('sectionImage');
+
+      if (tab === 'text') {
+        tabText.classList.add('active');
+        tabImg.classList.remove('active');
+        secText.style.display = 'flex';
+        secImg.style.display = 'none';
+      } else {
+        tabText.classList.remove('active');
+        tabImg.classList.add('active');
+        secText.style.display = 'none';
+        secImg.style.display = 'flex';
+      }
+      hideResult();
+    }
+
+    function handleImageSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          base64Image = canvas.toDataURL('image/jpeg', 0.85);
+
+          document.getElementById('dropzone').style.display = 'none';
+          document.getElementById('previewWrap').style.display = 'block';
+          document.getElementById('imagePreview').src = base64Image;
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearSelectedImage() {
+      base64Image = null;
+      document.getElementById('imageInput').value = '';
+      document.getElementById('dropzone').style.display = 'flex';
+      document.getElementById('previewWrap').style.display = 'none';
+      document.getElementById('imagePreview').src = '';
+    }
+
+    // ========================================================
+    // 4. 구글 서비스 파싱 엔진 (순수 JS 룰 파서 + Gemini API)
+    // ========================================================
+
+    // 과목 별칭 사전 (사회->통합사회, 사문->사회문화 등)
+    const aliasMap = {
+      '사회': ['통합사회', '공통사회', '사회', '사회문화'],
+      '과학': ['통합과학', '공통과학', '과학', '물리학I', '화학I', '생명과학I', '지구과학I'],
+      '국어': ['공통국어', '국어', '문학', '독서'],
+      '수학': ['공통수학', '수학', '수학I', '수학II', '미적분', '확률과통계', '기하'],
+      '영어': ['공통영어', '영어'],
+      '물리': ['물리학I', '물리학II', '물리학', '물리I', '물리'],
+      '화학': ['화학I', '화학II', '화학'],
+      '생명': ['생명과학I', '생명과학II', '생명과학', '생물'],
+      '생물': ['생명과학I', '생명과학II', '생명과학', '생물'],
+      '지구': ['지구과학I', '지구과학II', '지구과학'],
+      '사문': ['사회문화'],
+      '생윤': ['생활과윤리'],
+      '한지': ['한국지리'],
+      '세지': ['세계지리'],
+      '윤사': ['윤리와사상'],
+      '정법': ['정치와법'],
+      '미적': ['미적분'],
+      '확통': ['확률과통계'],
+      '기하': ['기하'],
+      '수1': ['수학I', '수학1', '수학'],
+      '수2': ['수학II', '수학2', '수학'],
+      '한국사': ['한국사', '역사'],
+      '국사': ['한국사', '역사'],
+      '역사': ['한국사', '역사', '세계사', '동아시아사']
+    };
+
+    function matchPlannerSubject(text, customSubjects) {
+      if (!text || typeof text !== 'string') return '일반';
+      const raw = text.trim();
+      const registered = Array.isArray(customSubjects) && customSubjects.length > 0
+        ? customSubjects.map(s => String(s).trim()).filter(Boolean)
+        : [];
+
+      if (registered.length === 0) return '일반';
+
+      // 1단계: 등록 과목명 그대로 포함 여부 (긴 글자 우선)
+      const sortedReg = [...registered].sort((a, b) => b.length - a.length);
+      for (let i = 0; i < sortedReg.length; i++) {
+        if (raw.indexOf(sortedReg[i]) > -1) return sortedReg[i];
+      }
+
+      // 2단계: 별칭 사전 매핑
+      const aliasKeys = Object.keys(aliasMap).sort((a, b) => b.length - a.length);
+      for (let i = 0; i < aliasKeys.length; i++) {
+        const alias = aliasKeys[i];
+        if (raw.indexOf(alias) > -1) {
+          const candidates = aliasMap[alias];
+          for (let j = 0; j < candidates.length; j++) {
+            if (registered.includes(candidates[j])) return candidates[j];
+          }
+        }
+      }
+
+      // 3단계: 부분 단어 매칭
+      for (let i = 0; i < sortedReg.length; i++) {
+        const reg = sortedReg[i];
+        for (let len = reg.length; len >= 2; len--) {
+          for (let start = 0; start <= reg.length - len; start++) {
+            const sub = reg.substring(start, start + len);
+            if (raw.indexOf(sub) > -1) return reg;
+          }
+        }
+      }
+
+      return '일반';
+    }
+
+    function getAcademyTitle(subject, rawText) {
+      const text = (rawText || '').trim();
+      if (subjectAcademyMap[subject]) return subjectAcademyMap[subject];
+
+      const knownAcademies = ['큰뜻국어', '과외하는수학', '프로토피아 영어', '프로토피아'];
+      for (let i = 0; i < knownAcademies.length; i++) {
+        if (text.indexOf(knownAcademies[i]) > -1) {
+          return knownAcademies[i] === '프로토피아' ? '프로토피아 영어' : knownAcademies[i];
+        }
+      }
+
+      const specificMatch = text.match(/([가-힣A-Za-z0-9]+(?:학원|어학원|클리닉|과외))/);
+      if (specificMatch) {
+        const found = specificMatch[1];
+        const genericNames = ['학원', '수학학원', '국어학원', '영어학원', '과학학원', '사회학원', '과외'];
+        if (!genericNames.includes(found.replace(/\s+/g, ''))) return found;
+      }
+
+      if (subject === '국어') return '큰뜻국어';
+      if (subject === '수학') return '과외하는수학';
+      if (subject === '영어') return '프로토피아 영어';
+      if (subject && subject !== '일반') return `${subject} 학원`;
+      return '학원일정';
+    }
+
+    function extractTimeInfo(rawText) {
+      if (!rawText || typeof rawText !== 'string') {
+        return { startTime: '', durationMinutes: 0, durationSec: 0, detail: '' };
+      }
+
+      let startH = null;
+      let startM = 0;
+      let durationMinutes = null;
+      let textForDuration = rawText;
+
+      // 1. 범위 매칭 (예: "14:00~16:00", "오후 7시부터 9시", "7시~9시30분", "2시반~4시", "1~3시")
+      const rangeMatch = rawText.match(
+        /(?:(오전|오후|저녁|밤|아침|낮|새벽)\s*)?(\d{1,2})(?::(\d{2})|\s*시(?![간])(?:\s*(\d{1,2})분|\s*(반))?)?\s*(?:부터|~|-)\s*(?:(오전|오후|저녁|밤|아침|낮|새벽)\s*)?(\d{1,2})(?::(\d{2})|\s*시(?![간])(?:\s*(\d{1,2})분|\s*(반))?)/
+      );
+
+      if (rangeMatch) {
+        const hasTimeIndicator = Boolean(
+          rangeMatch[1] || rangeMatch[6] ||
+          rangeMatch[3] || rangeMatch[8] ||
+          rangeMatch[4] || rangeMatch[9] ||
+          rangeMatch[5] || rangeMatch[10] ||
+          rangeMatch[0].includes('시') ||
+          rangeMatch[0].includes(':')
+        );
+
+        if (hasTimeIndicator) {
+          let sAmPm = rangeMatch[1];
+          let sH = parseInt(rangeMatch[2], 10);
+          let sM = rangeMatch[3] ? parseInt(rangeMatch[3], 10) : (rangeMatch[4] ? parseInt(rangeMatch[4], 10) : (rangeMatch[5] === '반' ? 30 : 0));
+          let eAmPm = rangeMatch[6] || sAmPm;
+          let eH = parseInt(rangeMatch[7], 10);
+          let eM = rangeMatch[8] ? parseInt(rangeMatch[8], 10) : (rangeMatch[9] ? parseInt(rangeMatch[9], 10) : (rangeMatch[10] === '반' ? 30 : 0));
+
+          const sIsMorning = (sAmPm === '오전' || sAmPm === '아침' || sAmPm === '새벽');
+          const eIsMorning = (eAmPm === '오전' || eAmPm === '아침' || eAmPm === '새벽');
+
+          // 1시부터 8시59분까지(sH >= 1 && sH <= 8) 또는 오후/저녁/밤이면 기본 +12 (오후) 처리
+          if (!sIsMorning && (sAmPm === '오후' || sAmPm === '저녁' || sAmPm === '밤' || (sH >= 1 && sH <= 8))) {
+            if (sH < 12) sH += 12;
+          } else if (sIsMorning && sH === 12) {
+            sH = 0;
+          }
+
+          if (!eIsMorning && (eAmPm === '오후' || eAmPm === '저녁' || eAmPm === '밤' || (eH >= 1 && eH <= 8))) {
+            if (eH < 12) eH += 12;
+          } else if (eIsMorning && eH === 12) {
+            eH = 0;
+          }
+
+          if (eH < sH && eH <= 12) {
+            eH += 12;
+          }
+
+          startH = sH;
+          startM = sM;
+          const startTotal = sH * 60 + sM;
+          const endTotal = eH * 60 + eM;
+          if (endTotal > startTotal) {
+            durationMinutes = endTotal - startTotal;
+          }
+          textForDuration = rawText.slice(0, rangeMatch.index) + ' ' + rawText.slice(rangeMatch.index + rangeMatch[0].length);
+        }
+      }
+
+      // 2. 단일 시작 시간 매칭 (예: "2시", "2시반", "18:40", "7시 30분", "오후 3시")
+      if (startH === null) {
+        const singleTimeMatch = rawText.match(
+          /(?:(오전|오후|저녁|밤|아침|낮|새벽)\s*)?(\d{1,2})(?::(\d{2})|\s*시(?![간])(?:\s*(\d{1,2})분|\s*(반))?)/
+        );
+        if (singleTimeMatch) {
+          const ampm = singleTimeMatch[1];
+          let h = parseInt(singleTimeMatch[2], 10);
+          let m = singleTimeMatch[3] ? parseInt(singleTimeMatch[3], 10) : (singleTimeMatch[4] ? parseInt(singleTimeMatch[4], 10) : (singleTimeMatch[5] === '반' ? 30 : 0));
+
+          const isMorning = (ampm === '오전' || ampm === '아침' || ampm === '새벽');
+          // 1시부터 8시59분까지는 오전/새벽 명시 없는 한 기본 +12 (오후) 처리
+          if (!isMorning && (ampm === '오후' || ampm === '저녁' || ampm === '밤' || (h >= 1 && h <= 8))) {
+            if (h < 12) h += 12;
+          } else if (isMorning && h === 12) {
+            h = 0;
+          }
+          startH = h;
+          startM = m;
+          textForDuration = rawText.slice(0, singleTimeMatch.index) + ' ' + rawText.slice(singleTimeMatch.index + singleTimeMatch[0].length);
+        }
+      }
+
+      // 3. 소요 시간 매칭 (예: "2시간", "1시간 30분", "1시간 반", "90분", "반시간")
+      if (durationMinutes === null) {
+        const durMatch = textForDuration.match(/(\d+)\s*시간(?:\s*(\d+)\s*분|\s*(반))?/) || textForDuration.match(/(\d+)\s*분/) || textForDuration.match(/반\s*시간/);
+        if (durMatch) {
+          if (durMatch[0].indexOf('시간') > -1 && durMatch[1]) {
+            const h = parseInt(durMatch[1], 10);
+            const m = durMatch[2] ? parseInt(durMatch[2], 10) : (durMatch[3] === '반' ? 30 : 0);
+            durationMinutes = (h * 60) + m;
+          } else if (durMatch[0].indexOf('반') > -1) {
+            durationMinutes = 30;
+          } else {
+            durationMinutes = parseInt(durMatch[1], 10);
+          }
+        }
+      }
+
+      // 4. 시간 언급 없을 시 기본 14:00 강제 주입 방지 (사용자가 입력했을 때만 시간 설정)
+      if (startH === null && durationMinutes === null) {
+        return {
+          startTime: '',
+          durationMinutes: 0,
+          durationSec: 0,
+          detail: ''
+        };
+      }
+
+      // 시작 시간은 있는데 소요 시간이 명시되지 않은 경우만 기본 1시간(60분) 설정
+      if (startH !== null && (durationMinutes === null || durationMinutes <= 0)) {
+        durationMinutes = 60;
+      }
+
+      const durationSec = (durationMinutes || 0) * 60;
+      let startTime = '';
+      if (startH !== null) {
+        const hh = String(startH).padStart(2, '0');
+        const mm = String(startM).padStart(2, '0');
+        startTime = `${hh}:${mm}`;
+      }
+
+      let durStr = '';
+      if (durationMinutes && durationMinutes > 0) {
+        const durH = Math.floor(durationMinutes / 60);
+        const durM = durationMinutes % 60;
+        if (durH > 0 && durM > 0) durStr = `${durH}시간 ${durM}분`;
+        else if (durH > 0) durStr = `${durH}시간`;
+        else durStr = `${durM}분`;
+      }
+
+      let detail = '';
+      if (startTime && durStr) {
+        detail = `${startTime} (${durStr})`;
+      } else if (startTime) {
+        detail = startTime;
+      } else if (durStr) {
+        detail = durStr;
+      }
+
+      return {
+        startTime: startTime,
+        durationMinutes: durationMinutes || 0,
+        durationSec: durationSec,
+        detail: detail
+      };
+    }
+
+    function extractAcademyTimeDetail(rawText) {
+      const info = extractTimeInfo(rawText);
+      return info.detail || '';
+    }
+
+    // 순수 JS 한국어 파서
+    function parseScheduleWithoutAI(text, currentTimestamp, customSubjects) {
+      if (!text || typeof text !== 'string') return [];
+
+      let now = new Date();
+      const raw = text.trim();
+
+      // 1. 날짜 추출
+      let targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (raw.indexOf('그저께') > -1 || raw.indexOf('그제') > -1) targetDate.setDate(targetDate.getDate() - 2);
+      else if (raw.indexOf('어제') > -1) targetDate.setDate(targetDate.getDate() - 1);
+      else if (raw.indexOf('모레') > -1) targetDate.setDate(targetDate.getDate() + 2);
+      else if (raw.indexOf('글피') > -1) targetDate.setDate(targetDate.getDate() + 3);
+      else if (raw.indexOf('내일') > -1) targetDate.setDate(targetDate.getDate() + 1);
       else {
-        const mMatch = rawText.match(/(\d{1,2})[월/.]\s*(\d{1,2})[일]?/);
-        if (mMatch) {
-          targetDate.setMonth(parseInt(mMatch[1], 10) - 1);
-          targetDate.setDate(parseInt(mMatch[2], 10));
+        const dayMatch = raw.match(/(이번\s*주|다음\s*주)?\s*([월화수목금토일])요일/);
+        if (dayMatch) {
+          const days = ['일', '월', '화', '수', '목', '금', '토'];
+          const targetDayIndex = days.indexOf(dayMatch[2]);
+          const currentDayIndex = now.getDay();
+          let diff = targetDayIndex - currentDayIndex;
+          if (dayMatch[1] && dayMatch[1].indexOf('다음') > -1) diff += 7;
+          else if (diff <= 0) diff += 7;
+          targetDate.setDate(targetDate.getDate() + diff);
+        } else {
+          const monthDateMatch = raw.match(/(\d{1,2})[월/.]\s*(\d{1,2})[일]?/);
+          if (monthDateMatch) {
+            targetDate.setMonth(parseInt(monthDateMatch[1], 10) - 1);
+            targetDate.setDate(parseInt(monthDateMatch[2], 10));
+          }
         }
       }
 
@@ -458,86 +1041,312 @@
       const dd = String(targetDate.getDate()).padStart(2, '0');
       const dateStr = `${yyyy}-${mm}-${dd}`;
 
-      // 과목 감지
-      let subj = defaultSubj;
-      ['영어', '국어', '통합사회', '수학', '과학', '한국사'].forEach(s => {
-        if (rawText.includes(s)) subj = s;
-      });
+      // 2. 카테고리 판정
+      const isAcademy = /(\d{1,2}시|\d{1,2}:\d{2}|오전|오후|학원|과외|수업|특강|클리닉|인강|강의)/.test(raw);
+      const isSubunitTest = /(단원\s*테스트|단원\s*평가|쪽지\s*시험|퀴즈|소단원\s*테스트|주간\s*테스트|복습\s*테스트)/.test(raw);
+      const isFullTest = /(모의고사|학평|모평|수능|중간고사|기말고사|전체\s*테스트|정기\s*고사)/.test(raw);
 
-      // 일정 제목 정제
-      let title = rawText
-        .replace(/(오늘|내일|어제|모레|그제|그저께)/g, '')
-        .replace(/(\d{1,2}[월/.])\s*\d{1,2}[일]?/g, '')
-        .replace(new RegExp(subj, 'g'), '')
-        .trim();
+      let category = '진도계획';
+      if (isAcademy) category = '학원일정';
+      else if (isSubunitTest) category = '단원테스트';
+      else if (isFullTest) category = '전체테스트';
 
-      if (!title) title = rawText;
+      // 3. 과목명 추출
+      const subject = matchPlannerSubject(raw, customSubjects);
+
+      // 4. 소단원/챕터 ID 추출
+      const subunitMatch = raw.match(/(\d+\s*(?:단원|강|챕터|Ch\.\s*\d+|회차|회))/i);
+      const subunitId = subunitMatch ? subunitMatch[1].replace(/\s+/g, '') : '';
+
+      // 5. 완료 여부 및 진도율
+      const isDone = /(완료|끝냄|했음|풀었음|마침|수강완료)/.test(raw);
+      const progressMatch = raw.match(/(\d{1,3})\s*%/);
+      let progress = isDone ? 100 : (progressMatch ? Math.min(100, parseInt(progressMatch[1], 10)) : 0);
+
+      // 6. 시간 정보 추출 (사용자 입력이 있을 때만 계산, 없으면 빈값)
+      const timeInfo = extractTimeInfo(raw);
+
+      let title = raw;
+      let detail = '';
+
+      if (category === '학원일정') {
+        title = getAcademyTitle(subject, raw);
+        detail = timeInfo.detail || '';
+      } else {
+        if (title.length > 35) {
+          title = `[${subject}] ${raw.substring(0, 32)}...`;
+        }
+        detail = timeInfo.detail ? `${raw} [${timeInfo.detail}]` : raw;
+      }
 
       return [{
         date: dateStr,
-        category: defaultCat,
-        subject: subj,
+        category: category,
+        subject: subject,
         title: title,
-        detail: '',
-        durationSec: 0,
-        completed: false
+        detail: detail,
+        startTime: timeInfo.startTime || '',
+        durationMinutes: timeInfo.durationMinutes || 0,
+        subunitId: subunitId,
+        progress: progress,
+        score: '',
+        durationSec: timeInfo.durationSec || 0,
+        completed: isDone
       }];
     }
 
     // Gemini API 호출
-    async function callGeminiAPI(text, apiKey, defaultCat, defaultSubj) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const prompt = `당신은 스터디 플래너 일정 파서입니다.
-오늘 날짜: ${todayStr}
-입력 텍스트: "${text}"
-기본 과목: "${defaultSubj}", 기본 카테고리: "${defaultCat}"
+    async function callGeminiForSchedule(type, content, currentTimestamp, apiKey, customSubjects) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-다음 JSON 배열 형식으로만 응답하세요(코드블록 없이 순수 JSON):
+      const subjGuide = (Array.isArray(customSubjects) && customSubjects.length > 0)
+        ? `반드시 플래너에 등록된 다음 과목 목록 [${customSubjects.join(', ')}] 중에서만 일치하는 과목명을 선택하세요. 없으면 '일반'.`
+        : `국어, 수학, 영어, 통합사회, 과학 등 식별 가능한 과목명을 한 단어로 기재. 없으면 '일반'.`;
+
+      const systemInstruction = `당신은 학생/수험생의 음성 텍스트나 대화문, 이미지에서 학습 일정을 완벽히 분석하는 전문 일정 파서(Parser)입니다.
+기준 시각: [${currentTimestamp}].
+"내일", "이번 주 금요일 2시", "모레" 등 상대 시간은 기준 시각을 바탕으로 정확한 'YYYY-MM-DD' 날짜로 환산하세요.
+구분(category): "진도계획", "단원테스트", "전체테스트", "학원일정" 4가지 중 1개만 지정.
+과목(subject): ${subjGuide}
+학원일정인 경우 detail에 "HH:mm (X시간 Y분)" 단독 시간 포맷만 기재.
+순수 JSON 배열(Array)만 출력하세요:
 [
   {
     "date": "YYYY-MM-DD",
-    "category": "진도계획|학원일정|자습|복습|시험",
+    "category": "진도계획|단원테스트|전체테스트|학원일정",
     "subject": "과목명",
-    "title": "구체적인 일정 제목",
-    "detail": ""
+    "title": "일정제목",
+    "detail": "세부내용",
+    "progress": 0,
+    "completed": false
   }
 ]`;
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      let parts = [];
+      if (type === 'image') {
+        let base64Data = content;
+        let mimeType = 'image/jpeg';
+        if (content.indexOf(';base64,') > -1) {
+          const splitArr = content.split(';base64,');
+          mimeType = splitArr[0].replace('data:', '') || 'image/jpeg';
+          base64Data = splitArr[1];
+        }
+        parts.push({
+          inline_data: { mime_type: mimeType, data: base64Data }
+        });
+        parts.push({
+          text: "위 이미지(시간표, 알림장, 캡처 등)에 있는 모든 일정을 분석하여 규격 JSON 배열로 추출해주세요."
+        });
+      } else {
+        parts.push({
+          text: `다음 입력된 내용을 분석하여 규격 JSON 배열로 만들어주세요:\n\n"${content}"`
+        });
+      }
+
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: 'application/json' }
+          contents: [{ parts: parts }],
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          generationConfig: {
+            temperature: 0.1,
+            responseMimeType: "application/json"
+          }
         })
       });
 
-      if (!res.ok) throw new Error('Gemini API 응답 오류: ' + res.status);
+      if (!res.ok) throw new Error(`Gemini API 오류 (${res.status})`);
       const data = await res.json();
-      const rawJson = data.candidates[0].content.parts[0].text;
-      return JSON.parse(rawJson);
+      let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+      rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const events = JSON.parse(rawText);
+      return Array.isArray(events) ? events : [events];
     }
 
-    function showResult(isSuccess, html) {
+    // ========================================================
+    // 5. 최종 등록 제출 핸들러 (Supabase schedules 테이블 연동)
+    // ========================================================
+    async function submitSchedule() {
+      const submitBtn = document.getElementById('submitBtn');
+      const submitSpinner = document.getElementById('submitSpinner');
+      const submitText = document.getElementById('submitText');
+      const apiKey = (localStorage.getItem('SP_GEMINI_KEY') || '').trim();
+
+      let content = '';
+      if (currentTab === 'text') {
+        content = document.getElementById('textInput').value.trim();
+        if (!content) {
+          showResult(false, '등록할 일정 내용을 입력해주세요.');
+          return;
+        }
+      } else {
+        if (!base64Image) {
+          showResult(false, '분석할 이미지를 먼저 선택해주세요.');
+          return;
+        }
+        content = base64Image;
+      }
+
+      submitBtn.disabled = true;
+      submitSpinner.style.display = 'inline-block';
+      submitText.innerText = (currentTab === 'text') ? '일정 분석 및 DB 등록 중...' : 'Gemini AI로 이미지 분석 중...';
+      hideResult();
+
+      try {
+        const curTimestamp = new Date().toISOString();
+        let parsedEvents = [];
+
+        // 1. 파싱 실행
+        if (currentTab === 'text') {
+          // 텍스트는 초고속 0초 룰베이스 파서 우선 실행 (API 키 있고 복합문장인 경우 Gemini 활용 가능)
+          if (apiKey && content.length > 50) {
+            try {
+              parsedEvents = await callGeminiForSchedule('text', content, curTimestamp, apiKey, registeredSubjects);
+            } catch (e) {
+              console.warn('Gemini 텍스트 파싱 오류, 로컬 파서로 대체:', e);
+              parsedEvents = parseScheduleWithoutAI(content, curTimestamp, registeredSubjects);
+            }
+          } else {
+            parsedEvents = parseScheduleWithoutAI(content, curTimestamp, registeredSubjects);
+          }
+        } else {
+          // 이미지는 Gemini Vision 필요
+          if (!apiKey) {
+            openApiKeyModal();
+            throw new Error('이미지 분석을 위해 Google AI Studio Gemini API 키가 필요합니다.');
+          }
+          parsedEvents = await callGeminiForSchedule('image', content, curTimestamp, apiKey, registeredSubjects);
+        }
+
+        if (!parsedEvents || parsedEvents.length === 0) {
+          throw new Error('일정 데이터를 추출하지 못했습니다. 내용을 조금 더 구체적으로 적어주세요.');
+        }
+
+        // 2. 카테고리/과목/학원명 표준화
+        const userAcadName = (document.getElementById('inputAcademyName')?.value || '').trim();
+
+        parsedEvents = parsedEvents.map(ev => {
+          if (selectedCategory && selectedCategory !== 'auto') {
+            ev.category = selectedCategory;
+          }
+          if (selectedSubject && selectedSubject !== 'auto') {
+            ev.subject = selectedSubject;
+          }
+
+          let timeInfo = {
+            startTime: ev.startTime || '',
+            durationMinutes: ev.durationMinutes || (ev.durationSec ? Math.round(ev.durationSec / 60) : 0),
+            durationSec: ev.durationSec || 0,
+            detail: ev.detail || ''
+          };
+
+          if (!timeInfo.startTime && !timeInfo.durationSec) {
+            const extracted = extractTimeInfo(ev.detail || content);
+            if (extracted.startTime) timeInfo.startTime = extracted.startTime;
+            if (extracted.durationSec) timeInfo.durationSec = extracted.durationSec;
+            if (extracted.durationMinutes) timeInfo.durationMinutes = extracted.durationMinutes;
+            if (extracted.detail) timeInfo.detail = extracted.detail;
+          }
+
+          if (ev.category === '학원일정') {
+            const finalAcad = userAcadName || subjectAcademyMap[ev.subject] || getAcademyTitle(ev.subject, content);
+            ev.title = finalAcad;
+            ev.detail = extractAcademyTimeDetail(ev.detail || content);
+            const acadTime = extractTimeInfo(ev.detail || content);
+            if (acadTime.startTime) timeInfo.startTime = acadTime.startTime;
+            if (acadTime.durationSec) timeInfo.durationSec = acadTime.durationSec;
+          }
+
+          return {
+            id: 'sch_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            lessonId: null,
+            subject: ev.subject || '공통',
+            date: ev.date || new Date().toISOString().slice(0, 10),
+            category: ev.category || '진도계획',
+            title: ev.title || '일정',
+            detail: ev.detail || '',
+            startTime: timeInfo.startTime || '',
+            progress: ev.progress !== undefined ? Number(ev.progress) : (ev.completed ? 100 : 0),
+            score: '',
+            durationSec: timeInfo.durationSec || 0,
+            completed: Boolean(ev.completed)
+          };
+        });
+
+        // 3. Supabase schedules 테이블에 직접 INSERT
+        if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+          await SupabaseService.insertSchedules(parsedEvents);
+
+          // 학원명이 수정된 경우 subjects 테이블의 academy_name도 갱신
+          if (userAcadName && selectedSubject && selectedSubject !== 'auto') {
+            try {
+              const client = SupabaseService.getClient();
+              if (client) {
+                await client.from('subjects').update({ academy_name: userAcadName }).eq('name', selectedSubject);
+                subjectAcademyMap[selectedSubject] = userAcadName;
+              }
+            } catch (upErr) {
+              console.warn('과목 학원명 갱신 예외:', upErr);
+            }
+          }
+        } else {
+          throw new Error('Supabase 데이터베이스가 연결되어 있지 않습니다. 플래너 메인에서 DB 설정을 먼저 확인하세요.');
+        }
+
+        // 4. 성공 알림 및 입력 폼 초기화
+        let successHtml = `🎉 <b>${parsedEvents.length}개</b>의 일정이 Supabase DB에 등록되었습니다!<br><ul style="margin-top:6px; padding-left:18px;">`;
+        parsedEvents.forEach(ev => {
+          successHtml += `<li><b>[${ev.date}]</b> [${ev.subject}] ${ev.title} ${ev.detail ? `(${ev.detail})` : ''}</li>`;
+        });
+        successHtml += `</ul><div style="margin-top:8px;"><a href="./index.html" style="color:#38bdf8; font-weight:bold; text-decoration:underline;">➔ 플래너 홈으로 이동하여 확인하기</a></div>`;
+
+        showResult(true, successHtml);
+
+        if (currentTab === 'text') {
+          document.getElementById('textInput').value = '';
+          const acadInput = document.getElementById('inputAcademyName');
+          if (acadInput) {
+            acadInput.value = '';
+            acadInput.dataset.manual = 'false';
+          }
+        } else {
+          clearSelectedImage();
+        }
+        updateCategoryBadge();
+        updateSubjectBadge();
+        checkAcademyFieldVisibility();
+
+      } catch (err) {
+        console.error('등록 오류:', err);
+        showResult(false, '오류 발생: ' + (err.message || err));
+      } finally {
+        submitBtn.disabled = false;
+        submitSpinner.style.display = 'none';
+        submitText.innerText = '일정등록하기';
+      }
+    }
+
+    function showResult(isSuccess, htmlContent) {
       const box = document.getElementById('resultBox');
       box.style.display = 'block';
-      box.className = `result-box ${isSuccess ? 'result-success' : 'result-error'}`;
-      box.innerHTML = html;
+      box.className = 'result-box' + (isSuccess ? '' : ' error');
+      box.innerHTML = htmlContent;
     }
 
     function hideResult() {
-      document.getElementById('resultBox').style.display = 'none';
+      const box = document.getElementById('resultBox');
+      box.style.display = 'none';
+      box.innerHTML = '';
     }
 
     function openApiKeyModal() {
       document.getElementById('apiKeyInput').value = localStorage.getItem('SP_GEMINI_KEY') || '';
       document.getElementById('apiModal').style.display = 'flex';
     }
-
     function closeApiKeyModal() {
       document.getElementById('apiModal').style.display = 'none';
     }
-
     function saveApiKey() {
       const key = document.getElementById('apiKeyInput').value.trim();
       if (key) localStorage.setItem('SP_GEMINI_KEY', key);

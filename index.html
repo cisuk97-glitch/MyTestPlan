@@ -526,55 +526,37 @@
         </button>
       </div>
 
+      <!-- Supabase 연동 오류 배너 -->
+      <div id="cloud-error-banner" class="hidden mb-4"></div>
+
       <!-- 2. 학습 일정 카드 리스트 컨테이너 (3단 구조) -->
       <div id="schedule-cards-container" class="space-y-4">
         <!-- 동적으로 카드 렌더링 -->
       </div>
 
-      <!-- 3. 과목별 시험 D-Day 현황 위젯 바 -->
-      <div class="neu-card p-4 rounded-3xl">
-        <div class="flex items-center justify-between mb-2.5 px-1">
-          <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-500"></i>
-            과목별 시험 D-Day 현황
-          </span>
-          <span class="text-[11px] text-slate-400 font-medium">클릭 시 과목별 통계로 이동</span>
+      <!-- 3. 과목별 D-Day 및 학습 요약 컴팩트 바 -->
+      <div class="neu-card p-3.5 sm:p-4 rounded-3xl space-y-2.5">
+        <!-- 미니 요약 메트릭 바 (전체일정, 완료율, 오늘 총 학습시간) -->
+        <div class="flex items-center justify-between flex-wrap gap-2 px-1 pb-2 border-b border-slate-200/70 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-500">전체</span>
+            <span id="metric-total-schedules" class="font-mono font-extrabold text-slate-800">0</span>개
+            <span class="text-slate-300">|</span>
+            <span class="font-bold text-slate-500">완료율</span>
+            <span id="metric-completion-rate" class="font-mono font-extrabold text-blue-600">0%</span>
+          </div>
+          <div class="flex items-center gap-1.5 font-bold">
+            <span class="text-slate-500">오늘 학습:</span>
+            <span id="metric-total-study-time" class="font-mono font-extrabold text-orange-600">0시간 0분</span>
+            <span class="text-[11px] text-slate-400 font-normal">
+              (<span id="metric-breakdown-academy" class="text-amber-600 font-semibold">학원 0분</span> · 
+               <span id="metric-breakdown-regular" class="text-blue-600 font-semibold">자습 0분</span>)
+            </span>
+          </div>
         </div>
-        <div id="dday-widget-bar" class="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5">
+        <!-- 과목별 D-Day 뱃지 목록 -->
+        <div id="dday-widget-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5 pt-0.5">
           <!-- 과목별 D-Day 뱃지 렌더링 -->
-        </div>
-      </div>
-
-      <!-- 4. 요약 대시보드 카드 (전체 일정, 완료율, 오늘 총 학습시간) -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <!-- 4-1. 전체 일정 -->
-        <div class="neu-card p-5 rounded-3xl text-center relative overflow-hidden">
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">전체 일정</div>
-          <div class="flex items-baseline justify-center gap-1">
-            <span id="metric-total-schedules" class="text-3xl font-extrabold text-slate-800 font-mono">0</span>
-            <span class="text-sm font-semibold text-slate-500">개</span>
-          </div>
-        </div>
-
-        <!-- 4-2. 완료율 -->
-        <div class="neu-card p-5 rounded-3xl text-center relative overflow-hidden">
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">완료율</div>
-          <div class="flex items-baseline justify-center gap-1">
-            <span id="metric-completion-rate" class="text-3xl font-extrabold text-[#54A0FF] font-mono">0%</span>
-          </div>
-        </div>
-
-        <!-- 4-3. 오늘 학습시간 (학원 + 자습/기타 일정 합계) -->
-        <div class="neu-card p-5 rounded-3xl text-center relative overflow-hidden">
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">오늘 총 학습시간</div>
-          <div class="flex items-baseline justify-center gap-1">
-            <span id="metric-total-study-time" class="text-3xl font-extrabold text-[#f28b2a] font-mono">0시간 0분</span>
-          </div>
-          <div class="mt-1.5 text-[11px] text-slate-500 flex items-center justify-center gap-2 font-medium">
-            <span id="metric-breakdown-academy" class="text-amber-600 font-bold">학원: 0분</span>
-            <span class="text-slate-300">•</span>
-            <span id="metric-breakdown-regular" class="text-blue-600 font-bold">자습: 0분</span>
-          </div>
         </div>
       </div>
     </div>
@@ -650,35 +632,26 @@
             <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#FF9F43]"></i>
             <span id="st-chart-title-text">일자별 누적 학습시간 (학원 + 자습)</span>
           </h3>
-          <div class="flex items-center gap-3 text-xs">
-            <span class="flex items-center gap-1.5 text-amber-600 font-bold"><span
-                class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm"></span> 학원</span>
-            <span class="flex items-center gap-1.5 text-blue-600 font-bold"><span
-                class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span> 자습/과목</span>
-          </div>
         </div>
-        <div class="h-64 w-full relative">
+        <div class="relative w-full h-[220px]">
           <canvas id="studyTimeDailyChart"></canvas>
         </div>
       </div>
 
-      <!-- 4. 과목별 학원시간 + 자습시간 합산 분석 카드들 -->
+      <!-- 4. 과목별 공부시간 분석 리스트 -->
       <div class="space-y-3">
-        <div class="flex items-center justify-between px-1">
-          <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-2">
-            <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-500"></i>
-            과목별 공부시간 합계 및 세부 구성
-          </h3>
-          <span class="text-xs text-slate-500 font-medium">학원 수업 및 자습 시간 합산</span>
-        </div>
-        <div id="studytime-subjects-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- 과목별 시간 카드들 렌더링 (한 줄에 2과목) -->
+        <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-2">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-[#FF9F43]"></i>
+          <span>과목별 학습시간 현황</span>
+        </h3>
+        <div id="studytime-subjects-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 과목별 카드 -->
         </div>
       </div>
     </div>
 
     <!-- ======================================================== -->
-    <!-- 뷰 3: [과목통계] 과목별 종합 분석 화면 (소단원 + 전체 모의고사 통합) -->
+    <!-- 뷰 3: [과목통계] 과목별 시험 및 대단원 종합 통계 화면 -->
     <!-- ======================================================== -->
     <div id="view-analytics" class="space-y-6 hidden">
       <!-- 상단 과목 선택 탭 바 -->
@@ -693,96 +666,108 @@
         </div>
       </div>
 
-      <!-- 과목 종합 스탯 4종 -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-        <div onclick="openSubjectExamModal(appState.activeExamSubjId)" title="시험일 및 목표 점수 수정"
-          class="p-4 rounded-3xl neu-card text-center cursor-pointer hover:-translate-y-0.5 transition group">
-          <div class="text-[11px] font-bold text-slate-500 flex items-center justify-center gap-1">
-            시험 D-Day <i data-lucide="edit-2" class="w-3 h-3 text-slate-400 group-hover:text-rose-500"></i>
-          </div>
-          <div id="an-stat-dday" class="text-lg font-extrabold text-rose-500 font-mono mt-1">D-Day</div>
+      <!-- 데이터 부재 시 안내 Empty State UI -->
+      <div id="an-empty-state" class="hidden neu-card p-12 rounded-3xl text-center space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center font-bold text-xl neu-card-sm">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
         </div>
-        <div onclick="openSubjectExamModal(appState.activeExamSubjId)" title="시험일 및 목표 점수 수정"
-          class="p-4 rounded-3xl neu-card text-center cursor-pointer hover:-translate-y-0.5 transition group">
-          <div class="text-[11px] font-bold text-slate-500 flex items-center justify-center gap-1">
-            목표 점수 <i data-lucide="edit-2" class="w-3 h-3 text-slate-400 group-hover:text-blue-500"></i>
-          </div>
-          <div id="an-stat-target" class="text-lg font-extrabold text-blue-600 font-mono mt-1">100점</div>
-        </div>
-        <div class="p-4 rounded-3xl neu-card text-center">
-          <div class="text-[11px] font-bold text-slate-500">소단원 테스트 평균</div>
-          <div id="an-stat-subunit-avg" class="text-lg font-extrabold text-amber-600 font-mono mt-1">-</div>
-        </div>
-        <div class="p-4 rounded-3xl neu-card text-center">
-          <div class="text-[11px] font-bold text-slate-500">최근 모의고사</div>
-          <div id="an-stat-recent-mock" class="text-lg font-extrabold text-emerald-600 font-mono mt-1">-</div>
-        </div>
+        <h3 class="text-sm font-extrabold text-slate-800">등록된 과목 및 단원이 없습니다</h3>
+        <p class="text-xs text-slate-500 font-medium max-w-sm mx-auto">Supabase 설정을 확인하거나 과목을 추가해주세요.</p>
       </div>
 
-      <!-- 상단: 과목 전체 모의고사 회차별 득점 추이 차트 -->
-      <div class="neu-card p-5 rounded-3xl space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-            <i data-lucide="trending-up" class="w-4 h-4 text-rose-500"></i>
-            과목 전체 모의고사 성적 추이 & 목표선
-          </span>
-          <span id="an-mock-badge" class="text-xs font-mono font-bold text-slate-500 neu-pill-inset px-2.5 py-0.5">0회
-            응시</span>
-        </div>
-        <div class="relative w-full h-[220px]">
-          <canvas id="anMockChart"></canvas>
-          <div id="an-mock-empty"
-            class="hidden absolute inset-0 flex flex-col items-center justify-center text-xs text-slate-400 font-medium">
-            아직 등록된 전체 모의고사 성적이 없습니다.
+      <!-- 과목 분석 메인 섹션 컨테이너 -->
+      <div id="an-content-sections" class="space-y-6">
+        <!-- 과목 종합 스탯 4종 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div onclick="openSubjectExamModal(appState.activeExamSubjId)" title="시험일 및 목표 점수 수정"
+            class="p-4 rounded-3xl neu-card text-center cursor-pointer hover:-translate-y-0.5 transition group">
+            <div class="text-[11px] font-bold text-slate-500 flex items-center justify-center gap-1">
+              시험 D-Day <i data-lucide="edit-2" class="w-3 h-3 text-slate-400 group-hover:text-rose-500"></i>
+            </div>
+            <div id="an-stat-dday" class="text-lg font-extrabold text-rose-500 font-mono mt-1">D-Day</div>
+          </div>
+          <div onclick="openSubjectExamModal(appState.activeExamSubjId)" title="시험일 및 목표 점수 수정"
+            class="p-4 rounded-3xl neu-card text-center cursor-pointer hover:-translate-y-0.5 transition group">
+            <div class="text-[11px] font-bold text-slate-500 flex items-center justify-center gap-1">
+              목표 점수 <i data-lucide="edit-2" class="w-3 h-3 text-slate-400 group-hover:text-blue-500"></i>
+            </div>
+            <div id="an-stat-target" class="text-lg font-extrabold text-blue-600 font-mono mt-1">100점</div>
+          </div>
+          <div class="p-4 rounded-3xl neu-card text-center">
+            <div class="text-[11px] font-bold text-slate-500">단원 테스트 평균</div>
+            <div id="an-stat-subunit-avg" class="text-lg font-extrabold text-amber-600 font-mono mt-1">-</div>
+          </div>
+          <div class="p-4 rounded-3xl neu-card text-center">
+            <div class="text-[11px] font-bold text-slate-500">최근 전체테스트</div>
+            <div id="an-stat-recent-mock" class="text-lg font-extrabold text-emerald-600 font-mono mt-1">-</div>
           </div>
         </div>
-      </div>
 
-      <!-- 중단: 취약 소단원 목록 (70점 미만) -->
-      <div class="neu-card p-5 rounded-3xl space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
-            취약 소단원 집중 보완 목록 (단원 테스트 70점 미만)
-          </span>
-          <span id="an-weak-count-badge"
-            class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 border border-amber-200">0개
-            단원</span>
-        </div>
-        <div id="an-weak-subunits-list" class="space-y-2">
-          <!-- 취약 단원 목록 렌더링 -->
-        </div>
-      </div>
-
-      <!-- 하단: 대단원별 소단원 전체 성적표 (점수 인라인 수정 및 최근 10회 추이 차트) -->
-      <div class="neu-card p-5 rounded-3xl space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-          <div>
-            <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-              <i data-lucide="award" class="w-4 h-4 text-[#FF9F43]"></i>
-              소단원별 성적표 & 점수 관리
-            </h3>
-            <p class="text-xs text-slate-500 mt-0.5 font-medium">단원별 점수를 직접 수정하거나 클릭하여 최근 10회차 점수 변화 추이를 확인합니다.</p>
-          </div>
-          <span class="text-[11px] text-slate-500 font-mono font-bold neu-pill-inset px-2.5 py-0.5">최근 10회 보관</span>
-        </div>
-
-        <!-- 선택 소단원 10회차 추이 그래프 (클릭 시 펼침) -->
-        <div id="subunit-trend-panel" class="hidden p-4 rounded-2xl neu-inset space-y-2">
+        <!-- 상단: 전체테스트 성적추이 차트 -->
+        <div class="neu-card p-5 rounded-3xl space-y-3">
           <div class="flex items-center justify-between">
-            <span id="subunit-trend-title" class="text-xs font-bold text-blue-600">소단원 점수 변화 추이 (최근 10회)</span>
-            <button onclick="closeSubunitTrend()" class="neu-icon-btn w-7 h-7 text-slate-500 hover:text-slate-800">
-              <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
+            <span class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-4 h-4 text-rose-500"></i>
+              전체테스트 성적추이
+            </span>
+            <span id="an-mock-badge" class="text-xs font-mono font-bold text-slate-500 neu-pill-inset px-2.5 py-0.5">0회
+              응시</span>
           </div>
-          <div class="relative w-full h-[150px]">
-            <canvas id="subunitTrendChart"></canvas>
+          <div class="relative w-full h-[220px]">
+            <canvas id="anMockChart"></canvas>
+            <div id="an-mock-empty"
+              class="hidden absolute inset-0 flex flex-col items-center justify-center text-xs text-slate-400 font-medium">
+              아직 등록된 전체테스트 성적이 없습니다.
+            </div>
           </div>
         </div>
 
-        <!-- 소단원 리스트 테이블 -->
-        <div id="an-subunits-table-container" class="space-y-4">
-          <!-- 대단원별 소단원 행 렌더링 -->
+        <!-- 중단: 취약 대단원 목록 (70점 미만) -->
+        <div class="neu-card p-5 rounded-3xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
+              취약 대단원 집중 보완 목록 (단원 테스트 70점 미만)
+            </span>
+            <span id="an-weak-count-badge"
+              class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 border border-amber-200">0개
+              단원</span>
+          </div>
+          <div id="an-weak-subunits-list" class="space-y-2">
+            <!-- 취약 단원 목록 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 하단: 대단원별 전체 성적표 (점수 인라인 수정 및 최근 10회 추이 차트) -->
+        <div class="neu-card p-5 rounded-3xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-[#FF9F43]"></i>
+                대단원별 성적표 & 점수 관리
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5 font-medium">대단원별 점수를 직접 수정하거나 클릭하여 최근 10회차 점수 변화 추이를 확인합니다.</p>
+            </div>
+            <span class="text-[11px] text-slate-500 font-mono font-bold neu-pill-inset px-2.5 py-0.5">최근 10회 보관</span>
+          </div>
+
+          <!-- 선택 대단원 10회차 추이 그래프 (클릭 시 펼침) -->
+          <div id="subunit-trend-panel" class="hidden p-4 rounded-2xl neu-inset space-y-2">
+            <div class="flex items-center justify-between">
+              <span id="subunit-trend-title" class="text-xs font-bold text-blue-600">대단원 점수 변화 추이 (최근 10회)</span>
+              <button onclick="closeSubunitTrend()" class="neu-icon-btn w-7 h-7 text-slate-500 hover:text-slate-800">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="relative w-full h-[150px]">
+              <canvas id="subunitTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- 대단원 리스트 테이블 -->
+          <div id="an-subunits-table-container" class="space-y-4">
+            <!-- 대단원 행 렌더링 -->
+          </div>
         </div>
       </div>
 
@@ -861,7 +846,7 @@
             <select id="select-schedule-category" onchange="onCategoryChange(this.value)"
               class="neu-input w-full px-3 py-2.5 text-xs font-semibold">
               <option value="진도계획">📖 진도 계획</option>
-              <option value="소단원테스트">📝 소단원 테스트</option>
+              <option value="단원테스트">📝 단원 테스트</option>
               <option value="전체테스트">🎯 과목별 전체 테스트</option>
               <option value="학원일정">🏫 학원 일정</option>
             </select>
@@ -973,7 +958,7 @@
           <div id="wrapper-subunit-select" class="space-y-1.5">
             <div class="flex items-center justify-between">
               <label class="block text-xs font-bold text-slate-700">
-                연동 소단원 선택 <span class="text-slate-500 font-normal">(대단원 체크 시 하위 소단원 전체 일괄 선택)</span>
+                연동 대단원 선택 <span class="text-slate-500 font-normal">(학습할 대단원을 선택하세요)</span>
               </label>
               <div class="flex items-center gap-1.5">
                 <span id="badge-selected-subunits-count"
@@ -989,7 +974,7 @@
             </div>
             <div id="container-schedule-subunits-tree"
               class="max-h-52 overflow-y-auto space-y-2 p-3 rounded-2xl neu-inset text-xs">
-              <!-- 대단원 및 소단원 체크박스 리스트 동적 렌더링 -->
+              <!-- 대단원 체크박스 리스트 동적 렌더링 -->
             </div>
           </div>
 
@@ -1047,9 +1032,9 @@
         <div>
           <h3 class="font-extrabold text-base text-slate-800 flex items-center gap-2">
             <i data-lucide="book-open" class="w-5 h-5 text-[#FF9F43]"></i>
-            과목 및 대단원·소단원 목차 관리
+            과목 및 대단원 목차 관리
           </h3>
-          <p class="text-xs text-slate-500 mt-0.5 font-medium">단원명 수정, 시험범위 포함/제외 토글, 대단원 및 소단원 추가/삭제를 관리합니다.</p>
+          <p class="text-xs text-slate-500 mt-0.5 font-medium">단원명 수정, 시험범위 포함/제외 토글, 대단원 추가/삭제 및 담당 학원명을 관리합니다.</p>
         </div>
         <button onclick="closeSubjectManagerModal()"
           class="neu-icon-btn w-8 h-8 rounded-full text-slate-500 hover:text-slate-800">
@@ -1057,43 +1042,40 @@
         </button>
       </div>
 
-      <!-- 과목 선택 및 과목 추가/일괄등록 바 -->
-      <div class="p-3.5 neu-inset my-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
-        <div class="flex items-center gap-2">
+      <!-- 과목 선택 및 버튼 툴바 -->
+      <div class="p-3 neu-inset my-3 rounded-2xl flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
+        <div class="flex items-center gap-2 flex-wrap">
           <span class="text-xs font-bold text-slate-700">선택 과목:</span>
           <select id="mgr-select-subject" onchange="renderSubjectTreeManager(this.value)"
             class="neu-input px-3 py-1.5 text-xs font-bold text-slate-800">
             <!-- 과목 옵션 -->
           </select>
-          <button onclick="promptEditSubjectDetails()" title="과목 시험일/목표점수 수정"
-            class="neu-icon-btn w-8 h-8 rounded-xl text-slate-600">
-            <i data-lucide="settings" class="w-4 h-4"></i>
+          <button onclick="promptEditSubjectDetails()" title="과목 시험일/목표점수/학원 설정"
+            class="neu-btn px-2.5 py-1.5 text-xs font-bold text-slate-700 flex items-center gap-1 shadow-sm">
+            <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-600"></i> 시험일·목표·학원
           </button>
-        </div>
-
-        <div class="flex items-center gap-2">
           <button onclick="promptAddSubject()"
-            class="neu-btn text-xs px-3 py-1.5 text-blue-600 flex items-center gap-1 font-bold">
+            class="neu-btn text-xs px-2.5 py-1.5 text-blue-600 flex items-center gap-1 font-bold">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 새 과목
           </button>
           <button onclick="openBulkImportModal()"
-            class="neu-btn-emerald text-xs px-3 py-1.5 flex items-center gap-1 font-bold shadow-sm">
-            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> 단원 일괄 등록
+            class="neu-btn-emerald text-xs px-2.5 py-1.5 flex items-center gap-1 font-bold shadow-sm">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> 대단원 일괄 등록
           </button>
           <button onclick="promptAddChapter()"
-            class="neu-btn-primary text-xs px-3 py-1.5 text-white flex items-center gap-1 font-bold shadow-sm">
+            class="neu-btn-primary text-xs px-2.5 py-1.5 text-white flex items-center gap-1 font-bold shadow-sm">
             <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i> 대단원 추가
           </button>
         </div>
       </div>
 
-      <!-- 단원 트리 편집 목록 영역 (스크롤) -->
-      <div id="mgr-chapter-tree-container" class="flex-1 overflow-y-auto p-2 space-y-3.5">
-        <!-- 동적으로 대단원 및 소단원 목록 렌더링 -->
+      <!-- 단원 편집 목록 영역 (스크롤) -->
+      <div id="mgr-chapter-tree-container" class="flex-1 overflow-y-auto p-2 space-y-3">
+        <!-- 동적으로 대단원 목록 렌더링 -->
       </div>
 
       <div class="pt-3 border-t border-slate-200 flex items-center justify-between flex-shrink-0">
-        <span class="text-xs text-slate-500 font-medium">단원명 변경 및 시험범위 토글 시 즉시 저장됩니다.</span>
+        <span class="text-xs text-slate-500 font-medium">대단원명 및 학원명 변경, 시험범위 토글 시 즉시 저장됩니다.</span>
         <button onclick="closeSubjectManagerModal()"
           class="neu-btn px-5 py-2 text-xs font-bold text-slate-700 rounded-xl">닫기</button>
       </div>
@@ -1111,9 +1093,9 @@
         <div>
           <h3 class="font-extrabold text-base text-slate-800 flex items-center gap-2">
             <i data-lucide="file-text" class="w-5 h-5 text-emerald-500"></i>
-            단원 목차 전체 일괄 등록
+            대단원 목차 전체 일괄 등록
           </h3>
-          <p class="text-xs text-slate-500 mt-0.5 font-medium">양식에 맞춰 텍스트를 붙여넣으면 대단원과 소단원이 한 번에 자동 등록됩니다.</p>
+          <p class="text-xs text-slate-500 mt-0.5 font-medium">줄 단위로 대단원명을 붙여넣으면 한 번에 자동 등록됩니다.</p>
         </div>
         <button onclick="closeBulkImportModal()"
           class="neu-icon-btn w-8 h-8 rounded-full text-slate-500 hover:text-slate-800">
@@ -1124,16 +1106,12 @@
       <div class="pt-4 space-y-4">
         <div class="p-3 neu-inset rounded-2xl text-xs text-slate-700 space-y-1">
           <div class="font-bold text-emerald-600 flex items-center gap-1">💡 입력 양식 안내:</div>
-          <p class="text-[11px] text-slate-500">대단원은 일반 행으로, 소단원은 하이픈(-)이나 별표(*)로 시작하거나 들여쓰기하여 입력하세요.</p>
+          <p class="text-[11px] text-slate-500">한 줄에 하나씩 대단원명을 입력하세요.</p>
           <pre
             class="bg-white/80 p-2.5 rounded-xl text-[10px] text-slate-800 font-mono overflow-x-auto shadow-inner border border-white">
 I. 인권 보장과 헌법
-- 1 인권의 의미와 변화 양상
-- 2 현대 사회의 인권
-- 3 인권 보장을 위한 헌법의 역할
 II. 사회 정의와 불평등
-- 1 정의의 의미와 필요성
-- 2 분배적 정의와 교정적 정의</pre>
+III. 문화와 다양성</pre>
         </div>
 
         <div>
@@ -1205,6 +1183,15 @@ II. 사회 정의와 불평등
           </label>
           <input type="number" id="input-exam-subject-target" min="0" max="100" placeholder="100"
             class="neu-input w-full px-3.5 py-2.5 text-sm font-bold font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+            <i data-lucide="building-2" class="w-4 h-4 text-indigo-500"></i>
+            담당 학원명
+          </label>
+          <input type="text" id="input-exam-subject-academy" placeholder="예: 큰뜻국어, 과외하는수학, 프로토피아 영어"
+            class="neu-input w-full px-3.5 py-2.5 text-sm font-semibold">
         </div>
 
         <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
@@ -1492,7 +1479,7 @@ II. 사회 정의와 불평등
                 대시보드 ➔</span>
             </div>
             <p class="text-[11px] text-slate-500 leading-snug">
-              과거 백업된 시험들의 D-Day 주차별 페이스 곡선, 과목별 투자 시간, 소단원 회독수/모의고사 추이를 분석합니다.
+              과거 백업된 시험들의 D-Day 주차별 페이스 곡선, 과목별 투자 시간, 대단원 회독수/모의고사 추이를 분석합니다.
             </p>
           </div>
         </button>
@@ -1640,7 +1627,7 @@ II. 사회 정의와 불평등
           <ul class="list-disc list-inside space-y-1 text-slate-500 pl-0.5 leading-relaxed">
             <li><span class="font-bold text-slate-700">별도 파일 영구 백업:</span> 현재 일정 전체 및 통계는 구글 드라이브 내 <b>[DB] N-Study
                 Tracker Archive</b> 파일로 즉시 격리 백업됩니다.</li>
-            <li><span class="font-bold text-slate-700">메인 시트 스마트 리셋:</span> 과목 목차(대단원/소단원)는 그대로 유지되며, 일정 시트가 비워지고 시험범위 및
+            <li><span class="font-bold text-slate-700">메인 시트 스마트 리셋:</span> 과목 목차(대단원)는 그대로 유지되며, 일정 시트가 비워지고 시험범위 및
               점수만 깨끗하게 초기화됩니다.</li>
           </ul>
         </div>
@@ -1701,32 +1688,26 @@ II. 사회 정의와 불평등
     ];
 
     function buildDefaultChapters(items) {
-      const chapterMap = new Map();
+      // 대단원만 평탄하게 추출 (중복 제거)
+      const chTitles = new Set();
+      const chapters = [];
       items.forEach(item => {
-        let chTitle = '기본 대단원';
-        let subName = item.name;
+        let chTitle = item.name;
         if (item.name.includes(' - ')) {
-          const parts = item.name.split(' - ');
-          chTitle = parts[0].trim();
-          subName = parts.slice(1).join(' - ').trim();
+          chTitle = item.name.split(' - ')[0].trim();
         }
-        if (!chapterMap.has(chTitle)) {
-          chapterMap.set(chTitle, {
+        if (!chTitles.has(chTitle)) {
+          chTitles.add(chTitle);
+          chapters.push({
             id: 'ch-' + Math.random().toString(36).substr(2, 8),
             title: chTitle,
-            tag: chTitle.includes('I.') || chTitle.includes('II.') ? '시험범위 🔥' : '',
-            subunits: []
+            inScope: true,
+            unitScore: item.isCompleted ? 92 : '',
+            scoreHistory: item.isCompleted ? [85, 92] : []
           });
         }
-        chapterMap.get(chTitle).subunits.push({
-          id: item.id || ('sub-' + Math.random().toString(36).substr(2, 8)),
-          name: subName,
-          inScope: true,
-          unitScore: item.isCompleted ? 92 : '',
-          scoreHistory: item.isCompleted ? [85, 92] : [] // 최근 10회 점수 보관
-        });
       });
-      return Array.from(chapterMap.values());
+      return chapters;
     }
 
     // 로컬 타임존 기반 날짜 유틸리티 (UTC 시차 오차 완벽 방지)
@@ -1755,125 +1736,9 @@ II. 사회 정의와 불평등
       appTitle: '스마트 스터디 플래너',
       selectedDate: todayDateStr,
       currentMainTab: 'planner', // 'planner' or 'analytics'
-      activeExamSubjId: 'subj-ts',
-      subjects: [
-        {
-          id: 'subj-ts',
-          name: '통합사회',
-          dday: '2026-10-18',
-          targetScore: 100,
-          color: 'indigo',
-          mockTests: [
-            { id: 'm-1', round: 1, date: '2026-09-20', score: 85, memo: '1~2단원 전범위 모의고사' },
-            { id: 'm-2', round: 2, date: '2026-09-27', score: 92, memo: '오답 보완 후 점수 상승' }
-          ],
-          chapters: buildDefaultChapters(RAW_TONGHAP_SAHOE_ITEMS)
-        },
-        {
-          id: 'subj-kor',
-          name: '국어',
-          dday: '2026-10-15',
-          targetScore: 95,
-          color: 'rose',
-          mockTests: [
-            { id: 'm-k1', round: 1, date: '2026-09-22', score: 88, memo: '문학 서술형 감점' }
-          ],
-          chapters: [
-            {
-              id: 'ch-k-1',
-              title: '1단원. 문학의 갈래와 수용',
-              tag: '중간고사 🔥',
-              subunits: [
-                { id: 'sub-k-1', name: '1-1. 서정 갈래의 이해', inScope: true, unitScore: 90, scoreHistory: [88, 90] },
-                { id: 'sub-k-2', name: '1-2. 서사 갈래와 소설 독해', inScope: true, unitScore: 65, scoreHistory: [65] }
-              ]
-            }
-          ]
-        },
-        {
-          id: 'subj-eng',
-          name: '영어',
-          dday: '2026-10-16',
-          targetScore: 100,
-          color: 'emerald',
-          mockTests: [],
-          chapters: [
-            {
-              id: 'ch-e-1',
-              title: 'Lesson 1. Cultural Diversity',
-              tag: '시험범위 🔥',
-              subunits: [
-                { id: 'sub-e-1', name: '1 본문 완독 및 구문 분석', inScope: true, unitScore: 95, scoreHistory: [95] },
-                { id: 'sub-e-2', name: '2 어법 및 서술형 대비', inScope: true, unitScore: 84, scoreHistory: [80, 84] }
-              ]
-            }
-          ]
-        }
-      ],
-      schedules: [
-        {
-          id: 'sch-sample-1',
-          date: todayDateStr,
-          category: '진도계획',
-          subject: '국어',
-          title: '인공지능서술',
-          detail: '(국어학원교재)',
-          subunitId: 'sub-k-1',
-          subunitIds: ['sub-k-1'],
-          completedSubunits: [],
-          progress: 50,
-          score: 0,
-          durationSec: 0,
-          completed: false
-        },
-        {
-          id: 'sch-sample-2',
-          date: todayDateStr,
-          category: '진도계획',
-          subject: '국어',
-          title: 'ㅇㄱㅈㄴ 문제',
-          detail: '(국어학원교재)',
-          subunitId: 'sub-k-2',
-          subunitIds: ['sub-k-2'],
-          completedSubunits: [],
-          progress: 50,
-          score: 0,
-          durationSec: 0,
-          completed: false
-        },
-        {
-          id: 'sch-sample-3',
-          date: todayDateStr,
-          category: '전체테스트',
-          subject: '영어',
-          title: '테스트',
-          detail: '[60분]',
-          subunitId: '',
-          subunitIds: [],
-          completedSubunits: [],
-          progress: 50,
-          score: 0,
-          durationSec: 3600,
-          completed: false
-        },
-        {
-          id: 'sch-sample-acad',
-          date: todayDateStr,
-          category: '학원일정',
-          subject: '통합사회',
-          title: '사회탐구 학원 특강',
-          detail: '15:30 (2시간)',
-          startTime: '15:30',
-          durationMinutes: 120,
-          durationSec: 7200,
-          subunitId: '',
-          subunitIds: [],
-          completedSubunits: [],
-          progress: 0,
-          score: '',
-          completed: false
-        }
-      ]
+      activeExamSubjId: '',
+      subjects: [],
+      schedules: []
     };
 
     function normalizeDateStr(val) {
@@ -1901,6 +1766,10 @@ II. 사회 정의와 불평등
 
     function getAcademyNameForSubject(subjName) {
       if (!subjName) return '';
+      if (appState && Array.isArray(appState.subjects)) {
+        const found = appState.subjects.find(s => s.name === subjName);
+        if (found && found.academyName) return found.academyName;
+      }
       if (appState && appState.academyNames && appState.academyNames[subjName]) {
         return appState.academyNames[subjName];
       }
@@ -1911,59 +1780,34 @@ II. 사회 정의와 불평등
     }
 
     function setAcademyNameForSubject(subjName, acadName) {
-      if (!subjName || !acadName) return;
+      if (!subjName) return;
+      const cleanName = (acadName || '').trim();
       if (!appState.academyNames) {
         appState.academyNames = Object.assign({}, DEFAULT_ACADEMY_NAMES);
       }
-      appState.academyNames[subjName] = acadName.trim();
+      appState.academyNames[subjName] = cleanName;
+      if (Array.isArray(appState.subjects)) {
+        const found = appState.subjects.find(s => s.name === subjName);
+        if (found) {
+          found.academyName = cleanName;
+        }
+      }
       saveState();
+      if (typeof window.syncSubjectsToSupabase === 'function') {
+        window.syncSubjectsToSupabase();
+      }
     }
 
     let appState = loadState();
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.subjects) && Array.isArray(parsed.schedules)) {
-            // 첫 진입 시 항상 오늘 날짜의 일정이 보이도록 기본값 설정
-            parsed.selectedDate = todayDateStr;
-            parsed.currentMainTab = 'planner';
-            if (!parsed.studyPeriod) parsed.studyPeriod = 'week';
-            if (!parsed.appTitle) parsed.appTitle = '스마트 스터디 플래너';
-
-            // 학원명 사전 복구 및 기본값 머지
-            if (!parsed.academyNames) {
-              parsed.academyNames = Object.assign({}, DEFAULT_ACADEMY_NAMES);
-            } else {
-              parsed.academyNames = Object.assign({}, DEFAULT_ACADEMY_NAMES, parsed.academyNames);
-            }
-
-            // 모든 일정의 날짜 형식 정규화 및 완료된 일정 기본 1시간 보정
-            parsed.schedules.forEach(s => {
-              s.date = normalizeDateStr(s.date);
-              if (s.completed && (!s.durationSec || Number(s.durationSec) === 0)) {
-                s.durationSec = 3600;
-              }
-              if (!Array.isArray(s.subunitIds)) {
-                s.subunitIds = s.subunitId ? [s.subunitId] : [];
-              }
-              if (!Array.isArray(s.completedSubunits)) {
-                s.completedSubunits = s.completed ? [...s.subunitIds] : [];
-              }
-            });
-
-            // 일정이 비어있다면 오늘 기본 샘플 일정 복구
-            if (parsed.schedules.length === 0) {
-              parsed.schedules = JSON.parse(JSON.stringify(INITIAL_DATA.schedules));
-            }
-
-            return parsed;
-          }
-        }
+        // [로컬 데이터 모든 부분 삭제] 더미 캐시 및 로컬 상태 전면 삭제 (DB 순수 연동 보장)
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('study_planner_exam_archives');
+        localStorage.removeItem('study_planner_backup');
       } catch (e) {
-        console.error('로컬스토리지 로드 오류:', e);
+        console.warn('로컬 데이터 삭제 알림:', e);
       }
       const initial = JSON.parse(JSON.stringify(INITIAL_DATA));
       initial.academyNames = Object.assign({}, DEFAULT_ACADEMY_NAMES);
@@ -1971,17 +1815,14 @@ II. 사회 정의와 불평등
     }
 
     function resetToInitialSampleSchedules() {
-      const today = getLocalDateStr();
-      const freshSamples = JSON.parse(JSON.stringify(INITIAL_DATA.schedules)).map(s => {
-        s.date = today;
-        s.id = 'sch-' + Math.random().toString(36).substr(2, 9);
-        return s;
-      });
-      appState.schedules = [...appState.schedules.filter(s => s.date !== today), ...freshSamples];
-      appState.selectedDate = today;
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        syncWithCloud();
+        return;
+      }
+      appState.schedules = [];
       saveState();
       renderApp();
-      showToast('오늘 날짜의 기본 샘플 일정이 복원되었습니다.');
+      showToast('일정 목록이 초기화되었습니다.');
     }
 
     function editAppTitle() {
@@ -2041,6 +1882,39 @@ II. 사회 정의와 불평등
     let isSupabaseEnvironment = false;
     let cloudTimer = null;
 
+    function renderCloudErrorBanner(msg) {
+      let banner = document.getElementById('cloud-error-banner');
+      if (!banner) return;
+      banner.className = 'p-4 mb-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 neu-card flex flex-col gap-2.5';
+      banner.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-2 font-bold text-sm text-rose-700">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span>Supabase 데이터베이스 연동 오류</span>
+          </div>
+          <button onclick="clearCloudErrorBanner()" class="text-rose-400 hover:text-rose-600 font-bold text-sm">✕</button>
+        </div>
+        <p class="text-xs font-mono text-rose-900 bg-rose-100/70 p-2.5 rounded-xl break-all whitespace-pre-wrap leading-relaxed">${escapeHtml(msg)}</p>
+        <div class="flex items-center gap-2 pt-1">
+          <button onclick="syncWithCloud()" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-rose-700 flex items-center gap-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 다시 시도
+          </button>
+          <button onclick="openSupabaseModal()" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="settings" class="w-3.5 h-3.5"></i> DB 연결 설정 확인
+          </button>
+        </div>
+      `;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function clearCloudErrorBanner() {
+      const banner = document.getElementById('cloud-error-banner');
+      if (banner) {
+        banner.className = 'hidden mb-4';
+        banner.innerHTML = '';
+      }
+    }
+
     async function initCloudSync() {
       if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
         isSupabaseEnvironment = true;
@@ -2050,7 +1924,9 @@ II. 사회 정의와 불평등
             onCloudLoaded(cloudData);
           }
         } catch (err) {
-          console.warn('Supabase 초기 로드 알림:', err);
+          console.error('Supabase 초기 로드 실패:', err);
+          showToast('❌ Supabase DB 로드 실패: ' + err.message, 'error');
+          renderCloudErrorBanner(err.message);
         }
       }
     }
@@ -2058,10 +1934,12 @@ II. 사회 정의와 불평등
     function onCloudLoaded(cloudData) {
       if (!cloudData) return;
       try {
-        if (Array.isArray(cloudData.subjects) && cloudData.subjects.length > 0) {
+        clearCloudErrorBanner();
+        // Supabase DB 데이터를 기준으로 로컬 상태 완전 동기화 (로컬 더미/샘플 데이터 배제)
+        if (Array.isArray(cloudData.subjects)) {
           appState.subjects = cloudData.subjects;
         }
-        if (Array.isArray(cloudData.schedules) && cloudData.schedules.length > 0) {
+        if (Array.isArray(cloudData.schedules)) {
           appState.schedules = cloudData.schedules;
         }
         if (cloudData.appTitle) {
@@ -2071,11 +1949,33 @@ II. 사회 정의와 불평등
         if (cloudData.academyNames) {
           appState.academyNames = Object.assign({}, appState.academyNames, cloudData.academyNames);
         }
-        saveState();
-        renderApp();
-        showToast('Supabase 클라우드 데이터 동기화 완료!', 'info');
+
+        // 로컬스토리지에만 저장 (클라우드 불필요 역저장 방지)
+        saveStateLocalOnly();
+
+        // 현재 활성화된 탭에 따라 화면 즉시 갱신
+        if (appState.currentMainTab === 'analytics') {
+          renderAnalyticsView();
+        } else if (appState.currentMainTab === 'curriculum') {
+          if (typeof renderCurriculum === 'function') renderCurriculum();
+        } else if (appState.currentMainTab === 'studytime') {
+          if (typeof setStudyTimePeriod === 'function') setStudyTimePeriod(appState.studyPeriod || 'week');
+        } else {
+          renderApp();
+        }
+
+        showToast(`✅ Supabase 클라우드 동기화 완료! (일정: ${appState.schedules.length}건, 과목: ${appState.subjects.length}건)`, 'success');
       } catch (e) {
-        console.warn('클라우드 데이터 반영 예외:', e);
+        console.error('클라우드 데이터 반영 예외:', e);
+        showToast('클라우드 데이터 반영 예외: ' + e.message, 'error');
+      }
+    }
+
+    function saveStateLocalOnly() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.warn('스토리지 저장 경고:', e);
       }
     }
 
@@ -2089,6 +1989,8 @@ II. 사회 정의와 불평등
           showToast('Supabase에 자동 저장되었습니다.', 'info');
         } catch (e) {
           console.error('Supabase 저장 실패:', e);
+          showToast('❌ Supabase 저장 실패: ' + e.message, 'error');
+          renderCloudErrorBanner(e.message);
         }
       }, 800);
     }
@@ -2107,10 +2009,11 @@ II. 사회 정의와 불평등
         const cloudData = await SupabaseService.loadPlannerState();
         if (cloudData) {
           onCloudLoaded(cloudData);
-          showToast('최신 Supabase 데이터 동기화 완료!');
         }
       } catch (e) {
-        showToast('동기화 실패: ' + e.message, 'error');
+        console.error('Supabase 동기화 실패:', e);
+        showToast('❌ 동기화 실패: ' + e.message, 'error');
+        renderCloudErrorBanner(e.message);
       } finally {
         if (icon) icon.classList.remove('animate-spin');
       }
@@ -2120,9 +2023,12 @@ II. 사회 정의와 불평등
       const modal = document.getElementById('modal-supabase-settings');
       if (modal) {
         const conf = typeof SupabaseService !== 'undefined' ? SupabaseService.getConfig() : { url: '', anonKey: '' };
-        document.getElementById('input-supabase-url').value = conf.url || '';
-        document.getElementById('input-supabase-anon').value = conf.anonKey || '';
+        const urlInput = document.getElementById('input-supabase-url');
+        const anonInput = document.getElementById('input-supabase-anon');
+        if (urlInput) urlInput.value = conf.url || '';
+        if (anonInput) anonInput.value = conf.anonKey || '';
         modal.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
       }
     }
 
@@ -2175,10 +2081,11 @@ II. 사회 정의와 불평등
       requestAnimationFrame(() => {
         toast.classList.remove('translate-y-3', 'opacity-0');
       });
+      const duration = type === 'error' ? 5500 : 2500;
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
-      }, 2400);
+      }, duration);
     }
 
     // ==========================================
@@ -2256,6 +2163,13 @@ II. 사회 정의와 불평등
       } else {
         if (viewAnalytics) viewAnalytics.classList.remove('hidden');
         if (btnAnalytics) btnAnalytics.className = activeBtnCls;
+        // activeExamSubjId 유효성 검사 및 첫 번째 과목 기본 선택
+        if (Array.isArray(appState.subjects) && appState.subjects.length > 0) {
+          const isValid = appState.subjects.some(s => s.id === appState.activeExamSubjId);
+          if (!isValid) {
+            appState.activeExamSubjId = appState.subjects[0].id;
+          }
+        }
         renderAnalyticsView();
       }
       lucide.createIcons();
@@ -2743,7 +2657,7 @@ II. 사회 정의와 불평등
             ` : `
               <p class="text-xs text-slate-500 mt-1.5 font-medium">상단의 [+ 일정 추가] 버튼을 눌러 하루 학습 계획을 등록하세요.</p>
               <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
-                <button onclick="resetToInitialSampleSchedules()" class="neu-btn px-4 py-2 rounded-2xl text-xs font-bold text-slate-600">🔄 오늘 샘플 일정 복원하기</button>
+                <button onclick="syncWithCloud()" class="neu-btn px-4 py-2 rounded-2xl text-xs font-bold text-slate-600">🔄 Supabase 동기화 재시도</button>
                 <button onclick="openAddScheduleModal()" class="neu-btn-primary px-4 py-2 rounded-2xl text-xs font-bold text-white">+ 새 일정 등록</button>
               </div>
             `}
@@ -2818,64 +2732,34 @@ II. 사회 정의와 불평등
         let catBadge = '';
         if (sch.category === '진도계획') {
           catBadge = `<span class="text-[11px] px-2.5 py-1 rounded-xl font-bold bg-emerald-50 text-emerald-700 neu-card-sm flex items-center gap-1.5"><i data-lucide="book" class="w-3 h-3 text-emerald-500"></i> 진도 계획 ${sch.detail && sch.detail.includes('[') ? sch.detail : ''}</span>`;
-        } else if (sch.category === '소단원테스트') {
-          catBadge = `<span class="text-[11px] px-2.5 py-1 rounded-xl font-bold bg-blue-50 text-blue-700 neu-card-sm flex items-center gap-1.5"><i data-lucide="edit-3" class="w-3 h-3 text-blue-500"></i> 소단원 테스트</span>`;
+        } else if (sch.category === '소단원테스트' || sch.category === '단원테스트') {
+          catBadge = `<span class="text-[11px] px-2.5 py-1 rounded-xl font-bold bg-blue-50 text-blue-700 neu-card-sm flex items-center gap-1.5"><i data-lucide="edit-3" class="w-3 h-3 text-blue-500"></i> 단원 테스트</span>`;
         } else if (sch.category === '전체테스트') {
           catBadge = `<span class="text-[11px] px-2.5 py-1 rounded-xl font-bold bg-rose-50 text-rose-700 neu-card-sm flex items-center gap-1.5"><i data-lucide="award" class="w-3 h-3 text-rose-500"></i> 과목 전체 테스트 ${sch.detail && sch.detail.includes('[') ? sch.detail : ''}</span>`;
         }
 
         const detailText = sch.detail && !sch.detail.includes('[') ? `<span class="text-xs text-slate-500 font-semibold">${escapeHtml(sch.detail)}</span>` : '';
 
-        // 소단원 연동 체크리스트 렌더링 (진도계획에서 완료한 단원 리스트 체크 및 진행률 자동 계산)
-        let subunitsChecklistHtml = '';
-        const linkedSubIds = (Array.isArray(sch.subunitIds) && sch.subunitIds.length > 0) ? sch.subunitIds : (sch.subunitId ? [sch.subunitId] : []);
-        if (linkedSubIds.length > 0) {
+        // 연동 대단원 뱃지 렌더링
+        let chaptersBadgeHtml = '';
+        const linkedChIds = (Array.isArray(sch.chapterIds) && sch.chapterIds.length > 0) ? sch.chapterIds : 
+          ((Array.isArray(sch.subunitIds) && sch.subunitIds.length > 0) ? sch.subunitIds : 
+          (sch.chapterId ? [sch.chapterId] : (sch.subunitId ? [sch.subunitId] : [])));
+        if (linkedChIds.length > 0) {
           const subjObj = appState.subjects.find(s => s.name === sch.subject);
-          const subItems = [];
-          if (subjObj && subjObj.chapters) {
+          const chNames = [];
+          if (subjObj && Array.isArray(subjObj.chapters)) {
             subjObj.chapters.forEach(ch => {
-              ch.subunits.forEach(sub => {
-                if (linkedSubIds.includes(sub.id)) {
-                  subItems.push({ id: sub.id, name: sub.name, chapter: ch.title });
-                }
-              });
+              if (linkedChIds.includes(ch.id)) {
+                chNames.push(ch.title);
+              }
             });
           }
-          if (subItems.length > 0) {
-            if (!Array.isArray(sch.completedSubunits)) {
-              sch.completedSubunits = sch.completed ? [...linkedSubIds] : [];
-            }
-            const completedCount = sch.completedSubunits.filter(id => linkedSubIds.includes(id)).length;
-            const totalCount = subItems.length;
-            const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
-            const checklistItems = subItems.map(item => {
-              const isDone = sch.completedSubunits.includes(item.id);
-              return `
-                <label class="flex items-center gap-2 p-2 rounded-xl neu-card-sm cursor-pointer transition select-none hover:-translate-y-0.5 ${isDone ? 'bg-emerald-50/70 border border-emerald-300/40' : 'bg-white/60'
-                } group">
-                  <input type="checkbox" ${isDone ? 'checked' : ''} 
-                    onchange="onCardSubunitToggled('${sch.id}', '${item.id}', this.checked)"
-                    class="w-3.5 h-3.5 rounded text-emerald-600 bg-white border-slate-300 focus:ring-emerald-500 accent-emerald-500 cursor-pointer flex-shrink-0">
-                  <span class="text-xs truncate ${isDone ? 'line-through text-slate-400 font-normal' : 'text-slate-700 font-bold'} group-hover:text-slate-900 transition" title="${escapeHtml(item.name)}">
-                    ${escapeHtml(item.name)}
-                  </span>
-                </label>
-              `;
-            }).join('');
-
-            subunitsChecklistHtml = `
-              <div class="pt-3 pb-1 border-t border-slate-200/80 space-y-2">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="font-extrabold text-slate-700 flex items-center gap-1.5">
-                    <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-500"></i>
-                    학습 단원 완료 체크 <span class="text-[11px] font-mono text-slate-500 font-semibold">(${completedCount}/${totalCount}개)</span>
-                  </span>
-                  <span class="font-mono text-xs font-extrabold ${progressPct === 100 ? 'text-emerald-600' : 'text-brand-600'}">${progressPct}%</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 custom-scroll">
-                  ${checklistItems}
-                </div>
+          if (chNames.length > 0) {
+            chaptersBadgeHtml = `
+              <div class="pt-2 pb-0.5 border-t border-slate-200/60 flex flex-wrap items-center gap-1.5 text-xs">
+                <span class="text-slate-500 font-bold flex items-center gap-1"><i data-lucide="bookmark" class="w-3 h-3 text-brand-500"></i> 연동 단원:</span>
+                ${chNames.map(title => `<span class="px-2 py-0.5 rounded-lg bg-slate-100 font-medium text-slate-700 text-[11px] truncate max-w-xs" title="${escapeHtml(title)}">${escapeHtml(title)}</span>`).join('')}
               </div>
             `;
           }
@@ -2886,7 +2770,7 @@ II. 사회 정의와 불평등
 
         card.innerHTML = `
           ${leftBar}
-          <div class="space-y-3.5 pl-2.5">
+          <div class="space-y-3 pl-2.5">
             <!-- 1행: 체크박스 + 일정명 + 뱃지 + 이동/수정/삭제 액션 -->
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-3 flex-1 min-w-0">
@@ -2934,7 +2818,7 @@ II. 사회 정의와 불평등
               </div>
 
               <div class="flex items-center gap-1.5">
-                <span class="text-slate-500 font-bold">${sch.category === '소단원테스트' ? '단원 점수:' : (sch.category === '전체테스트' ? '모의 점수:' : '이해도:')}</span>
+                <span class="text-slate-500 font-bold">${(sch.category === '소단원테스트' || sch.category === '단원테스트') ? '단원 점수:' : (sch.category === '전체테스트' ? '모의 점수:' : '이해도:')}</span>
                 <input type="number" min="0" max="100" 
                   id="input-score-${sch.id}"
                   value="${sch.score !== undefined && sch.score !== '' ? sch.score : ''}" 
@@ -2945,8 +2829,8 @@ II. 사회 정의와 불평등
               </div>
             </div>
 
-            <!-- 2-1행: 연동 소단원 체크리스트 (선택된 소단원이 있는 경우 노출) -->
-            ${subunitsChecklistHtml}
+            <!-- 2-1행: 연동 대단원 뱃지 -->
+            ${chaptersBadgeHtml}
 
             <!-- 3행: 측정 시간 표시(클릭 시 직접 수정) & 스타트 버튼(클릭 시 전용 타이머 모달) -->
             <div class="flex items-center justify-between pt-2.5 border-t border-slate-200/80 text-xs">
@@ -2977,46 +2861,10 @@ II. 사회 정의와 불평등
     }
 
     // ==========================================
-    // 핵심 자동화 로직: 진도율-점수-소단원-체크박스 연동
+    // 핵심 자동화 로직: 진도율-점수-단원-체크박스 연동
     // ==========================================
-    // 0. 일정 카드 내 소단원 개별 체크박스 토글 ➔ 진행률 자동 계산
-    function onCardSubunitToggled(schId, subunitId, isChecked) {
-      const sch = appState.schedules.find(s => s.id === schId);
-      if (!sch) return;
-
-      const linkedSubIds = (Array.isArray(sch.subunitIds) && sch.subunitIds.length > 0) ? sch.subunitIds : (sch.subunitId ? [sch.subunitId] : []);
-      if (!Array.isArray(sch.completedSubunits)) {
-        sch.completedSubunits = sch.completed ? [...linkedSubIds] : [];
-      }
-
-      if (isChecked) {
-        if (!sch.completedSubunits.includes(subunitId)) {
-          sch.completedSubunits.push(subunitId);
-        }
-      } else {
-        sch.completedSubunits = sch.completedSubunits.filter(id => id !== subunitId);
-      }
-
-      if (linkedSubIds.length > 0) {
-        const rate = Math.round((sch.completedSubunits.length / linkedSubIds.length) * 100);
-        sch.progress = rate;
-        if (rate === 100) {
-          sch.completed = true;
-          if (!sch.durationSec || Number(sch.durationSec) === 0) {
-            sch.durationSec = 3600;
-          }
-        } else {
-          sch.completed = false;
-        }
-      }
-
-      saveState();
-      renderApp();
-      if (appState.currentMainTab === 'studytime' && typeof renderStudyTimeView === 'function') {
-        renderStudyTimeView();
-      }
-      showToast(`단원 완료 상태가 반영되었습니다 (진도율: ${sch.progress}%)`);
-    }
+    // 0. 레거시 호환 더미 (단원 개별 체크는 대단원 단위 관리로 통합됨)
+    function onCardSubunitToggled(schId, subunitId, isChecked) {}
 
     // 1. 단원 점수 입력 시 ➔ 진도율 100% 수정 ➔ 체크박스 체크 (시간 미설정 시 기본 1시간)
     function onScheduleScoreChanged(schId, val) {
@@ -3045,19 +2893,18 @@ II. 사회 정의와 불평등
         }
       }
 
-      // 소단원 점수 동기화 및 최근 10회 기록 보관
-      if (sch.category === '소단원테스트' && sch.subunitId && numVal !== '') {
+      // 대단원 점수 동기화 및 최근 10회 기록 보관
+      if ((sch.category === '소단원테스트' || sch.category === '단원테스트') && (sch.chapterId || sch.subunitId) && numVal !== '') {
+        const targetChId = sch.chapterId || sch.subunitId;
         const subj = appState.subjects.find(s => s.name === sch.subject);
-        if (subj) {
-          subj.chapters.forEach(ch => {
-            const sub = ch.subunits.find(su => su.id === sch.subunitId);
-            if (sub) {
-              sub.unitScore = numVal;
-              if (!Array.isArray(sub.scoreHistory)) sub.scoreHistory = [];
-              sub.scoreHistory.push(numVal);
-              if (sub.scoreHistory.length > 10) sub.scoreHistory = sub.scoreHistory.slice(-10);
-            }
-          });
+        if (subj && Array.isArray(subj.chapters)) {
+          const ch = subj.chapters.find(c => c.id === targetChId);
+          if (ch) {
+            ch.unitScore = numVal;
+            if (!Array.isArray(ch.scoreHistory)) ch.scoreHistory = [];
+            ch.scoreHistory.push(numVal);
+            if (ch.scoreHistory.length > 10) ch.scoreHistory = ch.scoreHistory.slice(-10);
+          }
         }
       }
 
@@ -3079,7 +2926,7 @@ II. 사회 정의와 불평등
       if (isChecked) {
         // 완료 체크 시 이해도/점수 입력(체크)
         const currentScore = (sch.score !== undefined && sch.score !== null && sch.score !== '') ? sch.score : '100';
-        const promptMsg = (sch.category === '전체테스트' || sch.category === '소단원테스트')
+        const promptMsg = (sch.category === '전체테스트' || sch.category === '소단원테스트' || sch.category === '단원테스트')
           ? `[${sch.title}]\n완료 체크를 위해 테스트/모의고사 점수(0~100점)를 입력해주세요:`
           : `[${sch.title}]\n완료 체크를 위해 학습 이해도(0~100점)를 입력해주세요:`;
         const inputVal = prompt(promptMsg, currentScore);
@@ -3096,19 +2943,18 @@ II. 사회 정의와 불평등
         }
         sch.score = parsed;
 
-        // 소단원 점수 동기화
-        if (sch.subunitId) {
+        // 대단원 점수 동기화
+        const targetChId = sch.chapterId || sch.subunitId;
+        if (targetChId) {
           const subj = appState.subjects.find(s => s.name === sch.subject);
-          if (subj) {
-            subj.chapters.forEach(ch => {
-              const sub = ch.subunits.find(su => su.id === sch.subunitId);
-              if (sub) {
-                sub.unitScore = parsed;
-                if (!Array.isArray(sub.scoreHistory)) sub.scoreHistory = [];
-                sub.scoreHistory.push(parsed);
-                if (sub.scoreHistory.length > 10) sub.scoreHistory = sub.scoreHistory.slice(-10);
-              }
-            });
+          if (subj && Array.isArray(subj.chapters)) {
+            const ch = subj.chapters.find(c => c.id === targetChId);
+            if (ch) {
+              ch.unitScore = parsed;
+              if (!Array.isArray(ch.scoreHistory)) ch.scoreHistory = [];
+              ch.scoreHistory.push(parsed);
+              if (ch.scoreHistory.length > 10) ch.scoreHistory = ch.scoreHistory.slice(-10);
+            }
           }
         }
 
@@ -3150,7 +2996,7 @@ II. 사회 정의와 불평등
         let scoreVal = sch.score;
         const hasScore = (scoreVal !== '' && scoreVal !== null && scoreVal !== undefined && !isNaN(Number(scoreVal)) && Number(scoreVal) > 0);
         if (!hasScore) {
-          const promptMsg = (sch.category === '전체테스트' || sch.category === '소단원테스트')
+          const promptMsg = (sch.category === '전체테스트' || sch.category === '소단원테스트' || sch.category === '단원테스트')
             ? `[${sch.title}]\n진도율 100% 완료를 위해 테스트/모의고사 점수(0~100점)를 꼭 입력해주세요:`
             : `[${sch.title}]\n진도율 100% 완료를 위해 학습 이해도(0~100점)를 꼭 입력해주세요:`;
           const inputVal = prompt(promptMsg, '100');
@@ -3170,18 +3016,17 @@ II. 사회 정의와 불평등
             return;
           }
           sch.score = parsed;
-          if (sch.subunitId) {
+          const targetChId = sch.chapterId || sch.subunitId;
+          if (targetChId) {
             const subj = appState.subjects.find(s => s.name === sch.subject);
-            if (subj) {
-              subj.chapters.forEach(ch => {
-                const sub = ch.subunits.find(su => su.id === sch.subunitId);
-                if (sub) {
-                  sub.unitScore = parsed;
-                  if (!Array.isArray(sub.scoreHistory)) sub.scoreHistory = [];
-                  sub.scoreHistory.push(parsed);
-                  if (sub.scoreHistory.length > 10) sub.scoreHistory = sub.scoreHistory.slice(-10);
-                }
-              });
+            if (subj && Array.isArray(subj.chapters)) {
+              const ch = subj.chapters.find(c => c.id === targetChId);
+              if (ch) {
+                ch.unitScore = parsed;
+                if (!Array.isArray(ch.scoreHistory)) ch.scoreHistory = [];
+                ch.scoreHistory.push(parsed);
+                if (ch.scoreHistory.length > 10) ch.scoreHistory = ch.scoreHistory.slice(-10);
+              }
             }
           }
         }
@@ -3534,7 +3379,7 @@ II. 사회 정의와 불평등
     }
 
     // ==========================================
-    // 일정 추가 및 수정 모달 로직 (대단원/소단원 트리 다중선택 & 전체정보 수정)
+    // 일정 추가 및 수정 모달 로직 (대단원 다중선택 & 전체정보 수정)
     // ==========================================
     function openAddScheduleModal() {
       const modalTitle = document.getElementById('modal-schedule-title');
@@ -3546,10 +3391,10 @@ II. 사회 정의와 불평등
       document.getElementById('select-schedule-category').value = '진도계획';
       document.getElementById('input-schedule-title').value = '';
       document.getElementById('input-schedule-detail').value = '';
-      document.getElementById('select-schedule-progress').value = '0'; // 신규 일정 기본값 0% (체크 해제 상태)
+      document.getElementById('select-schedule-progress').value = '0';
       document.getElementById('input-schedule-score').value = '';
 
-      // 학원 일정 입력 필드 초기화 (10분 단위 선택자)
+      // 학원 일정 입력 필드 초기화
       const startH = document.getElementById('select-academy-start-hour');
       if (startH) startH.value = '14';
       const startM = document.getElementById('select-academy-start-min');
@@ -3599,8 +3444,10 @@ II. 사회 정의와 불평등
         document.getElementById('select-schedule-progress').value = String(sch.progress !== undefined ? sch.progress : 50);
         document.getElementById('input-schedule-score').value = (sch.score !== undefined && sch.score !== null) ? sch.score : '';
 
-        const selectedSubIds = (Array.isArray(sch.subunitIds) && sch.subunitIds.length > 0) ? sch.subunitIds : (sch.subunitId ? [sch.subunitId] : []);
-        onSubjectChangeForSchedule(sch.subject, selectedSubIds);
+        const selectedChIds = (Array.isArray(sch.chapterIds) && sch.chapterIds.length > 0) ? sch.chapterIds :
+          ((Array.isArray(sch.subunitIds) && sch.subunitIds.length > 0) ? sch.subunitIds :
+          (sch.chapterId ? [sch.chapterId] : (sch.subunitId ? [sch.subunitId] : [])));
+        onSubjectChangeForSchedule(sch.subject, selectedChIds);
       }
 
       onCategoryChange(sch.category);
@@ -3632,8 +3479,7 @@ II. 사회 정의와 불평등
       }
     }
 
-    function onSubjectChangeForSchedule(subjName, preselectedSubunitIds = []) {
-      // 학원 일정 모드인 경우 과목 변경 시 학원명 및 퀵 시간 갱신
+    function onSubjectChangeForSchedule(subjName, preselectedChapterIds = []) {
       const cat = document.getElementById('select-schedule-category')?.value;
       if (cat === '학원일정') {
         const acadTitleInput = document.getElementById('input-schedule-academy-title');
@@ -3648,81 +3494,37 @@ II. 사회 정의와 불평등
       container.innerHTML = '';
 
       const subj = appState.subjects.find(s => s.name === subjName);
-      if (!subj || !subj.chapters || subj.chapters.length === 0) {
-        container.innerHTML = '<div class="py-4 text-center text-slate-500 font-semibold text-xs">등록된 단원이 없습니다. 과목 관리에서 단원을 먼저 추가해주세요.</div>';
+      if (!subj || !Array.isArray(subj.chapters) || subj.chapters.length === 0) {
+        container.innerHTML = '<div class="py-4 text-center text-slate-500 font-semibold text-xs">등록된 대단원이 없습니다. 과목 관리에서 대단원을 먼저 추가해주세요.</div>';
         updateSelectedSubunitsCount();
         return;
       }
 
       subj.chapters.forEach(ch => {
-        const chBlock = document.createElement('div');
-        chBlock.className = 'neu-card-sm rounded-2xl overflow-hidden mb-2.5';
-
-        const allSubIds = ch.subunits.map(sub => sub.id);
-        const checkedInCh = allSubIds.filter(id => preselectedSubunitIds.includes(id));
-        const isAllChChecked = allSubIds.length > 0 && checkedInCh.length === allSubIds.length;
-
-        const subunitsHtml = ch.subunits.map(sub => {
-          const isChecked = preselectedSubunitIds.includes(sub.id);
-          return `
-            <label class="flex items-center justify-between px-3 py-1.5 rounded-xl hover:bg-slate-100/70 cursor-pointer transition select-none group">
-              <div class="flex items-center gap-2 min-w-0">
-                <input type="checkbox" class="modal-subunit-checkbox rounded-md cursor-pointer accent-brand-500 w-3.5 h-3.5 flex-shrink-0"
-                  data-ch-id="${ch.id}" data-sub-id="${sub.id}" data-sub-name="${escapeHtml(sub.name)}"
-                  ${isChecked ? 'checked' : ''}
-                  onchange="onModalSubunitCheckboxChanged('${ch.id}')">
-                <span class="text-xs text-slate-700 font-bold truncate group-hover:text-slate-900 transition" title="${escapeHtml(sub.name)}">${escapeHtml(sub.name)}</span>
-              </div>
-              ${sub.unitScore !== undefined && sub.unitScore !== '' ? `<span class="text-[10px] font-mono text-amber-700 font-extrabold bg-amber-100/80 px-2 py-0.5 rounded-lg flex-shrink-0">${sub.unitScore}점</span>` : ''}
-            </label>
-          `;
-        }).join('');
-
-        chBlock.innerHTML = `
-          <div class="flex items-center justify-between px-3.5 py-2 bg-slate-100/60 border-b border-slate-200/80">
-            <label class="flex items-center gap-2 cursor-pointer select-none">
-              <input type="checkbox" class="chapter-master-checkbox rounded-md cursor-pointer accent-brand-500 w-3.5 h-3.5"
-                id="ch-master-${ch.id}"
-                data-ch-id="${ch.id}"
-                ${isAllChChecked ? 'checked' : ''}
-                onchange="onChapterMasterCheckboxToggled('${ch.id}', this.checked)">
-              <span class="font-extrabold text-slate-800 text-xs flex items-center gap-1.5">
-                <i data-lucide="folder" class="w-3.5 h-3.5 text-amber-500"></i> ${escapeHtml(ch.title)}
-              </span>
-            </label>
-            <span class="text-[11px] text-slate-500 font-mono font-semibold">${ch.subunits.length}개 소단원</span>
+        const isChecked = preselectedChapterIds.includes(ch.id);
+        const item = document.createElement('label');
+        item.className = 'neu-card-sm flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-100/70 cursor-pointer transition select-none group mb-1.5';
+        item.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0">
+            <input type="checkbox" class="modal-subunit-checkbox rounded-md cursor-pointer accent-brand-500 w-4 h-4 flex-shrink-0"
+              data-ch-id="${ch.id}" data-sub-id="${ch.id}" data-sub-name="${escapeHtml(ch.title)}"
+              ${isChecked ? 'checked' : ''}
+              onchange="updateSelectedSubunitsCount()">
+            <span class="text-xs text-slate-800 font-bold truncate group-hover:text-slate-900 transition" title="${escapeHtml(ch.title)}">
+              ${escapeHtml(ch.title)}
+            </span>
           </div>
-          <div class="p-1.5 space-y-0.5 bg-white/40">
-            ${subunitsHtml}
-          </div>
+          ${ch.unitScore !== undefined && ch.unitScore !== '' && ch.unitScore !== null ? `<span class="text-[10px] font-mono text-amber-700 font-extrabold bg-amber-100/80 px-2 py-0.5 rounded-lg flex-shrink-0">${ch.unitScore}점</span>` : ''}
         `;
-        container.appendChild(chBlock);
+        container.appendChild(item);
       });
 
       updateSelectedSubunitsCount();
       lucide.createIcons();
     }
 
-    function onChapterMasterCheckboxToggled(chId, isChecked) {
-      const subCheckboxes = document.querySelectorAll(`.modal-subunit-checkbox[data-ch-id="${chId}"]`);
-      subCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-      });
-      updateSelectedSubunitsCount();
-    }
-
-    function onModalSubunitCheckboxChanged(chId) {
-      const subCheckboxes = Array.from(document.querySelectorAll(`.modal-subunit-checkbox[data-ch-id="${chId}"]`));
-      const masterCb = document.getElementById(`ch-master-${chId}`);
-      if (masterCb && subCheckboxes.length > 0) {
-        masterCb.checked = subCheckboxes.every(cb => cb.checked);
-      }
-      updateSelectedSubunitsCount();
-    }
-
     function toggleAllSubunitsModal(selectAll) {
       document.querySelectorAll('.modal-subunit-checkbox').forEach(cb => cb.checked = selectAll);
-      document.querySelectorAll('.chapter-master-checkbox').forEach(cb => cb.checked = selectAll);
       updateSelectedSubunitsCount();
     }
 
@@ -3734,7 +3536,6 @@ II. 사회 정의와 불평등
         badge.textContent = `${count}개 선택됨`;
       }
 
-      // 제목이 비어있거나 기본 진도 학습인 경우 자동 추천
       const titleInput = document.getElementById('input-schedule-title');
       const cat = document.getElementById('select-schedule-category')?.value;
       if (cat === '진도계획' && titleInput) {
@@ -3744,7 +3545,7 @@ II. 사회 정의와 불평등
             titleInput.value = checkedBoxes[0].dataset.subName || '진도 학습';
           } else if (count > 1) {
             const first = checkedBoxes[0].dataset.subName || '';
-            titleInput.value = `${first} 외 ${count - 1}개 단원`;
+            titleInput.value = `${first} 외 ${count - 1}개 대단원`;
           }
         }
       }
@@ -3755,7 +3556,6 @@ II. 사회 정의와 불평등
       const regFields = document.getElementById('wrapper-regular-fields');
       const subunitSelectWrapper = document.getElementById('wrapper-subunit-select');
       const scoreLabel = document.getElementById('label-schedule-score');
-      const titleInput = document.getElementById('input-schedule-title');
       const acadTitleInput = document.getElementById('input-schedule-academy-title');
       const subjSelect = document.getElementById('select-schedule-subject');
       const subjName = subjSelect ? subjSelect.value : '';
@@ -3765,7 +3565,6 @@ II. 사회 정의와 불평등
         if (regFields) regFields.classList.add('hidden');
         if (subunitSelectWrapper) subunitSelectWrapper.classList.add('hidden');
         if (acadTitleInput) {
-          // 과목에 맞는 학원명으로 자동 변경 (큰뜻국어, 과외하는수학, 프로토피아 영어 등)
           acadTitleInput.value = getAcademyNameForSubject(subjName);
         }
         renderAcademyQuickTimes();
@@ -3773,24 +3572,20 @@ II. 사회 정의와 불평등
         if (acadFields) acadFields.classList.add('hidden');
         if (regFields) regFields.classList.remove('hidden');
 
-        if (cat === '진도계획' || cat === '소단원테스트') {
+        if (cat === '진도계획' || cat === '소단원테스트' || cat === '단원테스트') {
           if (subunitSelectWrapper) subunitSelectWrapper.classList.remove('hidden');
         } else {
           if (subunitSelectWrapper) subunitSelectWrapper.classList.add('hidden');
         }
 
-        if (cat !== '진도계획') {
-          if (!titleInput.value || titleInput.value.trim() === '' || titleInput.value === '진도계획') {
-            titleInput.value = '테스트';
+        if (scoreLabel) {
+          if (cat === '전체테스트') {
+            scoreLabel.textContent = '과목 전체 모의고사 득점 (점)';
+          } else if (cat === '소단원테스트' || cat === '단원테스트') {
+            scoreLabel.textContent = '단원 테스트 점수 (점)';
+          } else {
+            scoreLabel.textContent = '이해도 (0~100)';
           }
-        }
-
-        if (cat === '전체테스트') {
-          if (scoreLabel) scoreLabel.textContent = '과목 전체 모의고사 득점 (점)';
-        } else if (cat === '소단원테스트') {
-          if (scoreLabel) scoreLabel.textContent = '단원 테스트 점수 (점)';
-        } else {
-          if (scoreLabel) scoreLabel.textContent = '이해도 (0~100)';
         }
       }
     }
@@ -3821,7 +3616,6 @@ II. 사회 정의와 불평등
       if (category === '학원일정') {
         const acadTitleEl = document.getElementById('input-schedule-academy-title');
         title = (acadTitleEl && acadTitleEl.value.trim()) ? acadTitleEl.value.trim() : getAcademyNameForSubject(subject);
-        // 사용자가 수정한 학원명은 해당 과목의 기본 학원명으로 기억하여 다음번에도 유지
         setAcademyNameForSubject(subject, title);
         const startH = document.getElementById('select-academy-start-hour')?.value || '14';
         const startM = document.getElementById('select-academy-start-min')?.value || '00';
@@ -3832,32 +3626,29 @@ II. 사회 정의와 불평등
         const durM = durationMinutes % 60;
         const durStr = durH > 0 ? (durM > 0 ? `${durH}시간 ${durM}분` : `${durH}시간`) : `${durM}분`;
         detail = `${startTime} (${durStr})`;
-        // 신규 추가 시에는 즉시 체크되지 않도록 0%, 수정 시에는 기존 진행률 유지
         progress = editId ? (appState.schedules.find(s => s.id === editId)?.progress || 0) : 0;
       } else {
         const checkedBoxes = Array.from(document.querySelectorAll('.modal-subunit-checkbox:checked'));
-        subunitIds = checkedBoxes.map(cb => cb.dataset.subId);
+        subunitIds = checkedBoxes.map(cb => cb.dataset.subId || cb.dataset.chId);
         subunitId = subunitIds[0] || '';
 
         const titleEl = document.getElementById('input-schedule-title');
-        title = (titleEl && titleEl.value.trim()) ? titleEl.value.trim() : (category === '진도계획' ? `${subject} 진도 학습` : '테스트');
+        title = (titleEl && titleEl.value.trim()) ? titleEl.value.trim() : (category === '진도계획' ? `${subject} 진도 학습` : '단원 테스트');
         detail = document.getElementById('input-schedule-detail')?.value.trim() || '';
         progress = Number(document.getElementById('select-schedule-progress')?.value) || 0;
         const scVal = document.getElementById('input-schedule-score')?.value;
         score = scVal !== '' && scVal !== null ? Number(scVal) : '';
       }
 
-      // 신규 추가 시에는 바로 체크되지 않도록 항상 false로 처리 (수정 시에만 100% 완료 인정)
       const isCompleted = editId ? (progress === 100) : false;
       if (!editId && progress >= 100) {
-        progress = 50; // 신규 추가 시 즉시 100% 체크 방지
+        progress = 50;
       }
       if (isCompleted && (!durationSec || Number(durationSec) === 0)) {
-        durationSec = 3600; // 완료 시 기본 1시간(3600초) 설정
+        durationSec = 3600;
       }
 
       if (editId) {
-        // 기존 일정 수정
         const targetSch = appState.schedules.find(s => s.id === editId);
         if (targetSch) {
           targetSch.date = date;
@@ -3867,6 +3658,8 @@ II. 사회 정의와 불평등
           targetSch.detail = detail;
           targetSch.subunitId = subunitId;
           targetSch.subunitIds = subunitIds;
+          targetSch.chapterId = subunitId;
+          targetSch.chapterIds = subunitIds;
           targetSch.progress = progress;
           targetSch.score = score;
           targetSch.completed = isCompleted;
@@ -3888,7 +3681,6 @@ II. 사회 정의와 불평등
         }
         showToast('일정이 성공적으로 수정되었습니다.');
       } else {
-        // 새 일정 추가
         const newId = 'sch-' + Date.now();
         const completedSubunits = isCompleted ? [...subunitIds] : [];
         appState.schedules.push({
@@ -3900,6 +3692,8 @@ II. 사회 정의와 불평등
           detail,
           subunitId,
           subunitIds,
+          chapterId: subunitId,
+          chapterIds: subunitIds,
           completedSubunits,
           progress,
           score,
@@ -3935,82 +3729,134 @@ II. 사회 정의와 불평등
     }
 
     // ==========================================
-    // 뷰 2: 과목별 종합 통계 렌더링 (소단원 + 전체 모의고사 통합)
+    // 뷰 2: 과목별 종합 통계 렌더링 (대단원 + 전체 모의고사 통합)
     // ==========================================
     let anMockChartInstance = null;
     let subunitTrendChartInstance = null;
 
     function renderAnalyticsView() {
-      // 1. 과목 탭 렌더링
       const tabs = document.getElementById('analytics-subject-tabs');
-      tabs.innerHTML = '';
-      appState.subjects.forEach(s => {
-        const btn = document.createElement('button');
-        const isActive = (appState.activeExamSubjId || appState.subjects[0]?.id) === s.id;
-        btn.className = `text-xs px-4 py-2 rounded-2xl font-bold transition ${isActive ? 'neu-tab-active text-brand-600 font-extrabold' : 'neu-btn text-slate-600'
-          }`;
-        btn.textContent = s.name;
-        btn.onclick = () => {
-          appState.activeExamSubjId = s.id;
-          renderAnalyticsView();
-        };
-        tabs.appendChild(btn);
-      });
+      const emptyStateEl = document.getElementById('an-empty-state');
+      const contentEl = document.getElementById('an-content-sections');
 
-      const activeSubj = appState.subjects.find(s => s.id === (appState.activeExamSubjId || appState.subjects[0]?.id)) || appState.subjects[0];
+      // DB 로딩 전이거나 appState.subjects가 비어있는 경우 Empty State 표시 (조기 return 방지)
+      if (!Array.isArray(appState.subjects) || appState.subjects.length === 0) {
+        if (tabs) tabs.innerHTML = '';
+        if (emptyStateEl) emptyStateEl.classList.remove('hidden');
+        if (contentEl) contentEl.classList.add('hidden');
+        if (anMockChartInstance) {
+          anMockChartInstance.destroy();
+          anMockChartInstance = null;
+        }
+        lucide.createIcons();
+        return;
+      }
+
+      if (emptyStateEl) emptyStateEl.classList.add('hidden');
+      if (contentEl) contentEl.classList.remove('hidden');
+
+      // activeExamSubjId 유효성 확인 및 첫 번째 과목 기본 선택
+      if (!appState.subjects.some(s => s.id === appState.activeExamSubjId)) {
+        appState.activeExamSubjId = appState.subjects[0].id;
+      }
+
+      // 1. 과목 탭 렌더링
+      if (tabs) {
+        tabs.innerHTML = '';
+        appState.subjects.forEach(s => {
+          const btn = document.createElement('button');
+          const isActive = appState.activeExamSubjId === s.id;
+          btn.className = `text-xs px-4 py-2 rounded-2xl font-bold transition ${
+            isActive ? 'neu-tab-active text-brand-600 font-extrabold' : 'neu-btn text-slate-600 hover:text-slate-800'
+          }`;
+          btn.textContent = s.name;
+          btn.onclick = () => {
+            appState.activeExamSubjId = s.id;
+            renderAnalyticsView();
+          };
+          tabs.appendChild(btn);
+        });
+      }
+
+      const activeSubj = appState.subjects.find(s => s.id === appState.activeExamSubjId) || appState.subjects[0];
       if (!activeSubj) return;
 
       // 2. 시험 개요 스탯 갱신
       const ddayInfo = getDDayBadge(activeSubj.dday);
-      document.getElementById('an-stat-dday').textContent = ddayInfo.text;
-      document.getElementById('an-stat-target').textContent = `${activeSubj.targetScore || 100}점`;
+      const ddayEl = document.getElementById('an-stat-dday');
+      if (ddayEl) ddayEl.textContent = ddayInfo.text;
+      const targetEl = document.getElementById('an-stat-target');
+      if (targetEl) targetEl.textContent = `${activeSubj.targetScore || 100}점`;
 
       let unitScores = [];
       const weakList = [];
-      activeSubj.chapters.forEach(ch => {
-        ch.subunits.forEach(sub => {
-          if (sub.unitScore !== '' && sub.unitScore !== undefined && sub.unitScore !== null) {
-            const sc = Number(sub.unitScore);
-            unitScores.push(sc);
-            if (sc < 70) weakList.push({ name: sub.name, chapter: ch.title, score: sc });
+      if (Array.isArray(activeSubj.chapters)) {
+        activeSubj.chapters.forEach(ch => {
+          if (ch.unitScore !== '' && ch.unitScore !== undefined && ch.unitScore !== null) {
+            const sc = Number(ch.unitScore);
+            if (!isNaN(sc)) {
+              unitScores.push(sc);
+              if (sc < 70) weakList.push({ name: ch.title, chapter: ch.title, score: sc });
+            }
           }
         });
-      });
+      }
 
       const avgUnit = unitScores.length > 0 ? (unitScores.reduce((a, b) => a + b, 0) / unitScores.length).toFixed(1) + '점' : '-';
-      document.getElementById('an-stat-subunit-avg').textContent = avgUnit;
+      const avgUnitEl = document.getElementById('an-stat-subunit-avg');
+      if (avgUnitEl) avgUnitEl.textContent = avgUnit;
 
-      const mockList = activeSubj.mockTests || [];
-      document.getElementById('an-stat-recent-mock').textContent = mockList.length > 0 ? `${mockList[mockList.length - 1].score}점` : '-';
-      document.getElementById('an-mock-badge').textContent = `${mockList.length}회 응시`;
+      // 전체테스트 성적 목록 구성 (schedules 테이블의 전체테스트/테스트 일정 우선 연동)
+      const scheduleMockTests = (appState.schedules || [])
+        .filter(s => s.subject === activeSubj.name &&
+                     (s.category === '전체테스트' || s.category === '테스트') &&
+                     s.score !== undefined && s.score !== null && String(s.score).trim() !== '' && !isNaN(Number(s.score)))
+        .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+        .map((s, idx) => ({
+          id: s.id,
+          round: idx + 1,
+          score: Number(s.score),
+          date: s.date,
+          memo: s.title
+        }));
+
+      const subMockTests = Array.isArray(activeSubj.mockTests) ? activeSubj.mockTests : (Array.isArray(activeSubj.mock_tests) ? activeSubj.mock_tests : []);
+      const mockList = scheduleMockTests.length > 0 ? scheduleMockTests : subMockTests;
+      const recentMockEl = document.getElementById('an-stat-recent-mock');
+      if (recentMockEl) recentMockEl.textContent = mockList.length > 0 ? `${mockList[mockList.length - 1].score}점` : '-';
+      const mockBadgeEl = document.getElementById('an-mock-badge');
+      if (mockBadgeEl) mockBadgeEl.textContent = `${mockList.length}회 응시`;
 
       // 3. 취약 단원 렌더링
       const weakContainer = document.getElementById('an-weak-subunits-list');
-      weakContainer.innerHTML = '';
-      document.getElementById('an-weak-count-badge').textContent = `${weakList.length}개 단원`;
+      const weakCountBadge = document.getElementById('an-weak-count-badge');
+      if (weakCountBadge) weakCountBadge.textContent = `${weakList.length}개 단원`;
 
-      if (weakList.length === 0) {
-        weakContainer.innerHTML = '<div class="py-6 text-center text-xs text-slate-500 font-bold">70점 미만의 취약 단원이 없습니다! 매우 훌륭합니다. 🎉</div>';
-      } else {
-        weakList.forEach(w => {
-          const row = document.createElement('div');
-          row.className = 'neu-card-sm flex items-center justify-between p-3 rounded-2xl text-xs hover:-translate-y-0.5 transition';
-          row.innerHTML = `
-            <div>
-              <span class="font-bold text-slate-800">${escapeHtml(w.name)}</span>
-              <span class="text-[11px] text-slate-500 block font-semibold mt-0.5">${escapeHtml(w.chapter)}</span>
-            </div>
-            <span class="font-mono font-extrabold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-xl neu-card-sm">${w.score}점 (보완필요)</span>
-          `;
-          weakContainer.appendChild(row);
-        });
+      if (weakContainer) {
+        weakContainer.innerHTML = '';
+        if (weakList.length === 0) {
+          weakContainer.innerHTML = '<div class="py-6 text-center text-xs text-slate-500 font-bold">70점 미만의 취약 대단원이 없습니다! 매우 훌륭합니다. 🎉</div>';
+        } else {
+          weakList.forEach(w => {
+            const row = document.createElement('div');
+            row.className = 'neu-card-sm flex items-center justify-between p-3 rounded-2xl text-xs hover:-translate-y-0.5 transition';
+            row.innerHTML = `
+              <div>
+                <span class="font-bold text-slate-800">${escapeHtml(w.name)}</span>
+              </div>
+              <span class="font-mono font-extrabold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-xl neu-card-sm">${w.score}점 (보완필요)</span>
+            `;
+            weakContainer.appendChild(row);
+          });
+        }
       }
 
       // 4. 모의고사 추이 꺾은선 차트 렌더링
       renderMockChart(mockList, activeSubj.targetScore || 100);
 
-      // 5. 소단원별 성적표 테이블 렌더링 (최근 10회 추이 연동)
+      // 5. 대단원별 성적표 테이블 렌더링 (최근 10회 추이 연동)
       renderSubunitsTable(activeSubj);
+      lucide.createIcons();
     }
 
     // Chart.js 데이터 포인트 위 점수 직관 노출 플러그인 (그래프에 점수가 바로 보이도록 설정)
@@ -4044,17 +3890,20 @@ II. 사회 정의와 불평등
       const emptyEl = document.getElementById('an-mock-empty');
       if (!canvas) return;
 
-      if (mockList.length === 0) {
+      if (anMockChartInstance) {
+        anMockChartInstance.destroy();
+        anMockChartInstance = null;
+      }
+
+      if (!Array.isArray(mockList) || mockList.length === 0) {
         if (emptyEl) emptyEl.classList.remove('hidden');
-        if (anMockChartInstance) anMockChartInstance.destroy();
         return;
       }
 
       if (emptyEl) emptyEl.classList.add('hidden');
       const ctx = canvas.getContext('2d');
-      if (anMockChartInstance) anMockChartInstance.destroy();
 
-      const labels = mockList.map(m => `${m.round}회차`);
+      const labels = mockList.map((m, idx) => m.round ? `${m.round}회차` : `${idx + 1}회차`);
       const data = mockList.map(m => Number(m.score));
 
       anMockChartInstance = new Chart(ctx, {
@@ -4063,7 +3912,7 @@ II. 사회 정의와 불평등
           labels,
           datasets: [
             {
-              label: '모의고사 득점',
+              label: '전체테스트 점수',
               data,
               borderColor: '#54A0FF',
               backgroundColor: 'rgba(84, 160, 255, 0.12)',
@@ -4103,70 +3952,88 @@ II. 사회 정의와 불평등
       const container = document.getElementById('an-subunits-table-container');
       container.innerHTML = '';
 
-      if (!subj.chapters || subj.chapters.length === 0) {
-        container.innerHTML = '<div class="py-8 text-center text-xs text-slate-500 font-semibold">등록된 단원이 없습니다.</div>';
+      if (!Array.isArray(subj.chapters) || subj.chapters.length === 0) {
+        container.innerHTML = '<div class="py-8 text-center text-xs text-slate-500 font-semibold">등록된 대단원이 없습니다.</div>';
         return;
       }
 
-      // 진도계획 일정 데이터 분석: 소단원별 누적 회독수(완료 횟수) 및 누적 공부시간(초)
-      const subjProgressSchedules = appState.schedules.filter(s => s.subject === subj.name && s.category === '진도계획');
-      const subunitRepetitionStats = {};
+      // 진도계획 및 테스트 일정 데이터 분석
+      const subjSchedules = (appState.schedules || []).filter(s => s.subject === subj.name);
+      const subjProgressSchedules = subjSchedules.filter(s => s.category === '진도계획' || s.category === '진도 계획' || (s.category && s.category.includes('진도')));
+      const subjTestSchedules = subjSchedules.filter(s => s.category === '테스트' || s.category === '단원테스트' || s.category === '전체테스트' || (s.category && s.category.includes('테스트')));
 
-      let totalSubunitsCount = 0;
+      const chapterStudyStats = {};
+      let totalChaptersCount = subj.chapters.length;
       subj.chapters.forEach(ch => {
-        ch.subunits.forEach(sub => {
-          totalSubunitsCount++;
-          subunitRepetitionStats[sub.id] = { count: 0, totalSec: 0, lastDate: '' };
-        });
+        const cid = String(ch.id);
+        chapterStudyStats[cid] = { totalSec: 0, lastDate: '' };
+        if (ch.id !== cid) {
+          chapterStudyStats[ch.id] = chapterStudyStats[cid];
+        }
       });
 
+      // 1) 진도 누적 공부시간 계산 (단원 ID 지정 여부와 무관하게 전액 합산)
       let totalSubjectProgressSec = 0;
-      let totalSubjectRepetitions = 0;
-
       subjProgressSchedules.forEach(s => {
-        const subIds = (Array.isArray(s.subunitIds) && s.subunitIds.length > 0) ? s.subunitIds : (s.subunitId ? [s.subunitId] : []);
-        if (subIds.length === 0) return;
-
-        const durSec = Number(s.durationSec) || (s.durationMinutes ? s.durationMinutes * 60 : 0);
-        const perSubSec = durSec > 0 ? Math.floor(durSec / subIds.length) : 0;
+        const durSec = Number(s.durationSec) || (s.durationMinutes ? s.durationMinutes * 60 : (Number(s.duration_sec) || 0));
         totalSubjectProgressSec += durSec;
 
-        subIds.forEach(id => {
-          if (!subunitRepetitionStats[id]) {
-            subunitRepetitionStats[id] = { count: 0, totalSec: 0, lastDate: '' };
-          }
-          const isDone = s.completed || (Array.isArray(s.completedSubunits) && s.completedSubunits.includes(id));
-          if (isDone) {
-            subunitRepetitionStats[id].count += 1;
-            totalSubjectRepetitions += 1;
-          }
-          subunitRepetitionStats[id].totalSec += perSubSec;
-          if (s.date && (!subunitRepetitionStats[id].lastDate || s.date > subunitRepetitionStats[id].lastDate)) {
-            subunitRepetitionStats[id].lastDate = s.date;
-          }
-        });
+        const chIds = (Array.isArray(s.chapterIds) && s.chapterIds.length > 0) ? s.chapterIds :
+          ((Array.isArray(s.subunitIds) && s.subunitIds.length > 0) ? s.subunitIds :
+          (s.lessonId ? [String(s.lessonId)] : (s.lesson_id ? [String(s.lesson_id)] : (s.chapterId ? [String(s.chapterId)] : (s.subunitId ? [String(s.subunitId)] : [])))));
+
+        if (chIds.length > 0) {
+          const perChSec = durSec > 0 ? Math.floor(durSec / chIds.length) : 0;
+          chIds.forEach(rawId => {
+            const id = String(rawId);
+            if (!chapterStudyStats[id]) {
+              chapterStudyStats[id] = { totalSec: 0, lastDate: '' };
+            }
+            chapterStudyStats[id].totalSec += perChSec;
+            if (s.date && (!chapterStudyStats[id].lastDate || s.date > chapterStudyStats[id].lastDate)) {
+              chapterStudyStats[id].lastDate = s.date;
+            }
+          });
+        }
       });
 
-      const avgRepetitions = totalSubunitsCount > 0 ? (totalSubjectRepetitions / totalSubunitsCount).toFixed(1) : '0.0';
+      // 2) 테스트 누적 공부시간 계산
+      let totalSubjectTestSec = 0;
+      subjTestSchedules.forEach(s => {
+        const durSec = Number(s.durationSec) || (s.durationMinutes ? s.durationMinutes * 60 : (Number(s.duration_sec) || 0));
+        totalSubjectTestSec += durSec;
+      });
+
+      // 3) 과목별 진도율 계산
+      const completedProgCount = subjProgressSchedules.filter(s => s.completed === true || s.completed === 'TRUE' || Number(s.progress) === 100).length;
+      const progressPercent = subjProgressSchedules.length > 0 
+        ? Math.round((completedProgCount / subjProgressSchedules.length) * 100) 
+        : 0;
+
+      // 시간 포맷
       const totalProgH = Math.floor(totalSubjectProgressSec / 3600);
       const totalProgM = Math.floor((totalSubjectProgressSec % 3600) / 60);
       const totalProgTimeStr = totalProgH > 0 ? `${totalProgH}시간 ${totalProgM}분` : `${totalProgM}분`;
 
-      // 1. 상단 회독 & 진도 종합 요약 바
+      const totalTestH = Math.floor(totalSubjectTestSec / 3600);
+      const totalTestM = Math.floor((totalSubjectTestSec % 3600) / 60);
+      const totalTestTimeStr = totalTestH > 0 ? `${totalTestH}시간 ${totalTestM}분` : `${totalTestM}분`;
+
+      // 1. 상단 종합 요약 바 (회독 대신 과목별진도, 테스트공부시간 배치)
       const summaryBar = document.createElement('div');
       summaryBar.className = 'neu-inset p-3.5 rounded-2xl grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4';
       summaryBar.innerHTML = `
         <div class="p-2.5 rounded-xl neu-card-sm text-center">
-          <div class="text-[10px] text-slate-500 font-bold">전체 소단원</div>
-          <div class="text-sm font-extrabold font-mono text-slate-800 mt-0.5">${totalSubunitsCount}개 단원</div>
+          <div class="text-[10px] text-slate-500 font-bold">전체 대단원</div>
+          <div class="text-sm font-extrabold font-mono text-slate-800 mt-0.5">${totalChaptersCount}개 단원</div>
         </div>
         <div class="p-2.5 rounded-xl neu-card-sm text-center">
-          <div class="text-[10px] text-slate-500 font-bold">총 누적 회독수</div>
-          <div class="text-sm font-extrabold font-mono text-emerald-600 mt-0.5">${totalSubjectRepetitions}회독</div>
+          <div class="text-[10px] text-slate-500 font-bold">과목별 진도</div>
+          <div class="text-sm font-extrabold font-mono text-emerald-600 mt-0.5">${progressPercent}% <span class="text-[10px] text-slate-400 font-medium">(${completedProgCount}/${subjProgressSchedules.length})</span></div>
         </div>
         <div class="p-2.5 rounded-xl neu-card-sm text-center">
-          <div class="text-[10px] text-slate-500 font-bold">단원별 평균 회독</div>
-          <div class="text-sm font-extrabold font-mono text-purple-600 mt-0.5">${avgRepetitions}회독</div>
+          <div class="text-[10px] text-slate-500 font-bold">테스트 공부시간</div>
+          <div class="text-sm font-extrabold font-mono text-purple-600 mt-0.5">${totalTestTimeStr}</div>
         </div>
         <div class="p-2.5 rounded-xl neu-card-sm text-center">
           <div class="text-[10px] text-slate-500 font-bold">진도 누적 공부시간</div>
@@ -4175,117 +4042,105 @@ II. 사회 정의와 불평등
       `;
       container.appendChild(summaryBar);
 
-      // 2. 대단원별 소단원 목록 렌더링
+      // 2. 대단원 목록 렌더링
+      const block = document.createElement('div');
+      block.className = 'neu-card p-4 sm:p-5 rounded-3xl space-y-3 mb-4';
+
+      let chaptersHtml = '';
       subj.chapters.forEach(ch => {
-        const block = document.createElement('div');
-        block.className = 'neu-card p-4 sm:p-5 rounded-3xl space-y-3 mb-4';
+        const hasScore = ch.unitScore !== undefined && ch.unitScore !== '' && ch.unitScore !== null;
+        const numScore = hasScore ? Number(ch.unitScore) : null;
 
-        let subunitsHtml = '';
-        ch.subunits.forEach(sub => {
-          const hasScore = sub.unitScore !== undefined && sub.unitScore !== '' && sub.unitScore !== null;
-          const numScore = hasScore ? Number(sub.unitScore) : null;
+        let gradeBadge = '<span class="text-[10px] text-slate-400 font-bold px-2 py-0.5 rounded-lg neu-inset-sm">미응시</span>';
+        if (hasScore) {
+          if (numScore >= 90) gradeBadge = '<span class="text-[10px] font-bold text-emerald-700 px-2 py-0.5 rounded-lg bg-emerald-50 neu-card-sm">우수 ✨</span>';
+          else if (numScore >= 70) gradeBadge = '<span class="text-[10px] font-bold text-blue-700 px-2 py-0.5 rounded-lg bg-blue-50 neu-card-sm">양호</span>';
+          else gradeBadge = '<span class="text-[10px] font-bold text-rose-700 px-2 py-0.5 rounded-lg bg-rose-50 neu-card-sm">취약 🔥</span>';
+        }
 
-          let gradeBadge = '<span class="text-[10px] text-slate-400 font-bold px-2 py-0.5 rounded-lg neu-inset-sm">미응시</span>';
-          if (hasScore) {
-            if (numScore >= 90) gradeBadge = '<span class="text-[10px] font-bold text-emerald-700 px-2 py-0.5 rounded-lg bg-emerald-50 neu-card-sm">우수 ✨</span>';
-            else if (numScore >= 70) gradeBadge = '<span class="text-[10px] font-bold text-blue-700 px-2 py-0.5 rounded-lg bg-blue-50 neu-card-sm">양호</span>';
-            else gradeBadge = '<span class="text-[10px] font-bold text-rose-700 px-2 py-0.5 rounded-lg bg-rose-50 neu-card-sm">취약 🔥</span>';
-          }
+        const studyStat = chapterStudyStats[String(ch.id)] || chapterStudyStats[ch.id] || { totalSec: 0, lastDate: '' };
+        const studyMin = Math.floor(studyStat.totalSec / 60);
+        const studyH = Math.floor(studyMin / 60);
+        const remM = studyMin % 60;
+        const studyTimeStr = studyH > 0 ? (remM > 0 ? `${studyH}h ${remM}m` : `${studyH}h`) : (studyMin > 0 ? `${studyMin}m` : '0m');
 
-          const repStat = subunitRepetitionStats[sub.id] || { count: 0, totalSec: 0, lastDate: '' };
-          const repCount = repStat.count;
-          const studyMin = Math.floor(repStat.totalSec / 60);
-          const studyH = Math.floor(studyMin / 60);
-          const remM = studyMin % 60;
-          const studyTimeStr = studyH > 0 ? (remM > 0 ? `${studyH}h ${remM}m` : `${studyH}h`) : (studyMin > 0 ? `${studyMin}m` : '0m');
+        let timeBadge = `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg neu-card-sm text-slate-700 flex items-center gap-1" title="진도계획 누적 공부시간">
+          <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i> ${studyTimeStr}
+        </span>`;
 
-          let repBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-lg neu-card-sm font-mono ${repCount >= 3 ? 'text-purple-700 bg-purple-50' :
-              repCount >= 2 ? 'text-emerald-700 bg-emerald-50' :
-                repCount === 1 ? 'text-blue-700 bg-blue-50' :
-                  'text-slate-500 bg-slate-50'
-            }" title="진도계획 누적 완료 횟수 (회독수)">${repCount}회독${repCount >= 2 ? ' 🔥' : ''}</span>`;
+        const historyCount = Array.isArray(ch.scoreHistory) ? ch.scoreHistory.length : 0;
 
-          let timeBadge = `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg neu-card-sm text-slate-700 flex items-center gap-1" title="진도계획 누적 공부시간">
-            <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i> ${studyTimeStr}
-          </span>`;
-
-          const historyCount = Array.isArray(sub.scoreHistory) ? sub.scoreHistory.length : 0;
-
-          subunitsHtml += `
-            <div class="neu-card-sm flex items-center justify-between gap-3 p-3 rounded-2xl hover:-translate-y-0.5 transition">
-              <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                <span class="text-[10px] px-2 py-0.5 rounded-lg font-bold ${sub.inScope !== false ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-400'} flex-shrink-0">
-                  ${sub.inScope !== false ? '시험범위' : '범위제외'}
-                </span>
-                <button onclick="showSubunitTrend('${subj.id}', '${sub.id}')" title="전체 누적 점수 추이 차트 보기" class="text-left font-bold text-xs text-slate-800 hover:text-brand-600 truncate transition underline-offset-2 hover:underline">
-                  ${escapeHtml(sub.name)}
-                </button>
-              </div>
-
-              <!-- 회독수, 공부시간, 성취도, 인라인 점수 수정 & 추이 버튼 -->
-              <div class="flex items-center gap-2 flex-shrink-0">
-                ${repBadge}
-                ${timeBadge}
-                ${gradeBadge}
-                <div class="flex items-center gap-1">
-                  <input type="number" min="0" max="100" 
-                    value="${hasScore ? sub.unitScore : ''}" 
-                    placeholder="-" 
-                    title="점수 수정 시 즉시 저장 및 누적 기록에 반영"
-                    onchange="updateSubunitScoreFromAnalytics('${subj.id}', '${ch.id}', '${sub.id}', this.value)"
-                    class="neu-input w-14 text-center font-mono font-extrabold text-xs text-brand-600 rounded-xl px-1.5 py-1">
-                  <span class="text-[11px] text-slate-500 font-bold">점</span>
-                </div>
-                <button onclick="showSubunitTrend('${subj.id}', '${sub.id}')" title="누적 전체 추이 확인 (${historyCount}회 보관)" class="neu-icon-btn p-1.5 rounded-xl text-slate-500 hover:text-blue-600">
-                  <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
+        chaptersHtml += `
+          <div class="neu-card-sm flex items-center justify-between gap-3 p-3 rounded-2xl hover:-translate-y-0.5 transition">
+            <div class="flex items-center gap-2.5 flex-1 min-w-0">
+              <span class="text-[10px] px-2 py-0.5 rounded-lg font-bold ${ch.inScope !== false ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-400'} flex-shrink-0">
+                ${ch.inScope !== false ? '시험범위' : '범위제외'}
+              </span>
+              <button onclick="showSubunitTrend('${subj.id}', '${ch.id}')" title="전체 누적 점수 추이 차트 보기" class="text-left font-bold text-xs text-slate-800 hover:text-brand-600 truncate transition underline-offset-2 hover:underline">
+                ${escapeHtml(ch.title)}
+              </button>
             </div>
-          `;
-        });
 
-        block.innerHTML = `
-          <div class="flex items-center justify-between pb-2 border-b border-slate-200/80 text-xs">
-            <span class="font-extrabold text-slate-800 flex items-center gap-2">
-              <i data-lucide="folder" class="w-4 h-4 text-amber-500"></i>
-              ${escapeHtml(ch.title)}
-            </span>
-            <span class="text-[11px] text-slate-500 font-mono font-semibold">${ch.subunits.length}개 소단원</span>
-          </div>
-          <div class="space-y-2">
-            ${subunitsHtml}
+            <!-- 공부시간, 성취도, 인라인 점수 수정 & 추이 버튼 (회독수 제거) -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+              ${timeBadge}
+              ${gradeBadge}
+              <div class="flex items-center gap-1">
+                <input type="number" min="0" max="100" 
+                  value="${hasScore ? ch.unitScore : ''}" 
+                  placeholder="-" 
+                  title="점수 수정 시 즉시 저장 및 누적 기록에 반영"
+                  onchange="updateSubunitScoreFromAnalytics('${subj.id}', '${ch.id}', '', this.value)"
+                  class="neu-input w-14 text-center font-mono font-extrabold text-xs text-brand-600 rounded-xl px-1.5 py-1">
+                <span class="text-[11px] text-slate-500 font-bold">점</span>
+              </div>
+              <button onclick="showSubunitTrend('${subj.id}', '${ch.id}')" title="누적 전체 추이 확인 (${historyCount}회 보관)" class="neu-icon-btn p-1.5 rounded-xl text-slate-500 hover:text-blue-600">
+                <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
         `;
-        container.appendChild(block);
       });
+
+      block.innerHTML = `
+        <div class="flex items-center justify-between pb-2 border-b border-slate-200/80 text-xs">
+          <span class="font-extrabold text-slate-800 flex items-center gap-2">
+            <i data-lucide="folder" class="w-4 h-4 text-amber-500"></i>
+            대단원 목록 & 성적 관리
+          </span>
+          <span class="text-[11px] text-slate-500 font-mono font-semibold">${subj.chapters.length}개 대단원</span>
+        </div>
+        <div class="space-y-2">
+          ${chaptersHtml}
+        </div>
+      `;
+      container.appendChild(block);
       lucide.createIcons();
     }
 
-    // 소단원 누적 전체 점수 추이 차트 표시 (2회 제한 해결 및 이전 모든 테스트 데이터 플롯)
-    function showSubunitTrend(subjId, subId) {
+    // 대단원 누적 전체 점수 추이 차트 표시
+    function showSubunitTrend(subjId, targetChId) {
       const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
-      let foundSub = null;
-      subj.chapters.forEach(ch => {
-        const sub = ch.subunits.find(su => su.id === subId);
-        if (sub) foundSub = sub;
-      });
-      if (!foundSub) return;
+      if (!subj || !Array.isArray(subj.chapters)) return;
+      const foundCh = subj.chapters.find(c => c.id === targetChId);
+      if (!foundCh) return;
 
       const panel = document.getElementById('subunit-trend-panel');
       panel.classList.remove('hidden');
 
-      // 1. 소단원 객체 내의 scoreHistory 누적 기록
+      // 1. 대단원 객체 내의 scoreHistory 누적 기록
       let allScores = [];
-      if (Array.isArray(foundSub.scoreHistory) && foundSub.scoreHistory.length > 0) {
-        allScores = foundSub.scoreHistory.map(s => (typeof s === 'object' && s !== null ? Number(s.score) : Number(s))).filter(n => !isNaN(n));
-      } else if (foundSub.unitScore !== '' && foundSub.unitScore !== null && foundSub.unitScore !== undefined) {
-        allScores = [Number(foundSub.unitScore)];
+      if (Array.isArray(foundCh.scoreHistory) && foundCh.scoreHistory.length > 0) {
+        allScores = foundCh.scoreHistory.map(s => (typeof s === 'object' && s !== null ? Number(s.score) : Number(s))).filter(n => !isNaN(n));
+      } else if (foundCh.unitScore !== '' && foundCh.unitScore !== null && foundCh.unitScore !== undefined) {
+        allScores = [Number(foundCh.unitScore)];
       }
 
-      // 2. 일정 관리에서 등록된 해당 소단원의 과거 테스트 기록 병합
+      // 2. 일정 관리에서 등록된 해당 대단원의 과거 테스트 기록 병합
       const relatedSchedScores = appState.schedules
-        .filter(s => (s.category === '소단원테스트' || s.category === '단원테스트' || s.subunitId === subId) && s.subunitId === subId && s.score !== '' && s.score !== null && !isNaN(Number(s.score)))
+        .filter(s => (s.category === '소단원테스트' || s.category === '단원테스트' || s.chapterId === targetChId || s.subunitId === targetChId) &&
+          (s.chapterId === targetChId || s.subunitId === targetChId) &&
+          s.score !== '' && s.score !== null && !isNaN(Number(s.score)))
         .sort((a, b) => (a.date > b.date ? 1 : -1))
         .map(s => Number(s.score));
 
@@ -4293,14 +4148,13 @@ II. 사회 정의와 불평등
         if (allScores.length <= 1) {
           allScores = [...relatedSchedScores];
         } else {
-          // 일정에서 기록된 점수들을 추가
           relatedSchedScores.forEach(sc => allScores.push(sc));
         }
       }
 
       if (allScores.length === 0) allScores = [0];
 
-      document.getElementById('subunit-trend-title').textContent = `[${foundSub.name}] 누적 전체 (${allScores.length}회차) 점수 변화 추이`;
+      document.getElementById('subunit-trend-title').textContent = `[${foundCh.title}] 누적 전체 (${allScores.length}회차) 점수 변화 추이`;
 
       const canvas = document.getElementById('subunitTrendChart');
       const ctx = canvas.getContext('2d');
@@ -4311,7 +4165,7 @@ II. 사회 정의와 불평등
         data: {
           labels: allScores.map((_, idx) => `${idx + 1}회`),
           datasets: [{
-            label: '소단원 점수',
+            label: '단원 점수',
             data: allScores,
             borderColor: '#FF9F43',
             backgroundColor: 'rgba(255, 159, 67, 0.15)',
@@ -4345,23 +4199,22 @@ II. 사회 정의와 불평등
 
     function updateSubunitScoreFromAnalytics(subjId, chId, subId, val) {
       const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
-      const ch = subj.chapters.find(c => c.id === chId);
+      if (!subj || !Array.isArray(subj.chapters)) return;
+      const targetId = chId || subId;
+      const ch = subj.chapters.find(c => c.id === targetId);
       if (!ch) return;
-      const sub = ch.subunits.find(su => su.id === subId);
-      if (!sub) return;
 
       const numVal = val !== '' ? Number(val) : '';
-      sub.unitScore = numVal;
+      ch.unitScore = numVal;
 
       if (numVal !== '') {
-        if (!Array.isArray(sub.scoreHistory)) sub.scoreHistory = [];
-        sub.scoreHistory.push(numVal); // 전체 누적 보존
+        if (!Array.isArray(ch.scoreHistory)) ch.scoreHistory = [];
+        ch.scoreHistory.push(numVal);
       }
 
       saveState();
       renderAnalyticsView();
-      showToast(`${sub.name} 점수 저장 완료!`);
+      showToast(`${ch.title} 점수 저장 완료!`);
     }
 
     // ==========================================
@@ -4381,79 +4234,93 @@ II. 사회 정의와 불평등
       document.getElementById('modal-bulk-import').classList.add('hidden');
     }
 
-    function executeBulkImport() {
+    async function executeBulkImport() {
       const subjId = document.getElementById('mgr-select-subject')?.value || appState.subjects[0]?.id;
       const subj = appState.subjects.find(s => s.id === subjId);
       if (!subj) return;
 
       const rawText = document.getElementById('bulk-import-textarea').value;
       if (!rawText || !rawText.trim()) {
-        showToast('단원 텍스트를 입력해주세요.', 'error');
+        showToast('대단원 텍스트를 입력해주세요.', 'error');
         return;
       }
 
-      const parsedChapters = parseBulkText(rawText);
-      if (parsedChapters.length === 0) {
-        showToast('유효한 대단원 또는 소단원을 찾지 못했습니다. 입력 양식을 확인하세요.', 'error');
+      const lines = rawText.split('\n').map(l => l.replace(/^[-*•#\s]+/, '').trim()).filter(l => l.length > 0);
+      if (lines.length === 0) {
+        showToast('유효한 대단원을 찾지 못했습니다. 입력 양식을 확인하세요.', 'error');
         return;
       }
 
       const mode = document.querySelector('input[name="bulk-mode"]:checked')?.value || 'append';
-      if (mode === 'replace') {
-        subj.chapters = parsedChapters;
+
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          if (mode === 'replace') {
+            for (const ch of (subj.chapters || [])) {
+              if (!isNaN(Number(ch.id))) {
+                await SupabaseService.deleteLesson(Number(ch.id));
+              }
+            }
+          }
+          const createdList = await SupabaseService.bulkAddLessons(subj.name, lines);
+          const newChs = createdList.map(item => ({
+            id: String(item.id),
+            title: item.unit_name,
+            inScope: true,
+            unitScore: '',
+            scoreHistory: []
+          }));
+          if (mode === 'replace') subj.chapters = newChs;
+          else {
+            if (!Array.isArray(subj.chapters)) subj.chapters = [];
+            subj.chapters.push(...newChs);
+          }
+        } catch (err) {
+          console.warn('bulkAddLessons 오류, 로컬 처리:', err);
+          const fallbackChs = lines.map(line => ({
+            id: 'ch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            title: line,
+            inScope: true,
+            unitScore: '',
+            scoreHistory: []
+          }));
+          if (mode === 'replace') subj.chapters = fallbackChs;
+          else {
+            if (!Array.isArray(subj.chapters)) subj.chapters = [];
+            subj.chapters.push(...fallbackChs);
+          }
+        }
       } else {
-        if (!Array.isArray(subj.chapters)) subj.chapters = [];
-        subj.chapters.push(...parsedChapters);
+        const parsedChapters = lines.map(line => ({
+          id: 'ch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          title: line,
+          inScope: true,
+          unitScore: '',
+          scoreHistory: []
+        }));
+        if (mode === 'replace') subj.chapters = parsedChapters;
+        else {
+          if (!Array.isArray(subj.chapters)) subj.chapters = [];
+          subj.chapters.push(...parsedChapters);
+        }
       }
 
       saveState();
       closeBulkImportModal();
       renderSubjectTreeManager(subjId);
       renderApp();
-      showToast(`${subj.name} 과목에 ${parsedChapters.length}개 대단원이 일괄 등록되었습니다!`);
+      showToast(`${subj.name} 과목에 ${lines.length}개 대단원이 일괄 등록되었습니다!`);
     }
 
     function parseBulkText(text) {
       const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      const chapters = [];
-      let currentChapter = null;
-
-      lines.forEach(line => {
-        const isSubunit = line.startsWith('-') || line.startsWith('*') || line.startsWith('•');
-        if (!isSubunit && (
-          /^[I|V|X]+\./i.test(line) ||
-          /^\d+단원/.test(line) ||
-          /^[0-9]+\.\s*[^0-9]/.test(line) ||
-          !currentChapter
-        )) {
-          currentChapter = {
-            id: 'ch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-            title: line.replace(/^#+\s*/, '').trim(),
-            tag: '시험범위 🔥',
-            subunits: []
-          };
-          chapters.push(currentChapter);
-        } else {
-          if (!currentChapter) {
-            currentChapter = {
-              id: 'ch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-              title: 'I. 기본 대단원',
-              tag: '시험범위 🔥',
-              subunits: []
-            };
-            chapters.push(currentChapter);
-          }
-          const subName = line.replace(/^[-*•\s]+/, '').trim();
-          currentChapter.subunits.push({
-            id: 'sub-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-            name: subName,
-            inScope: true,
-            unitScore: '',
-            scoreHistory: []
-          });
-        }
-      });
-      return chapters;
+      return lines.map(line => ({
+        id: 'ch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        title: line.replace(/^[-*•#\s]+/, '').trim(),
+        inScope: true,
+        unitScore: '',
+        scoreHistory: []
+      }));
     }
 
     function promptRecordMockTest() {
@@ -4482,7 +4349,7 @@ II. 사회 정의와 불평등
     }
 
     // ==========================================
-    // 모달 2: 과목 및 대단원/소단원 목차 관리 모달 (점수 입력 제거, 목차 수정 전담)
+    // 모달 2: 과목 및 대단원 목차 관리 모달
     // ==========================================
     function openSubjectManagerModal() {
       const select = document.getElementById('mgr-select-subject');
@@ -4506,64 +4373,48 @@ II. 사회 정의와 불평등
       document.getElementById('modal-subject-manager').classList.add('hidden');
     }
 
+    function onSubjectManagerAcademyChanged(val) {
+      const subjId = document.getElementById('mgr-select-subject')?.value;
+      const subj = appState.subjects.find(s => s.id === subjId);
+      if (!subj) return;
+      subj.academyName = val.trim();
+      setAcademyNameForSubject(subj.name, val.trim());
+      saveState();
+    }
+
     function renderSubjectTreeManager(subjId) {
       const container = document.getElementById('mgr-chapter-tree-container');
       container.innerHTML = '';
       const subj = appState.subjects.find(s => s.id === subjId);
       if (!subj) return;
 
-      if (!subj.chapters || subj.chapters.length === 0) {
+      if (!Array.isArray(subj.chapters) || subj.chapters.length === 0) {
         container.innerHTML = '<div class="py-8 text-center text-xs text-slate-500 font-semibold">등록된 대단원이 없습니다. 상단의 [+ 대단원 추가] 버튼을 눌러주세요.</div>';
         return;
       }
 
       subj.chapters.forEach(ch => {
         const chCard = document.createElement('div');
-        chCard.className = 'neu-card p-4 sm:p-5 rounded-3xl space-y-3.5 mb-4';
+        chCard.className = 'neu-card-sm flex items-center justify-between gap-3 p-3 rounded-2xl mb-2.5';
 
         chCard.innerHTML = `
-          <!-- 대단원 헤더 (수정/삭제) -->
-          <div class="flex items-center justify-between gap-3 pb-2.5 border-b border-slate-200/80">
-            <div class="flex items-center gap-2 flex-1">
-              <i data-lucide="folder" class="w-4 h-4 text-amber-500 flex-shrink-0"></i>
-              <input type="text" value="${escapeHtml(ch.title)}" 
-                onchange="updateChapterTitle('${subj.id}', '${ch.id}', this.value)"
-                title="대단원명 클릭하여 수정"
-                class="neu-input font-extrabold text-sm text-slate-800 rounded-xl px-2.5 py-1 transition w-full">
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <button onclick="promptAddSubunitToChapter('${subj.id}', '${ch.id}')" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-brand-600 transition flex items-center gap-1">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i> 소단원 추가
-              </button>
-              <button onclick="deleteChapterFromManager('${subj.id}', '${ch.id}')" title="대단원 삭제" class="neu-icon-btn p-1.5 rounded-xl text-slate-500 hover:text-rose-600 transition">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+          <div class="flex items-center gap-2.5 flex-1 min-w-0">
+            <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-600 font-bold cursor-pointer flex-shrink-0" title="시험 범위 포함 여부 토글">
+              <input type="checkbox" ${ch.inScope !== false ? 'checked' : ''} 
+                onchange="toggleChapterInScope('${subj.id}', '${ch.id}', this.checked)"
+                class="w-3.5 h-3.5 rounded-md cursor-pointer accent-brand-500">
+              <span>시험범위</span>
+            </label>
+            <i data-lucide="folder" class="w-4 h-4 text-amber-500 flex-shrink-0"></i>
+            <input type="text" value="${escapeHtml(ch.title)}" 
+              onchange="updateChapterTitle('${subj.id}', '${ch.id}', this.value)"
+              title="대단원명 클릭하여 수정"
+              class="neu-input font-bold text-xs text-slate-800 rounded-xl px-2.5 py-1.5 flex-1 truncate">
           </div>
-
-          <!-- 소단원 리스트 (인라인 수정, 시험범위 토글, 삭제 - 점수 입력 제거) -->
-          <div class="space-y-2 pl-1">
-            ${ch.subunits.map(sub => `
-              <div class="neu-card-sm flex items-center justify-between gap-2.5 p-2.5 rounded-2xl text-xs">
-                <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                  <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-600 font-bold cursor-pointer flex-shrink-0" title="시험 범위 포함 여부 토글">
-                    <input type="checkbox" ${sub.inScope !== false ? 'checked' : ''} 
-                      onchange="toggleSubunitInScope('${subj.id}', '${ch.id}', '${sub.id}', this.checked)"
-                      class="w-3.5 h-3.5 rounded-md cursor-pointer accent-brand-500">
-                    <span>시험범위</span>
-                  </label>
-                  <input type="text" value="${escapeHtml(sub.name)}" 
-                    onchange="updateSubunitName('${subj.id}', '${ch.id}', '${sub.id}', this.value)"
-                    title="소단원명 수정"
-                    class="neu-input font-bold text-slate-800 rounded-xl px-2 py-1 flex-1 truncate">
-                </div>
-                <div class="flex items-center gap-1.5 flex-shrink-0">
-                  <button onclick="deleteSubunitFromManager('${subj.id}', '${ch.id}', '${sub.id}')" title="소단원 삭제" class="neu-icon-btn p-1.5 rounded-xl text-slate-400 hover:text-rose-600 transition">
-                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-              </div>
-            `).join('')}
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="deleteChapterFromManager('${subj.id}', '${ch.id}')" title="대단원 삭제" class="neu-icon-btn p-1.5 rounded-xl text-slate-400 hover:text-rose-600 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
           </div>
         `;
 
@@ -4572,97 +4423,89 @@ II. 사회 정의와 불평등
       lucide.createIcons();
     }
 
-    function updateChapterTitle(subjId, chId, newTitle) {
+    function toggleChapterInScope(subjId, chId, inScope) {
       const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
+      if (!subj || !Array.isArray(subj.chapters)) return;
       const ch = subj.chapters.find(c => c.id === chId);
       if (!ch) return;
-      ch.title = newTitle.trim();
-      saveState();
-      showToast('대단원명이 수정되었습니다.');
-    }
-
-    function updateSubunitName(subjId, chId, subId, newName) {
-      const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
-      const ch = subj.chapters.find(c => c.id === chId);
-      if (!ch) return;
-      const sub = ch.subunits.find(su => su.id === subId);
-      if (!sub) return;
-      sub.name = newName.trim();
-      saveState();
-      showToast('소단원명이 수정되었습니다.');
-    }
-
-    function toggleSubunitInScope(subjId, chId, subId, inScope) {
-      const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
-      const ch = subj.chapters.find(c => c.id === chId);
-      if (!ch) return;
-      const sub = ch.subunits.find(su => su.id === subId);
-      if (!sub) return;
-      sub.inScope = inScope;
+      ch.inScope = inScope;
       saveState();
       showToast(inScope ? '시험범위에 포함되었습니다.' : '시험범위에서 제외되었습니다.', 'info');
     }
 
-    function promptAddSubunitToChapter(subjId, chId) {
-      const name = prompt('추가할 새 소단원명을 입력하세요:');
-      if (!name || !name.trim()) return;
+    async function updateChapterTitle(subjId, chId, newTitle) {
       const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
+      if (!subj || !Array.isArray(subj.chapters)) return;
       const ch = subj.chapters.find(c => c.id === chId);
       if (!ch) return;
+      ch.title = newTitle.trim();
 
-      ch.subunits.push({
-        id: 'sub-' + Date.now(),
-        name: name.trim(),
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          if (!isNaN(Number(chId))) {
+            await SupabaseService.updateLesson(Number(chId), ch.title);
+          }
+        } catch (err) {
+          console.warn('lessons 테이블 수정 오류:', err);
+        }
+      }
+
+      saveState();
+      showToast('대단원명이 수정되었습니다.');
+    }
+
+    async function promptAddChapter() {
+      const subjId = document.getElementById('mgr-select-subject').value;
+      const subj = appState.subjects.find(s => s.id === subjId);
+      if (!subj) return;
+      const title = prompt('새 대단원명을 입력하세요 (예: I. 새로운 대단원):');
+      if (!title || !title.trim()) return;
+
+      const cleanTitle = title.trim();
+      let newId = 'ch-' + Date.now();
+
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          const created = await SupabaseService.addLesson(subj.name, cleanTitle);
+          if (created && created.id) newId = String(created.id);
+        } catch (err) {
+          console.warn('lessons 테이블 추가 오류:', err);
+        }
+      }
+
+      if (!Array.isArray(subj.chapters)) subj.chapters = [];
+      subj.chapters.push({
+        id: newId,
+        title: cleanTitle,
         inScope: true,
         unitScore: '',
         scoreHistory: []
       });
       saveState();
       renderSubjectTreeManager(subjId);
-      showToast('소단원이 추가되었습니다.');
-    }
-
-    function deleteSubunitFromManager(subjId, chId, subId) {
-      if (!confirm('이 소단원을 삭제하시겠습니까?')) return;
-      const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
-      const ch = subj.chapters.find(c => c.id === chId);
-      if (!ch) return;
-      ch.subunits = ch.subunits.filter(s => s.id !== subId);
-      saveState();
-      renderSubjectTreeManager(subjId);
-      showToast('소단원이 삭제되었습니다.', 'info');
-    }
-
-    function promptAddChapter() {
-      const subjId = document.getElementById('mgr-select-subject').value;
-      const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
-      const title = prompt('새 대단원명을 입력하세요 (예: VI. 새로운 대단원):');
-      if (!title || !title.trim()) return;
-
-      subj.chapters.push({
-        id: 'ch-' + Date.now(),
-        title: title.trim(),
-        tag: '시험범위 🔥',
-        subunits: []
-      });
-      saveState();
-      renderSubjectTreeManager(subjId);
+      renderApp();
       showToast('새 대단원이 생성되었습니다.');
     }
 
-    function deleteChapterFromManager(subjId, chId) {
-      if (!confirm('대단원과 포함된 모든 소단원이 삭제됩니다. 진행하시겠습니까?')) return;
+    async function deleteChapterFromManager(subjId, chId) {
+      if (!confirm('대단원을 삭제하시겠습니까?')) return;
       const subj = appState.subjects.find(s => s.id === subjId);
-      if (!subj) return;
+      if (!subj || !Array.isArray(subj.chapters)) return;
+
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          if (!isNaN(Number(chId))) {
+            await SupabaseService.deleteLesson(Number(chId));
+          }
+        } catch (err) {
+          console.warn('lessons 테이블 삭제 오류:', err);
+        }
+      }
+
       subj.chapters = subj.chapters.filter(c => c.id !== chId);
       saveState();
       renderSubjectTreeManager(subjId);
+      renderApp();
       showToast('대단원이 삭제되었습니다.', 'info');
     }
 
@@ -4698,7 +4541,7 @@ II. 사회 정의와 불평등
       document.getElementById('input-exam-subject-id').value = subj.id;
       const titleEl = document.getElementById('modal-exam-subject-title');
       if (titleEl) {
-        titleEl.innerHTML = `<i data-lucide="calendar" class="w-5 h-5 text-rose-500"></i> [${escapeHtml(subj.name)}] 시험일 & 목표 점수`;
+        titleEl.innerHTML = `<i data-lucide="calendar" class="w-5 h-5 text-rose-500"></i> [${escapeHtml(subj.name)}] 시험일, 목표 점수 & 학원`;
       }
 
       const ddayInput = document.getElementById('input-exam-subject-dday');
@@ -4708,6 +4551,10 @@ II. 사회 정의와 불평등
       const targetInput = document.getElementById('input-exam-subject-target');
       if (targetInput) {
         targetInput.value = subj.targetScore !== undefined ? subj.targetScore : 100;
+      }
+      const acadInput = document.getElementById('input-exam-subject-academy');
+      if (acadInput) {
+        acadInput.value = subj.academyName || getAcademyNameForSubject(subj.name) || '';
       }
 
       document.getElementById('modal-subject-exam-details').classList.remove('hidden');
@@ -4727,14 +4574,21 @@ II. 사회 정의와 불평등
 
       const dday = document.getElementById('input-exam-subject-dday').value;
       const target = document.getElementById('input-exam-subject-target').value;
+      const acad = document.getElementById('input-exam-subject-academy')?.value || '';
 
       subj.dday = dday ? dday.trim() : '';
       subj.targetScore = target !== '' ? Number(target) : 100;
+      subj.academyName = acad.trim();
+      setAcademyNameForSubject(subj.name, subj.academyName);
+
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        SupabaseService.saveSubjects(appState.subjects);
+      }
 
       saveState();
       closeSubjectExamModal();
       renderApp();
-      showToast(`[${subj.name}] 시험일(${subj.dday || '미정'}) 및 목표 점수(${subj.targetScore}점)가 저장되었습니다!`);
+      showToast(`[${subj.name}] 시험일, 목표 점수, 학원명이 저장되었습니다!`);
     }
 
     function promptEditSubjectDetails(subjId) {
@@ -4977,22 +4831,20 @@ II. 사회 정의와 불평등
       const countEl = document.getElementById('close-modal-stat-sch-count');
       if (countEl) countEl.textContent = `${schCount}개`;
 
-      // 시험 범위 소단원 완독률 계산
+      // 시험 범위 대단원 완독률 계산
       let totalScopeCount = 0;
       let completedScopeCount = 0;
       if (appState.subjects) {
         appState.subjects.forEach(subj => {
           if (subj.chapters) {
             subj.chapters.forEach(ch => {
-              if (ch.subunits) {
-                ch.subunits.forEach(sub => {
-                  if (sub.inScope) {
-                    totalScopeCount++;
-                    if (sub.isCompleted || (sub.readCount && sub.readCount > 0)) {
-                      completedScopeCount++;
-                    }
-                  }
-                });
+              if (ch.inScope) {
+                totalScopeCount++;
+                const hasScore = ch.unitScore !== '' && ch.unitScore !== undefined && ch.unitScore !== null;
+                const hasHistory = Array.isArray(ch.scoreHistory) && ch.scoreHistory.length > 0;
+                if (hasScore || hasHistory) {
+                  completedScopeCount++;
+                }
               }
             });
           }
@@ -5220,7 +5072,7 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
       }
     }
 
-    function handleCloseAndResetSubmit(event) {
+    async function handleCloseAndResetSubmit(event) {
       if (event) {
         try { event.preventDefault(); } catch (e) { }
         try { event.stopPropagation(); } catch (e) { }
@@ -5250,6 +5102,7 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
             return false;
           }
           actualScores[subjId] = val;
+          actualScores[subjName] = val;
           scoreTexts.push(`${subjName} ${val}점`);
           totalScore += val;
           scoreCount++;
@@ -5306,31 +5159,29 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
 
             if (s.chapters) {
               s.chapters.forEach(ch => {
-                if (ch.subunits) {
-                  ch.subunits.forEach(sub => {
-                    if (sub.inScope) {
-                      totalScopeCount++;
-                      sScope++;
-                      if (sub.isCompleted || (sub.readCount && sub.readCount > 0)) {
-                        completedScopeCount++;
-                        sCompleted++;
-                      }
-                    }
-                    const r = Number(sub.readCount) || 0;
-                    const t = Number(sub.testCount) || 0;
-                    sReads += r;
-                    sTests += t;
+                if (ch.inScope) {
+                  totalScopeCount++;
+                  sScope++;
+                  const hasScore = ch.unitScore !== '' && ch.unitScore !== undefined && ch.unitScore !== null;
+                  const hasHistory = Array.isArray(ch.scoreHistory) && ch.scoreHistory.length > 0;
+                  if (hasScore || hasHistory) {
+                    completedScopeCount++;
+                    sCompleted++;
+                  }
+                }
+                const histLen = Array.isArray(ch.scoreHistory) ? ch.scoreHistory.length : 0;
+                const t = histLen > 0 ? histLen : (ch.unitScore !== '' && ch.unitScore !== undefined && ch.unitScore !== null ? 1 : 0);
+                sTests += t;
 
-                    // 점수 80점 미만 취약단원 수집
-                    if (sub.score !== undefined && sub.score !== null && sub.score !== '' && Number(sub.score) < 80) {
-                      weakUnits.push({
-                        subject: s.name,
-                        unit: sub.name,
-                        score: Number(sub.score),
-                        readCount: r,
-                        testCount: t
-                      });
-                    }
+                // 점수 80점 미만 취약단원 수집
+                const numericScore = ch.unitScore !== '' && ch.unitScore !== undefined && ch.unitScore !== null ? Number(ch.unitScore) : null;
+                if (numericScore !== null && !isNaN(numericScore) && numericScore < 80) {
+                  weakUnits.push({
+                    subject: s.name,
+                    unit: ch.title || '',
+                    score: numericScore,
+                    readCount: 0,
+                    testCount: t
                   });
                 }
               });
@@ -5385,6 +5236,7 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
             startDate: nextStartDate,
             dday: nextDday
           },
+          subjects: subjectsSummary,
           curSchedules: appState.schedules || [],
           summary: {
             totalHours: (totalSec / 3600).toFixed(1) + 'h',
@@ -5450,14 +5302,9 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
               s.score = '';
               if (s.chapters) {
                 s.chapters.forEach(ch => {
-                  if (ch.subunits) {
-                    ch.subunits.forEach(sub => {
-                      sub.inScope = false;
-                      sub.score = '';
-                      sub.readCount = 0;
-                      sub.testCount = 0;
-                    });
-                  }
+                  ch.inScope = false;
+                  ch.unitScore = '';
+                  ch.scoreHistory = [];
                 });
               }
             });
@@ -5500,7 +5347,7 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
   </script>
 
   <!-- Supabase 클라우드 설정 모달 -->
-  <div id="modal-supabase-settings" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+  <div id="modal-supabase-settings" onclick="if(event.target === this) closeSupabaseModal()" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="neu-card p-6 rounded-3xl max-w-md w-full space-y-4">
       <div class="flex items-center justify-between">
         <h3 class="font-extrabold text-base text-slate-800 flex items-center gap-2">
