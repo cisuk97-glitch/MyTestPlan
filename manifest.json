@@ -1,0 +1,69 @@
+{
+  "name": "스마트 스터디 플래너 & 시험 관리 시스템 (SubjectPlan)",
+  "short_name": "SubjectPlan",
+  "description": "Supabase & GitHub Pages 기반 스마트 스터디 플래너 및 시험 아카이브 관리 시스템",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F0F4F8",
+  "theme_color": "#4f46e5",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./planner_icon.png",
+      "sizes": "346x318",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "데일리 플래너",
+      "short_name": "플래너",
+      "description": "학습 계획 및 스톱워치 타이머",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "간편 일정 등록",
+      "short_name": "일정 등록",
+      "description": "자연어 기반 신규 일정 등록",
+      "url": "./add_event.html",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "시험 결과 아카이브",
+      "short_name": "아카이브",
+      "description": "지난 시험 통계 및 점수 추이 분석",
+      "url": "./archive.html",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,10 @@ ALTER TABLE subjects ADD COLUMN IF NOT EXISTS academy_name TEXT DEFAULT '';
 ALTER TABLE subjects ADD COLUMN IF NOT EXISTS chapters JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE subjects ADD COLUMN IF NOT EXISTS mock_tests JSONB DEFAULT '[]'::jsonb;
 
+-- lessons 테이블 시험범위 구분 컬럼(CUREX: 이번 시험, NON_EXAM: 상시 학습)
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS exam_type TEXT NOT NULL DEFAULT 'CUREX';
+CREATE INDEX IF NOT EXISTS idx_lessons_exam_type ON lessons(exam_type);
+
 -- 2. 현재 활성 일정 관리 테이블 (lessons 공유 테이블 연동)
 CREATE TABLE IF NOT EXISTS schedules (
     id TEXT PRIMARY KEY,
