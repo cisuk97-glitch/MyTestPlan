@@ -5262,18 +5262,35 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
             const resData = await SupabaseService.archiveAndResetExam(archivePayload);
             // 클라이언트 상태도 새 시험으로 갱신
             appState.appTitle = nextTitle;
-            appState.schedules = [];
-            if (appState.subjects) {
-              appState.subjects.forEach(s => {
-                s.dday = nextDday;
-                s.score = '';
-                if (s.lessons) s.lessons = [];
-                if (s.chapters) s.chapters = [];
-              });
+            if (resData && Array.isArray(resData.deletedLessonIds) && resData.deletedLessonIds.length > 0) {
+              const delIdSet = new Set(resData.deletedLessonIds.map(String));
+              appState.schedules = (appState.schedules || []).filter(s => !delIdSet.has(String(s.lessonId || s.lesson_id)));
+              if (appState.subjects) {
+                appState.subjects.forEach(s => {
+                  s.dday = nextDday;
+                  s.score = '';
+                  if (s.lessons) s.lessons = s.lessons.filter(l => !delIdSet.has(String(l.id)));
+                  if (s.chapters) s.chapters = s.chapters.filter(ch => !delIdSet.has(String(ch.id)));
+                });
+              }
+            } else {
+              appState.schedules = [];
+              if (appState.subjects) {
+                appState.subjects.forEach(s => {
+                  s.dday = nextDday;
+                  s.score = '';
+                  if (s.lessons) s.lessons = [];
+                  if (s.chapters) s.chapters = [];
+                });
+              }
             }
             saveState();
             renderApp();
-            showToast('✅ Supabase 통계 아카이브 보존 및 다음 시험 리셋 완료!', 'success');
+            let toastMsg = '✅ Supabase 통계 아카이브 보존 및 다음 시험 리셋 완료!';
+            if (resData && resData.wrongAnswersBackupCount > 0) {
+              toastMsg += ` (오답노트 ${resData.wrongAnswersBackupCount}건 백업 JSON 다운로드)`;
+            }
+            showToast(toastMsg, 'success');
             showCloseExamStatus('success', resData);
           } catch (err) {
             console.error('백업 리셋 통신 오류:', err);
