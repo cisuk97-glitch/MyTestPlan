@@ -10,6 +10,7 @@
 
   const STORAGE_URL_KEY = 'SP_SUPABASE_URL';
   const STORAGE_ANON_KEY = 'SP_SUPABASE_ANON_KEY';
+  const PDF_STORAGE_BUCKET = 'test_papers';
 
   let _client = null;
 
@@ -466,6 +467,25 @@
       return !error;
     },
 
+    // JSON 파일 로컬 다운로드 유틸리티
+    downloadJsonFile(data, filename) {
+      if (typeof window === 'undefined' || typeof document === 'undefined') return;
+      try {
+        const jsonStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.warn('JSON 파일 다운로드 실패:', err);
+      }
+    },
+
     // ----------------------------------------------------
     // 8. 시험 마감 및 아카이브 저장 & 클린 리셋 (archiveAndResetExam)
     // ----------------------------------------------------
@@ -650,14 +670,83 @@
         if (lesRes.error) console.warn('archive_lesson_stats 저장 알림:', lesRes.error.message);
       }
 
-      // 3. 지난 시험 데이터 완전 삭제 (Clean Reset - 요청사항)
-      // (1) 일정 전체 삭제
-      const delSchedRes = await client.from('schedules').delete().neq('id', '_dummy_');
-      if (delSchedRes.error) console.warn('schedules 삭제 알림:', delSchedRes.error.message);
+      // 3. 이번 시험(CUREX) 연계 데이터 정리 및 클린 리셋 (Step 1~4)
+      // Step 1: 대상 단원(CUREX) 및 연계 데이터 조회
+      let curexLessonIds = [];
+      try {
+        const { data: curexLessons, error: curexErr } = await client
+          .from('lessons')
+          .select('id')
+          .eq('exam_type', 'CUREX');
 
-      // (2) 단원 전체 삭제 (CASCADE로 test_records도 함께 삭제됨)
-      const delLessonRes = await client.from('lessons').delete().neq('id', -999999);
-      if (delLessonRes.error) console.warn('lessons 삭제 알림:', delLessonRes.error.message);
+        if (curexErr) {
+          console.warn('CUREX 단원 조회 알림:', curexErr.message);
+        } else if (curexLessons && curexLessons.length > 0) {
+          curexLessonIds = curexLessons.map(l => l.id).filter(id => id !== undefined && id !== null);
+        }
+      } catch (e) {
+        console.warn('CUREX 단원 조회 예외:', e);
+      }
+
+      let wrongAnswersBackup = [];
+      if (curexLessonIds.length > 0) {
+        // Step 2: 오답노트(wrong_answers) 로컬 JSON 백업
+        try {
+          const { data: waData, error: waErr } = await client
+            .from('wrong_answers')
+            .select('*')
+            .in('lesson_id', curexLessonIds);
+
+          if (waErr) {
+            console.warn('wrong_answers 조회 알림:', waErr.message);
+          } else if (waData && waData.length > 0) {
+            wrongAnswersBackup = waData;
+            const yyyymmdd = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const waFileName = `wrong_answers_backup_${examId}_${yyyymmdd}.json`;
+            this.downloadJsonFile(waData, waFileName);
+          }
+        } catch (e) {
+          console.warn('wrong_answers 백업 처리 예외:', e);
+        }
+
+        // Step 3: Supabase Storage 내 PDF 파일 삭제
+        try {
+          const { data: pdfTests, error: pdfErr } = await client
+            .from('pdf_tests')
+            .select('id, pdf_filename')
+            .in('lesson_id', curexLessonIds);
+
+          if (pdfErr) {
+            console.warn('pdf_tests 파일명 조회 알림:', pdfErr.message);
+          } else if (pdfTests && pdfTests.length > 0) {
+            const fileList = pdfTests
+              .map(p => p.pdf_filename)
+              .filter(fn => fn && typeof fn === 'string' && fn.trim() !== '');
+
+            if (fileList.length > 0) {
+              const { error: storageErr } = await client.storage
+                .from(PDF_STORAGE_BUCKET)
+                .remove(fileList);
+              if (storageErr) {
+                console.warn('Supabase Storage PDF 삭제 알림:', storageErr.message);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Supabase Storage PDF 삭제 예외:', e);
+        }
+
+        // Step 4: 단원(lessons) 및 연계 데이터 삭제
+        // (1) 연관 플래너 일정(schedules) 정리 (고아 데이터 방지)
+        const delSchedRes = await client.from('schedules').delete().in('lesson_id', curexLessonIds);
+        if (delSchedRes.error) console.warn('schedules 삭제 알림:', delSchedRes.error.message);
+
+        // (2) 이번 시험 단원 삭제 실행 (CASCADE로 vocab_words, test_records, pdf_tests, writing_sentences 자동 삭제)
+        const delLessonRes = await client.from('lessons').delete().eq('exam_type', 'CUREX');
+        if (delLessonRes.error) console.warn('lessons (exam_type=CUREX) 삭제 알림:', delLessonRes.error.message);
+      } else {
+        console.log('CUREX 시험 범위 단원이 없으므로 연계 삭제 단계를 건너뜁니다.');
+      }
 
       // 4. 다음 시험 상태 세팅
       if (nextExam.dday) {
@@ -679,7 +768,9 @@
       return {
         success: true,
         examId: examId,
-        message: '성공적으로 아카이브에 통계가 보존되었으며, 새 시험 준비를 위해 단원과 일정이 리셋되었습니다.'
+        deletedLessonIds: curexLessonIds,
+        wrongAnswersBackupCount: wrongAnswersBackup.length,
+        message: '성공적으로 아카이브에 통계가 보존되었으며, CUREX 시험 단원 및 연계 데이터가 리셋되었습니다.'
       };
     },
 
