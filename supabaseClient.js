@@ -387,8 +387,11 @@
       }));
 
       const { error } = await client.from('subjects').upsert(rows, { onConflict: 'name' });
-      if (error) console.error('subjects 저장 오류:', error);
-      return !error;
+      if (error) {
+        console.error('subjects 저장 오류:', error);
+        throw error;
+      }
+      return true;
     },
 
     // ----------------------------------------------------
