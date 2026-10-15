@@ -1053,6 +1053,9 @@
             class="neu-input px-3 py-1.5 text-xs font-bold text-slate-800">
             <!-- 과목 옵션 -->
           </select>
+          <input type="text" id="mgr-input-academy" placeholder="담당 학원명"
+            onchange="onSubjectManagerAcademyChanged(this.value)"
+            class="neu-input px-3 py-1.5 text-xs font-bold text-slate-800 w-36 sm:w-44" title="담당 학원명 입력">
           <button onclick="promptEditSubjectDetails()" title="과목 시험일/목표점수/학원 설정"
             class="neu-btn px-2.5 py-1.5 text-xs font-bold text-slate-700 flex items-center gap-1 shadow-sm">
             <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-600"></i> 시험일·목표·학원
@@ -1859,6 +1862,9 @@ III. 문화와 다양성</pre>
         appState.appTitle = val;
         saveState();
         updateAppTitleDisplay();
+        if (isSupabaseEnvironment && typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+          SupabaseService.saveSetting('appTitle', val).catch(e => console.error('appTitle 저장 실패:', e));
+        }
         showToast(`플래너 제목이 '${appState.appTitle}'(으)로 변경되었습니다.`);
       }
       closeAppTitleModal();
@@ -1989,6 +1995,9 @@ III. 문화와 다양성</pre>
         try {
           await SupabaseService.saveSubjects(appState.subjects);
           await SupabaseService.saveSchedules(appState.schedules);
+          if (appState.appTitle) {
+            await SupabaseService.saveSetting('appTitle', appState.appTitle);
+          }
           showToast('Supabase에 자동 저장되었습니다.', 'info');
         } catch (e) {
           console.error('Supabase 저장 실패:', e);
@@ -3244,7 +3253,7 @@ III. 문화와 다양성</pre>
       showToast(deltaDays > 0 ? `[${sch.title}] 내일(${formatDateDisplay(nextDateStr)}) 일정으로 이동했습니다.` : `[${sch.title}] 어제(${formatDateDisplay(nextDateStr)}) 일정으로 이동했습니다.`, 'info');
     }
 
-    function deleteSchedule(schId) {
+    async function deleteSchedule(schId) {
       if (!confirm('이 일정을 삭제하시겠습니까?')) return;
       if (activeTimers[schId]) {
         clearInterval(activeTimers[schId]);
@@ -3253,6 +3262,18 @@ III. 문화와 다양성</pre>
       appState.schedules = appState.schedules.filter(s => s.id !== schId);
       saveState();
       renderApp();
+
+      if (isSupabaseEnvironment && typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          const ok = await SupabaseService.deleteSchedule(schId);
+          if (!ok) {
+            console.warn('DB 일정 삭제 응답 오류 (ID:', schId, ')');
+          }
+        } catch (err) {
+          console.error('Supabase 일정 삭제 실패:', err);
+          showToast('❌ DB 일정 삭제 실패: ' + err.message, 'error');
+        }
+      }
       showToast('일정이 삭제되었습니다.', 'info');
     }
 
@@ -4380,9 +4401,14 @@ III. 문화와 다양성</pre>
       const subjId = document.getElementById('mgr-select-subject')?.value;
       const subj = appState.subjects.find(s => s.id === subjId);
       if (!subj) return;
-      subj.academyName = val.trim();
-      setAcademyNameForSubject(subj.name, val.trim());
+      const cleanVal = val.trim();
+      subj.academyName = cleanVal;
+      setAcademyNameForSubject(subj.name, cleanVal);
+      if (isSupabaseEnvironment && typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        SupabaseService.saveSubjects(appState.subjects).catch(err => console.error('과목 학원명 저장 실패:', err));
+      }
       saveState();
+      showToast(`[${subj.name}] 담당 학원명이 '${cleanVal}'(으)로 저장되었습니다.`, 'info');
     }
 
     function renderSubjectTreeManager(subjId) {
@@ -4390,6 +4416,11 @@ III. 문화와 다양성</pre>
       container.innerHTML = '';
       const subj = appState.subjects.find(s => s.id === subjId);
       if (!subj) return;
+
+      const acadInput = document.getElementById('mgr-input-academy');
+      if (acadInput) {
+        acadInput.value = subj.academyName || getAcademyNameForSubject(subj.name) || '';
+      }
 
       if (!Array.isArray(subj.chapters) || subj.chapters.length === 0) {
         container.innerHTML = '<div class="py-8 text-center text-xs text-slate-500 font-semibold">등록된 대단원이 없습니다. 상단의 [+ 대단원 추가] 버튼을 눌러주세요.</div>';
