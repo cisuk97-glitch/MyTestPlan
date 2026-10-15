@@ -11,15 +11,11 @@ CREATE TABLE IF NOT EXISTS subjects (
     target_score INTEGER DEFAULT 100,
     color TEXT DEFAULT 'indigo',
     academy_name TEXT DEFAULT '',
-    chapters JSONB DEFAULT '[]'::jsonb,
-    mock_tests JSONB DEFAULT '[]'::jsonb,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 기존 subjects 테이블에 컬럼이 없는 경우 마이그레이션 구문
 ALTER TABLE subjects ADD COLUMN IF NOT EXISTS academy_name TEXT DEFAULT '';
-ALTER TABLE subjects ADD COLUMN IF NOT EXISTS chapters JSONB DEFAULT '[]'::jsonb;
-ALTER TABLE subjects ADD COLUMN IF NOT EXISTS mock_tests JSONB DEFAULT '[]'::jsonb;
 
 -- lessons 테이블 시험범위 구분 컬럼(CUREX: 이번 시험, NON_EXAM: 상시 학습)
 ALTER TABLE lessons ADD COLUMN IF NOT EXISTS exam_type TEXT NOT NULL DEFAULT 'CUREX';
