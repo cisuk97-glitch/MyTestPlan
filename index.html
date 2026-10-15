@@ -1808,12 +1808,15 @@ III. 문화와 다양성</pre>
 
     function loadState() {
       try {
-        // [로컬 데이터 모든 부분 삭제] 더미 캐시 및 로컬 상태 전면 삭제 (DB 순수 연동 보장)
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem('study_planner_exam_archives');
-        localStorage.removeItem('study_planner_backup');
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && Array.isArray(parsed.subjects) && parsed.subjects.length > 0) {
+            return parsed;
+          }
+        }
       } catch (e) {
-        console.warn('로컬 데이터 삭제 알림:', e);
+        console.warn('로컬 데이터 로드 알림:', e);
       }
       const initial = JSON.parse(JSON.stringify(INITIAL_DATA));
       initial.academyNames = Object.assign({}, DEFAULT_ACADEMY_NAMES);
@@ -4569,7 +4572,7 @@ III. 문화와 다양성</pre>
         const sel = document.getElementById('mgr-select-subject');
         subjId = sel ? sel.value : (appState.subjects[0]?.id || '');
       }
-      const subj = appState.subjects.find(s => s.id === subjId);
+      const subj = appState.subjects.find(s => s.id === subjId || s.name === subjId);
       if (!subj) return;
 
       document.getElementById('input-exam-subject-id').value = subj.id;
@@ -4588,7 +4591,7 @@ III. 문화와 다양성</pre>
       }
       const acadInput = document.getElementById('input-exam-subject-academy');
       if (acadInput) {
-        acadInput.value = subj.academyName || getAcademyNameForSubject(subj.name) || '';
+        acadInput.value = (subj.academyName !== undefined && subj.academyName !== null) ? subj.academyName : (getAcademyNameForSubject(subj.name) || '');
       }
 
       document.getElementById('modal-subject-exam-details').classList.remove('hidden');
@@ -4600,10 +4603,10 @@ III. 문화와 다양성</pre>
       if (modal) modal.classList.add('hidden');
     }
 
-    function saveSubjectExamDetails(e) {
+    async function saveSubjectExamDetails(e) {
       if (e) e.preventDefault();
       const subjId = document.getElementById('input-exam-subject-id').value;
-      const subj = appState.subjects.find(s => s.id === subjId);
+      const subj = appState.subjects.find(s => s.id === subjId || s.name === subjId);
       if (!subj) return;
 
       const dday = document.getElementById('input-exam-subject-dday').value;
@@ -4615,14 +4618,29 @@ III. 문화와 다양성</pre>
       subj.academyName = acad.trim();
       setAcademyNameForSubject(subj.name, subj.academyName);
 
-      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
-        SupabaseService.saveSubjects(appState.subjects);
+      if (isSupabaseEnvironment && typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          await SupabaseService.saveSubjects(appState.subjects);
+        } catch (err) {
+          console.error('과목 정보 Supabase 저장 실패:', err);
+          showToast('❌ DB 저장 실패: ' + err.message, 'error');
+        }
       }
 
       saveState();
       closeSubjectExamModal();
+
+      // UI 갱신: 메인 대시보드, 과목 분석 탭, 과목 관리 모달
       renderApp();
-      showToast(`[${subj.name}] 시험일, 목표 점수, 학원명이 저장되었습니다!`);
+      if (appState.currentMainTab === 'analytics') {
+        renderAnalyticsView();
+      }
+      const mgrAcadInput = document.getElementById('mgr-input-academy');
+      if (mgrAcadInput) {
+        mgrAcadInput.value = subj.academyName;
+      }
+
+      showToast(`[${subj.name}] 시험일, 목표 점수, 학원명이 저장되었습니다!`, 'success');
     }
 
     function promptEditSubjectDetails(subjId) {
