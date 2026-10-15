@@ -382,20 +382,24 @@
       if (!client) return false;
 
       // Clean upsert
-      const rows = schedulesList.map(sch => ({
-        id: sch.id,
-        lesson_id: sch.lessonId || null,
-        subject: sch.subject,
-        date: sch.date,
-        category: sch.category || '진도계획',
-        title: sch.title,
-        detail: sch.detail || '',
-        progress: sch.progress || 0,
-        score: sch.score ? String(sch.score) : '',
-        duration_sec: sch.durationSec || 0,
-        completed: Boolean(sch.completed),
-        updated_at: new Date().toISOString()
-      }));
+      const rows = schedulesList.map(sch => {
+        const rawLid = sch.lessonId ?? sch.subunitId ?? sch.chapterId ?? null;
+        const numLid = (rawLid !== null && rawLid !== '' && !isNaN(Number(rawLid))) ? Number(rawLid) : null;
+        return {
+          id: sch.id,
+          lesson_id: numLid,
+          subject: sch.subject,
+          date: sch.date,
+          category: sch.category || '진도계획',
+          title: sch.title,
+          detail: sch.detail || '',
+          progress: sch.progress || 0,
+          score: sch.score ? String(sch.score) : '',
+          duration_sec: sch.durationSec || 0,
+          completed: Boolean(sch.completed),
+          updated_at: new Date().toISOString()
+        };
+      });
 
       if (rows.length === 0) return true;
 
