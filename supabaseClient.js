@@ -150,62 +150,44 @@
           lessonsBySubject[l.subject_name].push(lessonObj);
         });
 
-        // 2. 과목 구조화 (lessons 테이블 데이터를 바탕으로 chapters 매핑 및 보존)
+        // 2. 과목 구조화 (lessons 및 test_records를 Source of Truth로 하여 chapters 및 mockTests 매핑)
         const subjects = rawSubjects.map(s => {
-          let chapters = [];
-          if (Array.isArray(s.chapters)) {
-            chapters = s.chapters;
-          } else if (typeof s.chapters === 'string') {
-            try { chapters = JSON.parse(s.chapters); } catch (e) { chapters = []; }
-          }
-
-          // 소단원 중첩 구조가 남아있는 경우 대단원 단일 구조로 정규화
-          chapters = chapters.map(ch => {
-            if (ch.subunits && Array.isArray(ch.subunits) && ch.subunits.length > 0) {
-              const firstScored = ch.subunits.find(su => su.unitScore !== '' && su.unitScore !== undefined);
-              const scoreHist = [];
-              ch.subunits.forEach(su => {
-                if (Array.isArray(su.scoreHistory)) scoreHist.push(...su.scoreHistory);
-              });
-              return {
-                id: ch.id || ('ch-' + Date.now()),
-                title: ch.title || '',
-                inScope: ch.inScope !== false,
-                unitScore: ch.unitScore !== undefined ? ch.unitScore : (firstScored ? firstScored.unitScore : ''),
-                scoreHistory: Array.isArray(ch.scoreHistory) && ch.scoreHistory.length > 0 ? ch.scoreHistory : scoreHist
-              };
-            }
+          const sLessons = lessonsBySubject[s.name] || [];
+          const chapters = sLessons.map(l => {
+            const hist = Array.isArray(l.tests) ? l.tests.map(t => Number(t.score)).filter(n => !isNaN(n)) : [];
             return {
-              id: ch.id || ('ch-' + Date.now()),
-              title: ch.title || '',
-              inScope: ch.inScope !== false,
-              unitScore: ch.unitScore !== undefined ? ch.unitScore : '',
-              scoreHistory: Array.isArray(ch.scoreHistory) ? ch.scoreHistory : []
+              id: String(l.id),
+              title: l.unitName,
+              inScope: l.examType ? l.examType === 'CUREX' : true,
+              unitScore: l.latestScore !== null && l.latestScore !== undefined ? l.latestScore : '',
+              scoreHistory: hist
             };
           });
 
-          // lessons 테이블에 등록된 단원이 있는 경우, lessons를 Source of Truth로 하여 chapters 구성
-          const sLessons = lessonsBySubject[s.name] || [];
-          if (sLessons.length > 0) {
-            chapters = sLessons.map(l => {
-              const matched = chapters.find(c => String(c.id) === String(l.id) || c.title === l.unitName);
-              const hist = Array.isArray(l.tests) ? l.tests.map(t => Number(t.score)).filter(n => !isNaN(n)) : [];
-              return {
-                id: String(l.id),
-                title: l.unitName,
-                inScope: matched ? matched.inScope !== false : true,
-                unitScore: l.latestScore !== null && l.latestScore !== undefined ? l.latestScore : (matched ? matched.unitScore : ''),
-                scoreHistory: hist.length > 0 ? hist : (matched && matched.scoreHistory ? matched.scoreHistory : [])
-              };
-            });
-          }
+          // 모의고사/전체테스트 성적: test_records 및 schedules(category=전체테스트)
+          const sLessonIds = new Set(sLessons.map(l => l.id));
+          const testMocks = rawTests
+            .filter(t => (t.test_category === 'MOCK' || t.test_category === '전체테스트') && t.lesson_id && sLessonIds.has(t.lesson_id))
+            .map((t, idx) => ({
+              id: 'm-' + t.id,
+              round: t.round || (idx + 1),
+              date: t.test_date ? t.test_date.substring(0, 10) : '',
+              score: Number(t.score) || 0,
+              memo: t.test_title || ''
+            }));
 
-          let mockTests = [];
-          if (Array.isArray(s.mock_tests)) {
-            mockTests = s.mock_tests;
-          } else if (typeof s.mock_tests === 'string') {
-            try { mockTests = JSON.parse(s.mock_tests); } catch (e) { mockTests = []; }
-          }
+          const schedMocks = rawSchedules
+            .filter(sch => sch.subject === s.name && (sch.category === '전체테스트' || sch.category === '모의고사') && sch.score)
+            .map((sch, idx) => ({
+              id: sch.id,
+              round: idx + 1,
+              date: sch.date,
+              score: Number(sch.score) || 0,
+              memo: sch.title || ''
+            }));
+
+          const mockTests = schedMocks.length > 0 ? schedMocks : testMocks;
+
           return {
             id: 'subj-' + encodeURIComponent(s.name),
             name: s.name,
@@ -381,8 +363,6 @@
         target_score: s.targetScore || 100,
         color: s.color || 'indigo',
         academy_name: s.academyName || '',
-        chapters: s.chapters || [],
-        mock_tests: s.mockTests || [],
         updated_at: new Date().toISOString()
       }));
 
