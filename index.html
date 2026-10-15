@@ -4350,7 +4350,7 @@ III. 문화와 다양성</pre>
       }));
     }
 
-    function promptRecordMockTest() {
+    async function promptRecordMockTest() {
       const activeId = appState.activeExamSubjId || appState.subjects[0]?.id;
       const subj = appState.subjects.find(s => s.id === activeId);
       if (!subj) return;
@@ -4362,13 +4362,34 @@ III. 문화와 다양성</pre>
 
       if (!subj.mockTests) subj.mockTests = [];
       const nextRound = subj.mockTests.length + 1;
-      subj.mockTests.push({
+      const memoText = prompt('간단한 오답 분석 또는 메모를 입력하세요 (선택):') || '';
+      const testDate = new Date().toISOString().slice(0, 10);
+
+      const newMockItem = {
         id: 'm-' + Date.now(),
         round: nextRound,
-        date: new Date().toISOString().slice(0, 10),
+        date: testDate,
         score: numScore,
-        memo: prompt('간단한 오답 분석 또는 메모를 입력하세요 (선택):') || ''
-      });
+        memo: memoText
+      };
+      subj.mockTests.push(newMockItem);
+
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          // 과목의 첫 번째 lessonId가 있으면 연결, 없으면 null
+          const firstLessonId = (subj.lessons && subj.lessons[0]?.id) || (subj.chapters && !isNaN(Number(subj.chapters[0]?.id)) ? Number(subj.chapters[0]?.id) : null);
+          await SupabaseService.addTestRecord({
+            lessonId: firstLessonId,
+            testCategory: 'MOCK',
+            testTitle: memoText || `${subj.name} ${nextRound}회차 모의고사`,
+            round: nextRound,
+            score: numScore,
+            testDate: new Date().toISOString()
+          });
+        } catch (err) {
+          console.warn('test_records 테이블 추가 실패:', err);
+        }
+      }
 
       saveState();
       renderAnalyticsView();
