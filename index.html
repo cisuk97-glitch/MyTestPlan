@@ -3473,7 +3473,7 @@ III. 문화와 다양성</pre>
 
         const selectedChIds = (Array.isArray(sch.chapterIds) && sch.chapterIds.length > 0) ? sch.chapterIds :
           ((Array.isArray(sch.subunitIds) && sch.subunitIds.length > 0) ? sch.subunitIds :
-          (sch.chapterId ? [sch.chapterId] : (sch.subunitId ? [sch.subunitId] : [])));
+          (sch.lessonId ? [String(sch.lessonId)] : (sch.lesson_id ? [String(sch.lesson_id)] : (sch.chapterId ? [String(sch.chapterId)] : (sch.subunitId ? [String(sch.subunitId)] : [])))));
         onSubjectChangeForSchedule(sch.subject, selectedChIds);
       }
 
@@ -3675,6 +3675,9 @@ III. 문화와 다양성</pre>
         durationSec = 3600;
       }
 
+      const rawLid = subunitId || (subunitIds.length > 0 ? subunitIds[0] : null);
+      const parsedLessonId = (rawLid && !isNaN(Number(rawLid))) ? Number(rawLid) : null;
+
       if (editId) {
         const targetSch = appState.schedules.find(s => s.id === editId);
         if (targetSch) {
@@ -3683,6 +3686,7 @@ III. 문화와 다양성</pre>
           targetSch.subject = subject;
           targetSch.title = title;
           targetSch.detail = detail;
+          targetSch.lessonId = parsedLessonId;
           targetSch.subunitId = subunitId;
           targetSch.subunitIds = subunitIds;
           targetSch.chapterId = subunitId;
@@ -3712,6 +3716,7 @@ III. 문화와 다양성</pre>
         const completedSubunits = isCompleted ? [...subunitIds] : [];
         appState.schedules.push({
           id: newId,
+          lessonId: parsedLessonId,
           date,
           category,
           subject,
