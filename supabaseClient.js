@@ -14,6 +14,27 @@
 
   let _client = null;
 
+  const DEFAULT_SUBJECT_COLORS = {
+    '국어': '#94CBF8',
+    '수학': '#F5AFC8',
+    '영어': '#B9ADEB',
+    '통합사회': '#A5D9CB',
+    '사회': '#A5D9CB',
+    '과학': '#A5D9CB'
+  };
+  const LEGACY_COLOR_MAP = {
+    'indigo': '#94CBF8',
+    'rose': '#F5AFC8',
+    'emerald': '#A5D9CB',
+    'purple': '#B9ADEB'
+  };
+  function resolveColor(name, color, fallback = '#94CBF8') {
+    if (color && color.startsWith('#')) return color;
+    if (color && LEGACY_COLOR_MAP[color]) return LEGACY_COLOR_MAP[color];
+    if (name && DEFAULT_SUBJECT_COLORS[name]) return DEFAULT_SUBJECT_COLORS[name];
+    return fallback;
+  }
+
   const SupabaseService = {
     // ----------------------------------------------------
     // 1. 설정 및 클라이언트 초기화
@@ -193,7 +214,7 @@
             name: s.name,
             dday: s.dday || '',
             targetScore: s.target_score !== undefined ? s.target_score : 100,
-            color: s.color || 'indigo',
+            color: resolveColor(s.name, s.color),
             academyName: s.academy_name || '',
             chapters: chapters,
             mockTests: mockTests,
@@ -220,7 +241,7 @@
               name: sName,
               dday: '',
               targetScore: 100,
-              color: 'emerald',
+              color: resolveColor(sName, null, '#A5D9CB'),
               academyName: '',
               chapters: synChapters,
               mockTests: [],
@@ -361,7 +382,7 @@
         name: s.name,
         dday: s.dday || '',
         target_score: s.targetScore || 100,
-        color: s.color || 'indigo',
+        color: resolveColor(s.name, s.color),
         academy_name: s.academyName || '',
         updated_at: new Date().toISOString()
       }));
@@ -742,7 +763,7 @@
           name: s.name,
           dday: nextExam.dday,
           target_score: s.targetScore || 100,
-          color: s.color || 'indigo',
+          color: resolveColor(s.name, s.color),
           updated_at: new Date().toISOString()
         }));
         await client.from('subjects').upsert(updateRows, { onConflict: 'name' });

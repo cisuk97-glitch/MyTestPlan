@@ -543,7 +543,7 @@
       const rawHours = subjects.map(s => Number((Number(s.total_duration_sec) / 3600).toFixed(1)));
       const acadHours = subjects.map(s => Number((Number(s.acad_duration_sec || 0) / 3600).toFixed(1)));
       const progHours = subjects.map(s => Number((Number(s.self_duration_sec || 0) / 3600).toFixed(1)));
-      const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#64748b', '#06b6d4', '#f97316'];
+      const colors = ['#94CBF8', '#F5AFC8', '#B9ADEB', '#A5D9CB', '#8b5cf6', '#64748b', '#06b6d4', '#f97316'];
 
       // 모든 과목의 시간이 0이거나 미입력일 때도 도넛 차트에 과목 슬라이스가 정상 노출되도록 균등 비율 처리
       const allZero = rawHours.length > 0 && rawHours.every(h => h === 0);

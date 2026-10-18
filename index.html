@@ -36,11 +36,11 @@
           },
           colors: {
             neu: {
-              bg: '#F0F4F8',
-              card: '#F0F4F8',
-              text: '#2D3748',
-              muted: '#718096',
-              dark: '#d1d9e6',
+              bg: '#FFF5F7',
+              card: '#FAFDFF',
+              text: '#20354F',
+              muted: '#627D98',
+              dark: '#E4F1FB',
               light: '#ffffff',
             },
             brand: {
@@ -51,6 +51,8 @@
               600: '#ea580c',
               peach: '#FF9F43',
               blue: '#54A0FF',
+              sky: '#94CBF8',
+              pink: '#FFD3E2',
             }
           }
         }
@@ -59,24 +61,29 @@
   </script>
   <style>
     /* ========================================================
-       소프트 뉴모피즘(Soft Neumorphism) / 스퀴시 3D 디자인 시스템
-       베이스: #F0F4F8
+       mystudy 파스텔 핑크/밀크스카이 디자인 시스템
+       베이스: #FFF5F7 / #FAFDFF (밀크 스카이)
        하이라이트: #ffffff
-       음영: #d1d9e6 / #cad5e3
-       텍스트: #2D3748 / #718096
-       포인트: 피치 오렌지 (#FF9F43) / 스퀴시 블루 (#54A0FF)
+       음영/보더: #E4F1FB / #D5EAF8
+       텍스트: #20354F (네이비 차콜) / #627D98 (소프트 블루 그레이)
+       포인트: 파우더 스카이블루 (#94CBF8) / 소프트 핑크 (#FFD3E2)
     ======================================================== */
     :root {
-      --bg: #F0F4F8;
+      --bg: #FFF5F7;
+      --bg-gradient: linear-gradient(135deg, #FFF5F7 0%, #FFEBF2 50%, #FFF0F5 100%);
       --shadow-light: #ffffff;
-      --shadow-dark: #d1d9e6;
-      --shadow-darker: #c2cedf;
-      --text-main: #2D3748;
-      --text-muted: #718096;
+      --shadow-dark: rgba(148, 203, 248, 0.14);
+      --shadow-darker: rgba(148, 203, 248, 0.22);
+      --text-main: #20354F;
+      --text-muted: #627D98;
+      --card-border: #E4F1FB;
       --peach: #FF9F43;
       --blue: #54A0FF;
       --emerald: #10B981;
       --rose: #F43F5E;
+      --purple: #8B5CF6;
+      --skyblue: #94CBF8;
+      --primary-sky: #94CBF8;
     }
 
     * {
@@ -84,8 +91,9 @@
     }
 
     body {
-      background-color: #F0F4F8 !important;
-      color: #2D3748 !important;
+      background: var(--bg-gradient) !important;
+      min-height: 100vh;
+      color: #20354F !important;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
@@ -100,74 +108,87 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: #D5EAF8;
       border-radius: 9999px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+      background: #94CBF8;
     }
 
-    /* 1. 뉴모피즘 3D 돌출 표면 (Elevated Surfaces) */
+    /* 1. mystudy 스타일 카드 표면 */
     .neu-card {
-      background: #F0F4F8;
-      box-shadow: 8px 8px 18px #d1d9e6, -8px -8px 18px #ffffff;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      background: #FAFDFF;
+      box-shadow: 0 6px 18px rgba(148, 203, 248, 0.1);
+      border-radius: 20px;
+      border: 1.5px solid #E4F1FB;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .neu-card:hover {
+      border-color: #D5EAF8;
+      background: #FFFFFF;
+      box-shadow: 0 8px 24px rgba(148, 203, 248, 0.16);
     }
 
     .neu-card-sm {
-      background: #F0F4F8;
-      box-shadow: 4px 4px 10px #d4dce8, -4px -4px 10px #ffffff;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.75);
+      background: #FAFDFF;
+      box-shadow: 0 4px 12px rgba(148, 203, 248, 0.08);
+      border-radius: 16px;
+      border: 1.5px solid #E4F1FB;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .neu-card-sm:hover {
+      border-color: #D5EAF8;
+      background: #FFFFFF;
     }
 
     .neu-card-lg {
-      background: #F0F4F8;
-      box-shadow: 14px 14px 30px #cad5e3, -14px -14px 30px #ffffff;
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: #FFFFFF;
+      box-shadow: 0 12px 32px rgba(139, 120, 230, 0.12);
+      border-radius: 24px;
+      border: 2px solid #FFFFFF;
     }
 
-    /* 2. 뉴모피즘 음각 / 눌린 표면 (Sunken / Inset Surfaces) */
+    /* 2. mystudy 인풋 및 음각 표면 */
     .neu-inset {
-      background: #F0F4F8;
-      box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: #F8FAFD;
+      box-shadow: inset 2px 2px 5px rgba(148, 203, 248, 0.1), inset -2px -2px 5px #ffffff;
+      border-radius: 16px;
+      border: 1px solid #E2EDF7;
     }
 
     .neu-inset-sm {
-      background: #F0F4F8;
-      box-shadow: inset 2px 2px 5px #d1d9e6, inset -2px -2px 5px #ffffff;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: #F8FAFD;
+      box-shadow: inset 1px 1px 3px rgba(148, 203, 248, 0.08), inset -1px -1px 3px #ffffff;
+      border-radius: 12px;
+      border: 1px solid #E2EDF7;
     }
 
-    /* 3. 입력 필드 (Sunken Input) */
+    /* 3. 입력 필드 */
     .neu-input {
-      background: #F0F4F8 !important;
-      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff !important;
-      border: 1px solid rgba(255, 255, 255, 0.8) !important;
-      color: #2D3748 !important;
-      border-radius: 16px !important;
+      background: #FFFFFF !important;
+      box-shadow: inset 2px 2px 5px rgba(148, 203, 248, 0.08), inset -2px -2px 5px #ffffff !important;
+      border: 1.5px solid #E2EDF7 !important;
+      color: #20354F !important;
+      border-radius: 14px !important;
       outline: none !important;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .neu-input:focus {
-      border-color: #54A0FF !important;
-      box-shadow: inset 3px 3px 6px #c7d2e2, inset -3px -3px 6px #ffffff, 0 0 0 3px rgba(84, 160, 255, 0.22) !important;
+      border-color: #94CBF8 !important;
+      box-shadow: 0 0 0 3px rgba(148, 203, 248, 0.25) !important;
     }
 
-    /* 4. 부드러운 뉴모피즘 기본 버튼 */
+    /* 4. mystudy 스타일 보조 버튼 */
     .neu-btn {
-      background: #F0F4F8;
-      box-shadow: 5px 5px 12px #d1d9e6, -5px -5px 12px #ffffff;
-      border-radius: 16px;
-      color: #2D3748;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      background: #F5FAFF;
+      box-shadow: 0 3px 8px rgba(148, 203, 248, 0.12);
+      border-radius: 14px;
+      color: #3E7DBA;
+      border: 1px solid #D5EAF8;
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       cursor: pointer;
       user-select: none;
@@ -175,13 +196,14 @@
 
     .neu-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 7px 7px 16px #c5d0de, -7px -7px 16px #ffffff;
-      color: #1a202c;
+      box-shadow: 0 5px 14px rgba(148, 203, 248, 0.2);
+      background: #EBF4FC;
+      color: #2D6BA8;
     }
 
     .neu-btn:active {
       transform: translateY(1px);
-      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
+      box-shadow: inset 2px 2px 4px rgba(148, 203, 248, 0.2);
     }
 
     /* 5. 스퀴시 3D 컬러 포인트 버튼 */
@@ -248,6 +270,31 @@
       box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.25), inset -3px -3px 6px rgba(255, 255, 255, 0.35) !important;
     }
 
+    .neu-btn-skyblue,
+    .neu-btn-purple {
+      background: #94CBF8 !important;
+      color: #ffffff !important;
+      box-shadow: 5px 5px 14px rgba(148, 203, 248, 0.35), -4px -4px 10px #ffffff !important;
+      border-radius: 18px !important;
+      border: 1px solid #94CBF8 !important;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .neu-btn-skyblue:hover,
+    .neu-btn-purple:hover {
+      transform: translateY(-2px);
+      box-shadow: 7px 7px 18px rgba(148, 203, 248, 0.45), -5px -5px 12px #ffffff !important;
+      background: #82BDF1 !important;
+    }
+
+    .neu-btn-skyblue:active,
+    .neu-btn-purple:active {
+      transform: translateY(1px);
+      box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.15), inset -3px -3px 6px rgba(255, 255, 255, 0.35) !important;
+    }
+
     .neu-btn-rose {
       background: linear-gradient(145deg, #ff6b81, #f43f5e) !important;
       color: #ffffff !important;
@@ -305,51 +352,54 @@
 
     /* 7. 미니 아이콘 버튼 */
     .neu-icon-btn {
-      background: #F0F4F8;
-      box-shadow: 4px 4px 9px #d1d9e6, -4px -4px 9px #ffffff;
+      background: #F5FAFF;
+      box-shadow: 0 2px 6px rgba(148, 203, 248, 0.12);
       border-radius: 14px;
-      color: #4a5568;
+      color: #3E7DBA;
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       user-select: none;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid #D5EAF8;
     }
 
     .neu-icon-btn:hover {
       transform: translateY(-1.5px);
-      box-shadow: 6px 6px 12px #c5d0de, -6px -6px 12px #ffffff;
-      color: #1a202c;
+      box-shadow: 0 4px 10px rgba(148, 203, 248, 0.2);
+      background: #EBF4FC;
+      color: #2D6BA8;
     }
 
     .neu-icon-btn:active {
       transform: translateY(1px);
-      box-shadow: inset 2px 2px 5px #d1d9e6, inset -2px -2px 5px #ffffff;
+      box-shadow: inset 2px 2px 4px rgba(148, 203, 248, 0.15);
     }
 
     /* 8. 소프트 뱃지 */
     .neu-pill {
-      background: #F0F4F8;
-      box-shadow: 3px 3px 6px #d1d9e6, -3px -3px 6px #ffffff;
+      background: #EDF6FD;
+      color: #3E7DBA;
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      border: 1px solid #D5EAF8;
     }
 
     .neu-pill-inset {
-      background: #eef3f8;
-      box-shadow: inset 2px 2px 4px #d1d9e6, inset -2px -2px 4px #ffffff;
+      background: #FFF8FA;
+      color: #D6336C;
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      border: 1px solid #FFD6E2;
     }
 
     /* 9. 하단 고정 플로팅 바 */
     .neu-bottom-nav {
-      background: #F0F4F8;
-      box-shadow: 10px 10px 24px #cad5e3, -10px -10px 24px #ffffff;
+      background: rgba(255, 245, 247, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(148, 203, 248, 0.15);
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      border: 1px solid #E4F1FB;
     }
 
     /* 10. 스퀴시 뉴모피즘 체크박스 */
@@ -359,9 +409,9 @@
       width: 1.2rem;
       height: 1.2rem;
       border-radius: 8px;
-      background: #F0F4F8;
-      box-shadow: inset 2px 2px 4px #d1d9e6, inset -2px -2px 4px #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: #FAFDFF;
+      box-shadow: inset 1px 1px 3px rgba(148, 203, 248, 0.15);
+      border: 1.5px solid #D5EAF8;
       display: inline-grid;
       place-content: center;
       cursor: pointer;
@@ -403,10 +453,13 @@
 
     /* 우측 하단 플로팅 마스코트 (천천히 부드럽게 위아래 이동) */
     @keyframes slowFloatBounce {
-      0%, 100% {
+
+      0%,
+      100% {
         transform: translateY(0);
         animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
       }
+
       50% {
         transform: translateY(-10px);
         animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -420,14 +473,14 @@
 </head>
 
 <body
-  class="bg-[#F0F4F8] text-slate-800 font-sans min-h-screen antialiased selection:bg-orange-200 selection:text-orange-900 flex flex-col pb-24">
+  class="bg-[#FFF5F7] text-[#20354F] font-sans min-h-screen antialiased selection:bg-pink-100 selection:text-pink-900 flex flex-col pb-24">
 
   <!-- Toast 알림 컨테이너 -->
   <div id="toast-container" class="fixed bottom-24 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- 상단 네비게이션 탑바 -->
   <header
-    class="h-16 bg-[#F0F4F8] border-b border-white/80 shadow-[0_4px_16px_rgba(209,217,230,0.5)] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-30 sticky top-0">
+    class="h-16 bg-[#FFF5F7]/85 backdrop-blur-md border-b border-[#E4F1FB] shadow-[0_4px_16px_rgba(148,203,248,0.08)] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-30 sticky top-0">
     <!-- 좌측 로고 및 타이틀 (시험명 커스텀 지원) -->
     <div class="flex items-center gap-3">
       <div
@@ -446,7 +499,7 @@
           <span
             class="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-orange-100 text-orange-600 border border-orange-200 shadow-sm">PRO</span>
         </h1>
-        <p class="text-[11px] text-slate-500 hidden sm:block font-medium">데일리 일정 관리 & 과목별 시험 대비</p>
+        <p class="text-[11px] text-slate-500 hidden sm:block font-medium"> 시험 대비 일정 관리</p>
       </div>
     </div>
 
@@ -549,17 +602,17 @@
       </div>
 
       <!-- 3. 과목별 D-Day 및 학습 요약 컴팩트 바 -->
-      <div class="neu-card p-3.5 sm:p-4 rounded-3xl space-y-2.5">
+      <div class="neu-card p-2 sm:p-2.5 rounded-2xl space-y-1.5">
         <!-- 미니 요약 메트릭 바 (전체일정, 완료율, 오늘 총 학습시간) -->
-        <div class="flex items-center justify-between flex-wrap gap-2 px-1 pb-2 border-b border-slate-200/70 text-xs">
-          <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between flex-wrap gap-1 px-1 pb-1 border-b border-slate-200/70 text-xs">
+          <div class="flex items-center gap-1.5">
             <span class="font-bold text-slate-500">전체</span>
             <span id="metric-total-schedules" class="font-mono font-extrabold text-slate-800">0</span>개
             <span class="text-slate-300">|</span>
             <span class="font-bold text-slate-500">완료율</span>
             <span id="metric-completion-rate" class="font-mono font-extrabold text-blue-600">0%</span>
           </div>
-          <div class="flex items-center gap-1.5 font-bold">
+          <div class="flex items-center gap-1 font-bold">
             <span class="text-slate-500">오늘 학습:</span>
             <span id="metric-total-study-time" class="font-mono font-extrabold text-orange-600">0시간 0분</span>
             <span class="text-[11px] text-slate-400 font-normal">
@@ -569,7 +622,7 @@
           </div>
         </div>
         <!-- 과목별 D-Day 뱃지 목록 -->
-        <div id="dday-widget-bar" class="flex items-center gap-2 overflow-x-auto pb-0.5 pt-0.5">
+        <div id="dday-widget-bar" class="flex items-center gap-1.5 overflow-x-auto py-0">
           <!-- 과목별 D-Day 뱃지 렌더링 -->
         </div>
       </div>
@@ -826,8 +879,10 @@
   <!-- ======================================================== -->
   <!-- 우측 맨 아래 고정 플로팅 마스코트 (스크롤 고정 & 순수 캐릭터 바운스) -->
   <!-- ======================================================== -->
-  <div class="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-40 select-none pointer-events-auto animate-slow-bounce" title="귀여운 마스코트">
-    <img src="mascot.png" alt="마스코트" class="w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-xl hover:scale-110 transition-transform cursor-pointer" />
+  <div class="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-40 select-none pointer-events-auto animate-slow-bounce"
+    title="귀여운 마스코트">
+    <img src="mascot.png" alt="마스코트"
+      class="w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-xl hover:scale-110 transition-transform cursor-pointer" />
   </div>
 
   <!-- ========================================== -->
@@ -1217,6 +1272,17 @@ III. 문화와 다양성</pre>
           </label>
           <input type="text" id="input-exam-subject-academy" placeholder="예: 큰뜻국어, 과외하는수학, 프로토피아 영어"
             class="neu-input w-full px-3.5 py-2.5 text-sm font-semibold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+            <i data-lucide="palette" class="w-4 h-4 text-purple-500"></i>
+            과목 대표 색상
+          </label>
+          <div class="flex items-center gap-2.5 p-2 neu-inset rounded-2xl" id="exam-subject-color-chips">
+            <!-- 4개 프리셋 색상 칩 -->
+          </div>
+          <input type="hidden" id="input-exam-subject-color" value="#94CBF8">
         </div>
 
         <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
@@ -1788,6 +1854,64 @@ III. 문화와 다양성</pre>
       '수학': '과외하는수학',
       '영어': '프로토피아 영어'
     };
+
+    const SUBJECT_COLOR_PALETTE = ['#94CBF8', '#F5AFC8', '#B9ADEB', '#A5D9CB'];
+    const DEFAULT_SUBJECT_COLORS = {
+      '국어': '#94CBF8',
+      '수학': '#F5AFC8',
+      '영어': '#B9ADEB',
+      '통합사회': '#A5D9CB',
+      '사회': '#A5D9CB',
+      '과학': '#A5D9CB'
+    };
+    const LEGACY_COLOR_MAP = {
+      'indigo': '#94CBF8',
+      'blue': '#94CBF8',
+      'rose': '#F5AFC8',
+      'pink': '#F5AFC8',
+      'emerald': '#A5D9CB',
+      'teal': '#A5D9CB',
+      'purple': '#B9ADEB',
+      'violet': '#B9ADEB',
+      'amber': '#F5AFC8'
+    };
+
+    function getSubjectColor(subjOrName, index = 0) {
+      if (!subjOrName) return SUBJECT_COLOR_PALETTE[Math.abs(index) % SUBJECT_COLOR_PALETTE.length];
+      const name = typeof subjOrName === 'string' ? subjOrName : (subjOrName.name || '');
+      const rawColor = typeof subjOrName === 'object' && subjOrName.color ? subjOrName.color : (typeof subjOrName === 'string' && subjOrName.startsWith('#') ? subjOrName : '');
+
+      if (rawColor && rawColor.startsWith('#')) return rawColor;
+      if (rawColor && LEGACY_COLOR_MAP[rawColor]) return LEGACY_COLOR_MAP[rawColor];
+      if (name && DEFAULT_SUBJECT_COLORS[name]) return DEFAULT_SUBJECT_COLORS[name];
+      if (typeof subjOrName === 'string' && LEGACY_COLOR_MAP[subjOrName]) return LEGACY_COLOR_MAP[subjOrName];
+      return SUBJECT_COLOR_PALETTE[Math.abs(index) % SUBJECT_COLOR_PALETTE.length];
+    }
+
+    function renderExamColorChips(selectedColor) {
+      const container = document.getElementById('exam-subject-color-chips');
+      if (!container) return;
+      container.innerHTML = '';
+      SUBJECT_COLOR_PALETTE.forEach(c => {
+        const isSel = (c.toLowerCase() === (selectedColor || '').toLowerCase());
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-7 h-7 rounded-full transition-all transform hover:scale-110 flex items-center justify-center cursor-pointer ${isSel ? 'ring-2 ring-offset-2 ring-slate-700 shadow-md scale-105' : 'opacity-85 hover:opacity-100 border border-slate-300/40'
+          }`;
+        btn.style.backgroundColor = c;
+        if (isSel) {
+          btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-slate-800 stroke-[3]"></i>`;
+        }
+        btn.onclick = () => {
+          const inp = document.getElementById('input-exam-subject-color');
+          if (inp) inp.value = c;
+          renderExamColorChips(c);
+          lucide.createIcons();
+        };
+        container.appendChild(btn);
+      });
+      lucide.createIcons();
+    }
 
     function getAcademyNameForSubject(subjName) {
       if (!subjName) return '';
@@ -2519,7 +2643,7 @@ III. 문화와 다양성</pre>
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="w-3.5 h-3.5 rounded-full bg-${subj.color || 'indigo'}-400 shadow-sm flex-shrink-0"></span>
+              <span class="w-3.5 h-3.5 rounded-full shadow-sm flex-shrink-0" style="background-color: ${getSubjectColor(subj)};"></span>
               <span class="font-extrabold text-sm sm:text-base text-slate-800 truncate">${escapeHtml(subj.name)}</span>
               <span class="text-xs text-slate-500 font-semibold flex-shrink-0">(${overallRatio}%)</span>
             </div>
@@ -2605,7 +2729,7 @@ III. 문화와 다양성</pre>
         };
         card.className = `flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold transition hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${info.cls}`;
         card.innerHTML = `
-          <span class="w-2.5 h-2.5 rounded-full bg-${s.color || 'indigo'}-500 shadow-sm"></span>
+          <span class="w-2.5 h-2.5 rounded-full shadow-sm flex-shrink-0" style="background-color: ${getSubjectColor(s)};"></span>
           <span class="font-bold text-slate-700">${escapeHtml(s.name)}</span>
           <span class="font-mono font-extrabold">${info.text}</span>
           <span class="text-[10px] text-slate-400 font-mono">(${s.targetScore !== undefined ? s.targetScore : 100}점)</span>
@@ -2708,9 +2832,9 @@ III. 문화와 다양성</pre>
           }`;
 
         const subjObj = appState.subjects.find(s => s.name === sch.subject);
-        const subjColor = subjObj ? subjObj.color : 'indigo';
-        const leftBar = `<div class="absolute left-0 top-0 bottom-0 w-2 bg-${subjColor}-500 rounded-l-3xl"></div>`;
-        const subjBadge = `<span class="text-[11px] px-2.5 py-1 rounded-xl font-bold bg-${subjColor}-50 text-${subjColor}-700 neu-card-sm">${escapeHtml(sch.subject)}</span>`;
+        const subjHex = getSubjectColor(subjObj || sch.subject);
+        const leftBar = `<div class="absolute left-0 top-0 bottom-0 w-2.5 rounded-l-3xl" style="background-color: ${subjHex};"></div>`;
+        const subjBadge = `<span class="text-[11px] px-2.5 py-1 rounded-xl font-bold neu-card-sm flex items-center gap-1.5" style="background-color: ${subjHex}22; color: #1e293b; border: 1px solid ${subjHex}66;"><span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${subjHex};"></span>${escapeHtml(sch.subject)}</span>`;
 
         // [학원 일정] 전용 카드: 선택한 시작 시각과 소요 시간만 깔끔하게 노출
         if (sch.category === '학원일정') {
@@ -2880,7 +3004,7 @@ III. 문화와 다양성</pre>
               </div>
 
               <div>
-                <button type="button" onclick="openTimerModal('${sch.id}')" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition shadow-sm hover:scale-105 active:scale-95 cursor-pointer ${isTimerRunning ? 'neu-btn-amber ring-2 ring-amber-400 ring-offset-1' : 'neu-btn-emerald'
+                <button type="button" onclick="openTimerModal('${sch.id}')" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition shadow-sm hover:scale-105 active:scale-95 cursor-pointer ${isTimerRunning ? 'neu-btn-amber ring-2 ring-amber-400 ring-offset-1' : 'neu-btn-skyblue'
           }">
                   <i data-lucide="${isTimerRunning ? 'timer' : 'play'}" class="w-3.5 h-3.5"></i>
                   <span>${isTimerRunning ? '측정 중 (창 열기)' : '스타트'}</span>
@@ -3186,7 +3310,7 @@ III. 문화와 다양성</pre>
         text.textContent = '멈춤';
         if (icon) icon.setAttribute('data-lucide', 'pause');
       } else {
-        btn.className = 'neu-btn-emerald flex-1 py-3 px-4 rounded-2xl text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-2 transition hover:scale-[1.02] active:scale-[0.98] cursor-pointer';
+        btn.className = 'neu-btn-skyblue flex-1 py-3 px-4 rounded-2xl text-xs sm:text-sm font-bold text-white flex items-center justify-center gap-2 transition hover:scale-[1.02] active:scale-[0.98] cursor-pointer';
         text.textContent = '재개';
         if (icon) icon.setAttribute('data-lucide', 'play');
       }
@@ -3814,12 +3938,16 @@ III. 문화와 다양성</pre>
       // 1. 과목 탭 렌더링
       if (tabs) {
         tabs.innerHTML = '';
-        appState.subjects.forEach(s => {
+        appState.subjects.forEach((s, idx) => {
           const btn = document.createElement('button');
           const isActive = appState.activeExamSubjId === s.id;
-          btn.className = `text-xs px-4 py-2 rounded-2xl font-bold transition ${isActive ? 'neu-tab-active text-brand-600 font-extrabold' : 'neu-btn text-slate-600 hover:text-slate-800'
+          const sColor = getSubjectColor(s, idx);
+          btn.className = `text-xs px-4 py-2 rounded-2xl font-bold transition flex items-center gap-1.5 ${isActive ? 'neu-tab-active font-extrabold' : 'neu-btn text-slate-600 hover:text-slate-800'
             }`;
-          btn.textContent = s.name;
+          if (isActive) {
+            btn.style.boxShadow = `0 0 0 2px ${sColor}`;
+          }
+          btn.innerHTML = `<span class="w-2.5 h-2.5 rounded-full shadow-sm flex-shrink-0" style="background-color: ${sColor};"></span><span>${escapeHtml(s.name)}</span>`;
           btn.onclick = () => {
             appState.activeExamSubjId = s.id;
             renderAnalyticsView();
@@ -4593,12 +4721,13 @@ III. 문화와 다양성</pre>
     function promptAddSubject() {
       const name = prompt('새 과목명을 입력하세요 (예: 과학, 수학):');
       if (!name || !name.trim()) return;
+      const nextIdx = appState.subjects.length;
       const newSubj = {
         id: 'subj-' + Date.now(),
         name: name.trim(),
         dday: '',
         targetScore: 100,
-        color: 'indigo',
+        color: SUBJECT_COLOR_PALETTE[nextIdx % SUBJECT_COLOR_PALETTE.length],
         mockTests: [],
         chapters: []
       };
@@ -4638,6 +4767,13 @@ III. 문화와 다양성</pre>
         acadInput.value = (subj.academyName !== undefined && subj.academyName !== null) ? subj.academyName : (getAcademyNameForSubject(subj.name) || '');
       }
 
+      const currentColor = getSubjectColor(subj);
+      const colorInput = document.getElementById('input-exam-subject-color');
+      if (colorInput) {
+        colorInput.value = currentColor;
+      }
+      renderExamColorChips(currentColor);
+
       document.getElementById('modal-subject-exam-details').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -4656,10 +4792,12 @@ III. 문화와 다양성</pre>
       const dday = document.getElementById('input-exam-subject-dday').value;
       const target = document.getElementById('input-exam-subject-target').value;
       const acad = document.getElementById('input-exam-subject-academy')?.value || '';
+      const colorVal = document.getElementById('input-exam-subject-color')?.value || '';
 
       subj.dday = dday ? dday.trim() : '';
       subj.targetScore = target !== '' ? Number(target) : 100;
       subj.academyName = acad.trim();
+      if (colorVal) subj.color = colorVal;
       setAcademyNameForSubject(subj.name, subj.academyName);
 
       if (isSupabaseEnvironment && typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
@@ -5000,7 +5138,7 @@ III. 문화와 다양성</pre>
         row.className = 'flex items-center justify-between p-2.5 neu-inset rounded-xl gap-2';
         row.innerHTML = `
           <div class="flex items-center gap-2 min-w-0 flex-1">
-            <span class="w-3 h-3 rounded-full flex-shrink-0 bg-${subj.color || 'indigo'}-500"></span>
+            <span class="w-3 h-3 rounded-full flex-shrink-0 shadow-sm" style="background-color: ${getSubjectColor(subj)};"></span>
             <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(subj.name)}</span>
             <span class="text-[10px] text-slate-400 font-mono">(목표: ${subj.targetScore || 100}점)</span>
           </div>
@@ -5295,7 +5433,7 @@ ${errStack ? '\n' + escapeHtml(errStack) : ''}
             subjectsSummary.push({
               id: s.id,
               name: s.name,
-              color: s.color || 'indigo',
+              color: getSubjectColor(s),
               targetScore: s.targetScore || 100,
               actualScore: actualScores[s.id] !== undefined ? actualScores[s.id] : (s.score || ''),
               totalHours: subjHoursNum + 'h',
