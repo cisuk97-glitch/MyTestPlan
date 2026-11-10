@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubjectPlan - 일정 관리 어드민</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="icon" type="image/png" href="./icon-192.png">
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase JS SDK & Client Layer -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabaseClient.js"></script>
+
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+    }
+    input, select, textarea {
+      font-family: inherit;
+    }
+    /* 커스텀 스크롤바 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-16">
+
+  <!-- ======================= 상단 네비게이션 헤더 ======================= -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="./index.html" class="p-2 -ml-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition" title="메인 화면으로">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+            <i data-lucide="calendar-range" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">일정 관리 어드민</h1>
+            <p class="text-xs text-slate-500 hidden sm:block">SubjectPlan 플래너 일정 조회 및 일괄 관리</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- 동기화 상태 뱃지 -->
+        <span id="syncStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 transition">
+          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+          <span id="syncStatusText">확인 중...</span>
+        </span>
+
+        <!-- Supabase 설정 버튼 -->
+        <button id="openConfigBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-200 transition">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Supabase 설정</span>
+        </button>
+
+        <!-- 새로고침 버튼 -->
+        <button id="refreshBtn" class="p-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition" title="새로고침">
+          <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================= 메인 컨텐츠 영역 ======================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-5">
+
+    <!-- 1. 기간 설정 및 필터 툴바 -->
+    <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        
+        <!-- 날짜 선택 영역 -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
+            <span>조회 기간:</span>
+          </div>
+          
+          <div class="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
+            <input type="date" id="filterStartDate" class="px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <span class="text-slate-400 font-bold">~</span>
+            <input type="date" id="filterEndDate" class="px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <button id="applyFilterBtn" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">
+            조회
+          </button>
+        </div>
+
+        <!-- 기간 퀵 프리셋 버튼들 -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <button data-range="default" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
+            앞 3일 ~ 뒤 7일 (기본)
+          </button>
+          <button data-range="today" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            오늘
+          </button>
+          <button data-range="week" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            이번 주
+          </button>
+          <button data-range="month" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            이번 달
+          </button>
+        </div>
+      </div>
+
+      <!-- 과목 및 완료 상태 부가 필터 -->
+      <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <span>과목:</span>
+            <select id="filterSubject" class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">전체 과목</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span>카테고리:</span>
+            <select id="filterCategory" class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">전체 카테고리</option>
+              <option value="진도 계획">진도 계획</option>
+              <option value="단원 테스트">단원 테스트</option>
+              <option value="학원 일정">학원 일정</option>
+              <option value="과목별 전체 테스트">과목별 전체 테스트</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span>상태:</span>
+            <select id="filterCompleted" class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">전체 일정</option>
+              <option value="INCOMPLETE">미완료만</option>
+              <option value="COMPLETED">완료만</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span id="scheduleCountText" class="font-semibold text-slate-800">조회된 일정: 0건</span>
+          <!-- PC / 모바일 뷰 전환 토글 (태블릿/PC에서 확인용) -->
+          <div class="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <button id="viewModeTableBtn" class="px-2 py-0.5 rounded text-xs font-medium bg-white text-slate-800 shadow-sm">표</button>
+            <button id="viewModeCardBtn" class="px-2 py-0.5 rounded text-xs font-medium text-slate-600 hover:text-slate-900">카드</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 빠른 일정 추가 위젯 (프리셋 선택 & 커스텀 추가) -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- 위젯 헤더 -->
+      <div id="quickAddHeader" class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          </span>
+          <span class="text-sm font-bold text-slate-800">빠른 일정 추가</span>
+          <span class="text-xs text-slate-500 hidden sm:inline">- 등록해 둔 학원/자습 일정을 원클릭으로 채워넣으세요</span>
+        </div>
+        <button type="button" class="text-slate-400 hover:text-slate-600 p-1">
+          <i id="quickAddToggleIcon" data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-200"></i>
+        </button>
+      </div>
+
+      <!-- 위젯 본문 -->
+      <div id="quickAddBody" class="p-4 sm:p-5 transition-all space-y-4">
+        
+        <!-- 자주 쓰는 빠른 일정 프리셋 칩 바 -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="bookmark" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>자주 쓰는 빠른 일정 프리셋 (클릭하여 채우기)</span>
+            </span>
+            <button type="button" id="openPresetManageBtn" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+              <i data-lucide="sliders" class="w-3 h-3"></i>
+              <span>프리셋 관리 / 새 프리셋 등록</span>
+            </button>
+          </div>
+          <div id="quickPresetChipsContainer" class="flex flex-wrap gap-1.5">
+            <!-- 자바스크립트로 칩 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 빠른 일정 입력 폼 -->
+        <form id="quickAddForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 pt-3 border-t border-slate-100">
+          
+          <!-- 날짜 -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">날짜</label>
+            <input type="date" id="qaDate" required class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+          </div>
+
+          <!-- 카테고리 (표준 4종) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">카테고리</label>
+            <select id="qaCategory" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
+              <option value="학원 일정" selected>학원 일정</option>
+              <option value="진도 계획">진도 계획</option>
+              <option value="단원 테스트">단원 테스트</option>
+              <option value="과목별 전체 테스트">과목별 전체 테스트</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <!-- 과목 -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">과목</label>
+            <select id="qaSubject" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
+              <option value="국어" selected>국어</option>
+              <option value="수학">수학</option>
+              <option value="영어">영어</option>
+              <option value="사회">사회</option>
+              <option value="과학">과학</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <!-- title (학원명 / 단원명) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">학원명 / 제목</label>
+            <input type="text" id="qaTitle" placeholder="예: 큰뜻국어" value="큰뜻국어" required class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+          </div>
+
+          <!-- 시작시간 (시/분 드롭다운 - 5분 단위 고정) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">시작 시간 (5분 단위)</label>
+            <div class="grid grid-cols-2 gap-1">
+              <select id="qaStartHour" class="w-full px-1.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-mono">
+                <!-- 06시 ~ 23시 -->
+              </select>
+              <select id="qaStartMinute" class="w-full px-1.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-mono">
+                <!-- 00, 05, 10, ... 55분 -->
+              </select>
+            </div>
+          </div>
+
+          <!-- 소요시간 프리셋 & duration_sec -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">
+              소요시간 <span id="qaDurationLabel" class="text-indigo-600 font-bold">(5400초)</span>
+            </label>
+            <select id="qaDurationPreset" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+              <option value="1800">30분 (1,800초)</option>
+              <option value="3600">1시간 (3,600초)</option>
+              <option value="5400" selected>1시간 30분 (5,400초)</option>
+              <option value="7200">2시간 (7,200초)</option>
+              <option value="9000">2시간 30분 (9,000초)</option>
+              <option value="10800">3시간 (10,800초)</option>
+              <option value="12600">3시간 30분 (12,600초)</option>
+              <option value="14400">4시간 (14,400초)</option>
+              <option value="custom">직접 입력...</option>
+            </select>
+            <input type="number" id="qaDurationCustom" placeholder="초 단위" class="hidden mt-1 w-full px-2.5 py-1 text-xs bg-white border border-slate-200 rounded-lg">
+          </div>
+
+          <!-- 추가 버튼 -->
+          <div class="flex items-end">
+            <button type="submit" id="qaSubmitBtn" class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>일정 추가</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. 메인 일정 테이블 (PC/태블릿) & 카드 목록 (모바일) -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      
+      <!-- 상단 컨트롤 바 -->
+      <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-800">일정 목록</span>
+          <span class="text-[11px] text-slate-500">· 날짜별로 행 색상이 구분됩니다(흰색/분홍색 교차). 수정 즉시 DB에 실시간 저장됩니다.</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="saveStatusIndicator" class="text-xs text-emerald-600 font-semibold opacity-0 transition-opacity flex items-center gap-1">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>저장됨</span>
+          </span>
+          <button id="addInlineRowBtnTop" class="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>새 일정 추가</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- A. PC/태블릿: 표 뷰 (Table View) -->
+      <div id="tableViewContainer" class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-100/90 border-b border-slate-200 text-slate-600 font-bold">
+              <th class="py-2.5 px-2.5 w-12 text-center">완료</th>
+              <th class="py-2.5 px-2.5 w-32">날짜</th>
+              <th class="py-2.5 px-2.5 w-24">과목</th>
+              <th class="py-2.5 px-2.5 w-32">카테고리</th>
+              <th class="py-2.5 px-2.5 min-w-[160px]">제목 (단원/학원)</th>
+              <th class="py-2.5 px-2.5 min-w-[140px]">상세 (detail)</th>
+              <th class="py-2.5 px-2.5 w-24 text-center">진행률 (%)</th>
+              <th class="py-2.5 px-2.5 w-20 text-center">점수</th>
+              <th class="py-2.5 px-2.5 w-24 text-center">소요시간 (초)</th>
+              <th class="py-2.5 px-2.5 w-20 text-center">관리</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTableBody" class="divide-y divide-slate-100">
+            <!-- 자바스크립트 렌더링 -->
+          </tbody>
+          <tfoot>
+            <!-- 마지막 행: + 버튼으로 새 일정 인라인 추가 행 생성 -->
+            <tr class="bg-slate-50/50 hover:bg-indigo-50/40 transition">
+              <td colspan="10" class="py-3 px-3 text-center">
+                <button id="addInlineRowBtnBottom" class="w-full py-2 flex items-center justify-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold border-2 border-dashed border-indigo-200 rounded-xl hover:border-indigo-400 bg-white/70 transition">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  <span>새 일정 추가 (+)</span>
+                </button>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- B. 모바일: 카드 뷰 (Card View) -->
+      <div id="cardViewContainer" class="hidden divide-y divide-slate-100 p-3 space-y-3">
+        <!-- 자바스크립트 렌더링 -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================= 모바일 하단 플로팅 추가 버튼 (FAB) ======================= -->
+  <button id="mobileFabBtn" class="sm:hidden fixed bottom-5 right-5 w-13 h-13 rounded-full bg-indigo-600 text-white shadow-xl flex items-center justify-center p-3.5 active:scale-95 transition z-20" title="새 일정 추가">
+    <i data-lucide="plus" class="w-6 h-6"></i>
+  </button>
+
+  <!-- ======================= 완료 점수 입력 모달 ======================= -->
+  <div id="scorePromptModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="award" class="w-5 h-5 text-indigo-600"></i>
+          <h2 class="text-sm font-bold text-slate-900">학습 완료 - 점수 입력</h2>
+        </div>
+        <button id="closeScoreModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <p id="scorePromptTitle" class="text-xs font-semibold text-slate-700 leading-relaxed">
+            [과목 - 제목] 학습을 완료했습니다.
+          </p>
+          <p class="text-[11px] text-slate-500 mt-1">
+            진행률 100%로 변경되며 점수가 기록됩니다.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">달성 점수 (0 ~ 100)</label>
+          <input type="number" id="promptScoreInput" min="0" max="100" value="100" class="w-full px-3 py-2 text-sm font-bold text-indigo-700 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-center">
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" id="scorePromptCancelBtn" class="w-1/2 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition">
+            취소
+          </button>
+          <button type="button" id="scorePromptConfirmBtn" class="w-1/2 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
+            완료 및 저장
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= 빠른 일정 프리셋 관리 모달 ======================= -->
+  <div id="presetManageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bookmark-plus" class="w-5 h-5 text-indigo-600"></i>
+          <h2 class="text-base font-bold text-slate-900">빠른 일정 프리셋 관리</h2>
+        </div>
+        <button id="closePresetModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+        <!-- 새 프리셋 등록 카드 -->
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+          <span class="text-xs font-bold text-slate-800">새 프리셋 등록</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <label class="block text-[11px] text-slate-600 mb-0.5">과목</label>
+              <select id="newPresetSubject" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-600 mb-0.5">카테고리</label>
+              <select id="newPresetCategory" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium">
+                <option value="학원 일정" selected>학원 일정</option>
+                <option value="진도 계획">진도 계획</option>
+                <option value="단원 테스트">단원 테스트</option>
+                <option value="과목별 전체 테스트">과목별 전체 테스트</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[11px] text-slate-600 mb-0.5">학원명 / 단원 제목</label>
+              <input type="text" id="newPresetTitle" placeholder="예: 큰뜻국어 또는 수학과외" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-600 mb-0.5">기본 시작시간 (5분 단위)</label>
+              <div class="grid grid-cols-2 gap-1">
+                <select id="newPresetHour" class="w-full px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono"></select>
+                <select id="newPresetMinute" class="w-full px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono"></select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-600 mb-0.5">기본 소요시간</label>
+              <select id="newPresetDuration" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs">
+                <option value="1800">30분</option>
+                <option value="3600">1시간</option>
+                <option value="5400" selected>1시간 30분</option>
+                <option value="7200">2시간</option>
+                <option value="9000">2시간 30분</option>
+                <option value="10800">3시간</option>
+                <option value="12600">3시간 30분</option>
+                <option value="14400">4시간</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" id="addNewPresetBtn" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition">
+            프리셋 목록에 추가
+          </button>
+        </div>
+
+        <!-- 등록된 프리셋 리스트 -->
+        <div>
+          <span class="block text-xs font-bold text-slate-700 mb-2">등록된 프리셋 목록</span>
+          <div id="presetListContainer" class="space-y-1.5">
+            <!-- 자바스크립트로 렌더링 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= Supabase 설정 모달 ======================= -->
+  <div id="configModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5 text-indigo-600"></i>
+          <h2 class="text-base font-bold text-slate-900">Supabase 연결 설정</h2>
+        </div>
+        <button id="closeConfigModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="configForm" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Supabase URL</label>
+          <input type="url" id="cfgUrl" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Supabase Anon Key</label>
+          <input type="password" id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500">
+          <p class="mt-1 text-[11px] text-slate-500">설정 값은 브라우저(localStorage)에 안전하게 보관됩니다.</p>
+        </div>
+
+        <div id="cfgTestAlert" class="hidden p-2.5 rounded-lg text-xs font-medium"></div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+          <button type="button" id="cfgTestBtn" class="px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+            연결 테스트
+          </button>
+          <div class="flex gap-2">
+            <button type="button" id="cfgCancelBtn" class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-800">
+              취소
+            </button>
+            <button type="submit" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
+              저장 및 재연결
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================= Toast 알림 ======================= -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+    <span id="toastMsg">알림 메시지</span>
+  </div>
+
+  <!-- ======================= JavaScript 로직 ======================= -->
+  <script>
+    // 상태 관리
+    const state = {
+      schedules: [],       // 전체 로드된 일정 배열
+      subjects: [],        // 과목 목록
+      filter: {
+        startDate: '',
+        endDate: '',
+        subject: 'ALL',
+        category: 'ALL',
+        completed: 'ALL'
+      },
+      viewMode: 'auto',    // 'auto', 'table', 'card'
+      isSaving: false,
+      quickPresets: [],    // 빠른 일정 프리셋 목록
+      pendingScoreItem: null // 점수 입력 대기 중인 항목
+    };
+
+    // 표준 4종 카테고리 + 기타
+    const CATEGORY_OPTIONS = [
+      '학원 일정',
+      '진도 계획',
+      '단원 테스트',
+      '과목별 전체 테스트',
+      '기타'
+    ];
+
+    // 카테고리 정규화 함수 (DB의 다양한 표기 호환)
+    function normalizeCategory(cat) {
+      if (!cat) return '진도 계획';
+      const c = String(cat).trim();
+      if (c === '학원' || c === '학원일정' || c === '학원 일정') return '학원 일정';
+      if (c === '진도계획' || c === '진도 계획') return '진도 계획';
+      if (c === '단원테스트' || c === '소단원테스트' || c === '단원 테스트') return '단원 테스트';
+      if (c === '전체테스트' || c === '과목별전체테스트' || c === '과목별 전체 테스트') return '과목별 전체 테스트';
+      return c;
+    }
+
+    // 기본 빠른 일정 프리셋 (표준 카테고리 적용)
+    const DEFAULT_PRESETS = [
+      { id: 'p_1', title: '큰뜻국어', subject: '국어', category: '학원 일정', startTime: '09:00', durationSec: 5400 },
+      { id: 'p_2', title: '수학과외', subject: '수학', category: '학원 일정', startTime: '19:00', durationSec: 7200 },
+      { id: 'p_3', title: '영어 단어 테스트', subject: '영어', category: '단원 테스트', startTime: '21:00', durationSec: 1800 },
+      { id: 'p_4', title: '수학 기출 모의고사', subject: '수학', category: '과목별 전체 테스트', startTime: '14:00', durationSec: 7200 },
+      { id: 'p_5', title: '국어 비문학 독서', subject: '국어', category: '진도 계획', startTime: '16:00', durationSec: 3600 }
+    ];
+
+    // 5분 단위 분 목록
+    const MINUTES_5_STEP = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+
+    // 날짜 유틸 함수
+    function formatDate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function addDays(d, days) {
+      const copy = new Date(d);
+      copy.setDate(copy.getDate() + days);
+      return copy;
+    }
+
+    // 초 -> 사람이 읽기 쉬운 포맷 변환 (예: 5400 -> 1h 30m)
+    function formatDuration(sec) {
+      const s = Number(sec) || 0;
+      if (s === 0) return '0m';
+      const hours = Math.floor(s / 3600);
+      const minutes = Math.floor((s % 3600) / 60);
+      if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+      if (hours > 0) return `${hours}h`;
+      return `${minutes}m`;
+    }
+
+    // 초 -> 한글 포맷 변환 (예: 5400 -> 1시간 30분)
+    function formatDurationKorean(sec) {
+      const s = Number(sec) || 0;
+      if (s === 0) return '0분';
+      const hours = Math.floor(s / 3600);
+      const minutes = Math.floor((s % 3600) / 60);
+      if (hours > 0 && minutes > 0) return `${hours}시간 ${minutes}분`;
+      if (hours > 0) return `${hours}시간`;
+      return `${minutes}분`;
+    }
+
+    // Toast 안내
+    function showToast(msg, duration = 2500) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-2');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+      }, duration);
+    }
+
+    // 저장 완료 인디케이터
+    function flashSaveIndicator() {
+      const ind = document.getElementById('saveStatusIndicator');
+      ind.classList.remove('opacity-0');
+      setTimeout(() => {
+        ind.classList.add('opacity-0');
+      }, 1500);
+    }
+
+    // 시간/분 셀렉트 박스 옵션 채우기 (06~23시, 00~55분)
+    function populateTimeSelects() {
+      const hourSelects = [document.getElementById('qaStartHour'), document.getElementById('newPresetHour')];
+      const minuteSelects = [document.getElementById('qaStartMinute'), document.getElementById('newPresetMinute')];
+
+      hourSelects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '';
+        for (let h = 6; h <= 23; h++) {
+          const hh = String(h).padStart(2, '0');
+          const opt = document.createElement('option');
+          opt.value = hh;
+          opt.textContent = `${hh}시`;
+          if (hh === '09') opt.selected = true;
+          sel.appendChild(opt);
+        }
+      });
+
+      minuteSelects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '';
+        MINUTES_5_STEP.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = `${m}분`;
+          if (m === '00') opt.selected = true;
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    // 1. 초기 날짜 필터 세팅: 오늘 기준 앞 3일 ~ 뒤 7일
+    function initDefaultDateRange() {
+      const today = new Date();
+      const start = addDays(today, -3);
+      const end = addDays(today, 7);
+
+      state.filter.startDate = formatDate(start);
+      state.filter.endDate = formatDate(end);
+
+      document.getElementById('filterStartDate').value = state.filter.startDate;
+      document.getElementById('filterEndDate').value = state.filter.endDate;
+      document.getElementById('qaDate').value = formatDate(today);
+    }
+
+    // 2. Supabase 상태 배지 업데이트
+    async function updateSyncBadge() {
+      const badge = document.getElementById('syncStatusBadge');
+      const text = document.getElementById('syncStatusText');
+
+      if (!window.SupabaseService || !window.SupabaseService.isConfigured()) {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200';
+        badge.firstElementChild.className = 'w-2 h-2 rounded-full bg-amber-500';
+        text.textContent = '로컬 Mock 모드';
+        return;
+      }
+
+      badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
+      badge.firstElementChild.className = 'w-2 h-2 rounded-full bg-emerald-500';
+      text.textContent = 'Supabase 연결됨';
+    }
+
+    // 3. 데이터 로드 (SupabaseService.loadPlannerState 활용)
+    async function loadData() {
+      try {
+        if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+          const plannerState = await window.SupabaseService.loadPlannerState();
+          state.schedules = (plannerState.schedules || []).map(s => ({
+            ...s,
+            category: normalizeCategory(s.category),
+            isDraft: false
+          }));
+          state.subjects = (plannerState.subjects || []).map(s => s.name || s);
+        } else {
+          // 로컬 스토리지 Fallback
+          const savedSchedules = localStorage.getItem('local_schedules');
+          state.schedules = savedSchedules ? JSON.parse(savedSchedules) : generateMockSchedules();
+          state.schedules = state.schedules.map(s => ({ ...s, category: normalizeCategory(s.category), isDraft: false }));
+          state.subjects = ['국어', '수학', '영어', '사회', '과학', '기타'];
+        }
+
+        if (!state.subjects || state.subjects.length === 0) {
+          state.subjects = ['국어', '수학', '영어', '사회', '과학', '기타'];
+        }
+
+        loadQuickPresets();
+        populateSubjectDropdowns();
+        renderQuickPresetChips();
+        renderSchedules();
+        updateSyncBadge();
+      } catch (e) {
+        console.error('데이터 로드 오류:', e);
+        showToast('일정 불러오기 실패: 로컬 데이터를 사용합니다.');
+        updateSyncBadge();
+      }
+    }
+
+    // Mock 일정 생성기
+    function generateMockSchedules() {
+      const today = new Date();
+      return [
+        {
+          id: 'mock_1',
+          date: formatDate(today),
+          subject: '국어',
+          category: '학원 일정',
+          title: '큰뜻국어',
+          detail: '수능특강 독서 3강 복습',
+          progress: 50,
+          score: '0',
+          durationSec: 5400,
+          completed: false,
+          isDraft: false
+        },
+        {
+          id: 'mock_2',
+          date: formatDate(today),
+          subject: '영어',
+          category: '단원 테스트',
+          title: '단원 어휘 40문항 테스트',
+          detail: '틀린 단어 오답노트 작성',
+          progress: 50,
+          score: '0',
+          durationSec: 1800,
+          completed: false,
+          isDraft: false
+        },
+        {
+          id: 'mock_3',
+          date: formatDate(addDays(today, 1)),
+          subject: '수학',
+          category: '진도 계획',
+          title: '수학II 미분계수와 도함수',
+          detail: 'RPM 120p~135p 풀기',
+          progress: 70,
+          score: '95',
+          durationSec: 7200,
+          completed: false,
+          isDraft: false
+        }
+      ];
+    }
+
+    // 과목 드롭다운 채우기
+    function populateSubjectDropdowns() {
+      const filterSub = document.getElementById('filterSubject');
+      const qaSub = document.getElementById('qaSubject');
+      const newPresetSub = document.getElementById('newPresetSubject');
+
+      const currentFilterVal = filterSub.value;
+      const currentQaVal = qaSub.value;
+
+      filterSub.innerHTML = '<option value="ALL">전체 과목</option>';
+      qaSub.innerHTML = '';
+      if (newPresetSub) newPresetSub.innerHTML = '';
+
+      const uniqueSubjects = Array.from(new Set([...state.subjects, '국어', '수학', '영어', '사회', '과학', '기타']));
+
+      uniqueSubjects.forEach(sub => {
+        const opt1 = document.createElement('option');
+        opt1.value = sub;
+        opt1.textContent = sub;
+        filterSub.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = sub;
+        opt2.textContent = sub;
+        qaSub.appendChild(opt2);
+
+        if (newPresetSub) {
+          const opt3 = document.createElement('option');
+          opt3.value = sub;
+          opt3.textContent = sub;
+          newPresetSub.appendChild(opt3);
+        }
+      });
+
+      filterSub.value = currentFilterVal || 'ALL';
+      if (uniqueSubjects.includes(currentQaVal)) {
+        qaSub.value = currentQaVal;
+      }
+    }
+
+    // 4. 빠른 일정 프리셋 관리
+    function loadQuickPresets() {
+      const saved = localStorage.getItem('sp_quick_presets');
+      if (saved) {
+        try {
+          state.quickPresets = JSON.parse(saved).map(p => ({ ...p, category: normalizeCategory(p.category) }));
+        } catch {
+          state.quickPresets = DEFAULT_PRESETS;
+        }
+      } else {
+        state.quickPresets = DEFAULT_PRESETS;
+        localStorage.setItem('sp_quick_presets', JSON.stringify(DEFAULT_PRESETS));
+      }
+    }
+
+    function saveQuickPresets() {
+      localStorage.setItem('sp_quick_presets', JSON.stringify(state.quickPresets));
+      renderQuickPresetChips();
+      renderPresetModalList();
+    }
+
+    function renderQuickPresetChips() {
+      const container = document.getElementById('quickPresetChipsContainer');
+      container.innerHTML = '';
+
+      if (!state.quickPresets || state.quickPresets.length === 0) {
+        container.innerHTML = `<span class="text-xs text-slate-400">등록된 프리셋이 없습니다. [프리셋 관리]에서 추가하세요.</span>`;
+        return;
+      }
+
+      state.quickPresets.forEach(preset => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-white hover:bg-indigo-50 hover:border-indigo-300 text-slate-800 border border-slate-200 shadow-sm transition active:scale-95';
+        btn.title = `클릭 시 폼에 적용: [${preset.subject}] ${preset.title ? preset.title + ' / ' : ''}${preset.startTime || '09:00'} (${formatDuration(preset.durationSec)})`;
+        
+        btn.innerHTML = `
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">${escapeHtml(preset.subject || '공통')}</span>
+          <span class="inline-flex items-center gap-1 text-[11px] text-slate-600 font-mono font-semibold">
+            <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
+            <span>${preset.startTime || '09:00'}</span>
+          </span>
+          <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+            ${formatDuration(preset.durationSec)}
+          </span>
+        `;
+
+        btn.addEventListener('click', () => {
+          applyPresetToForm(preset);
+        });
+
+        container.appendChild(btn);
+      });
+      lucide.createIcons();
+    }
+
+    function applyPresetToForm(preset) {
+      document.getElementById('qaSubject').value = preset.subject || '국어';
+      document.getElementById('qaCategory').value = normalizeCategory(preset.category);
+      document.getElementById('qaTitle').value = preset.title || '';
+
+      const timeStr = preset.startTime || '09:00';
+      const [hh, mm] = timeStr.split(':');
+      if (hh) document.getElementById('qaStartHour').value = hh;
+      if (mm) document.getElementById('qaStartMinute').value = mm;
+
+      const durationSelect = document.getElementById('qaDurationPreset');
+      const durationCustom = document.getElementById('qaDurationCustom');
+      const durationLabel = document.getElementById('qaDurationLabel');
+
+      const sec = String(preset.durationSec || 5400);
+      const standardVals = ['1800', '3600', '5400', '7200', '9000', '10800', '12600', '14400'];
+
+      if (standardVals.includes(sec)) {
+        durationSelect.value = sec;
+        durationCustom.classList.add('hidden');
+        durationLabel.textContent = `(${sec}초)`;
+      } else {
+        durationSelect.value = 'custom';
+        durationCustom.classList.remove('hidden');
+        durationCustom.value = sec;
+        durationLabel.textContent = `(${sec}초)`;
+      }
+
+      showToast(`'${preset.title}' 프리셋이 폼에 채워졌습니다.`);
+    }
+
+    function renderPresetModalList() {
+      const list = document.getElementById('presetListContainer');
+      list.innerHTML = '';
+
+      if (state.quickPresets.length === 0) {
+        list.innerHTML = `<p class="text-xs text-slate-400 py-3 text-center">등록된 프리셋이 없습니다.</p>`;
+        return;
+      }
+
+      state.quickPresets.forEach((p) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs';
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">${escapeHtml(p.subject)}</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 text-slate-600 font-medium">${escapeHtml(p.category)}</span>
+            <span class="font-bold text-slate-800">${escapeHtml(p.title)}</span>
+            <span class="text-slate-400 font-mono text-[11px]">${p.startTime || '09:00'} (${formatDuration(p.durationSec)})</span>
+          </div>
+          <button type="button" data-del-preset="${p.id}" class="text-slate-400 hover:text-rose-600 p-1 transition" title="삭제">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        list.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    // 5. 필터링된 일정 목록 구하기
+    function getFilteredSchedules() {
+      return state.schedules.filter(sch => {
+        if (sch.isDraft) return true;
+
+        if (state.filter.startDate && sch.date < state.filter.startDate) return false;
+        if (state.filter.endDate && sch.date > state.filter.endDate) return false;
+
+        if (state.filter.subject !== 'ALL' && sch.subject !== state.filter.subject) return false;
+        if (state.filter.category !== 'ALL' && sch.category !== state.filter.category) return false;
+
+        if (state.filter.completed === 'INCOMPLETE' && sch.completed) return false;
+        if (state.filter.completed === 'COMPLETED' && !sch.completed) return false;
+
+        return true;
+      }).sort((a, b) => {
+        if (a.isDraft) return 1;
+        if (b.isDraft) return -1;
+        return a.date > b.date ? 1 : a.date < b.date ? -1 : 0;
+      });
+    }
+
+    // 6. 렌더링 함수 (PC 테이블 + 모바일 카드, 날짜별 행 배경색 교차)
+    function renderSchedules() {
+      const filtered = getFilteredSchedules();
+      const realCount = filtered.filter(s => !s.isDraft).length;
+      document.getElementById('scheduleCountText').textContent = `조회된 일정: ${realCount}건`;
+
+      renderTable(filtered);
+      renderCards(filtered);
+      lucide.createIcons();
+    }
+
+    // A. 테이블 렌더링 (날짜별 행 색상 교차)
+    function renderTable(list) {
+      const tbody = document.getElementById('scheduleTableBody');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="py-8 text-center text-slate-400 text-xs font-medium">
+              선택한 기간 내에 등록된 일정이 없습니다. 하단의 '+' 버튼으로 새 일정을 추가하세요.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const subjects = Array.from(new Set([...state.subjects, '국어', '수학', '영어', '사회', '과학', '기타']));
+
+      let lastDate = null;
+      let dateGroupIndex = 0;
+
+      list.forEach((item) => {
+        const isDraft = Boolean(item.isDraft);
+
+        // 날짜 그룹 변경 감지
+        if (!isDraft && item.date !== lastDate) {
+          if (lastDate !== null) {
+            dateGroupIndex++;
+          }
+          lastDate = item.date;
+        }
+
+        const isEvenDateGroup = (dateGroupIndex % 2 === 0);
+        const isDateGroupStart = (!isDraft && lastDate === item.date && list.findIndex(x => x.date === item.date) === list.indexOf(item));
+
+        const tr = document.createElement('tr');
+        
+        // 날짜별 교차 배경색 (흰색 vs 분홍색 계열) + 날짜 시작 구분선
+        let bgClass = isEvenDateGroup ? 'bg-white' : 'bg-rose-50/70';
+        let borderTopClass = isDateGroupStart ? 'border-t-2 border-rose-300' : 'border-t border-slate-100';
+
+        if (isDraft) {
+          bgClass = 'bg-amber-50/80 ring-1 ring-amber-300';
+          borderTopClass = 'border-t-2 border-amber-300';
+        } else if (item.completed) {
+          bgClass += ' opacity-75';
+        }
+
+        tr.className = `group transition ${bgClass} ${borderTopClass} hover:bg-rose-100/40`;
+        tr.dataset.id = item.id;
+        if (isDraft) tr.dataset.draft = 'true';
+
+        // 관리 열 버튼
+        const actionButtonHtml = isDraft
+          ? `
+            <div class="flex items-center justify-center gap-1">
+              <button type="button" data-action="save-draft" class="px-2 py-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition flex items-center gap-1" title="저장">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span>저장</span>
+              </button>
+              <button type="button" data-action="cancel-draft" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition" title="취소">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `
+          : `
+            <button type="button" data-action="delete" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="삭제">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+
+        const normalizedCat = normalizeCategory(item.category);
+
+        tr.innerHTML = `
+          <!-- 완료 체크 -->
+          <td class="py-2 px-2.5 text-center">
+            <input type="checkbox" data-field="completed" ${item.completed ? 'checked' : ''} 
+              class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+          </td>
+
+          <!-- 날짜 -->
+          <td class="py-1.5 px-2">
+            <input type="date" data-field="date" value="${item.date || ''}" 
+              class="w-full px-2 py-1 ${isDraft ? 'bg-white font-bold text-indigo-700' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs font-semibold text-slate-800 transition">
+          </td>
+
+          <!-- 과목 드롭다운 -->
+          <td class="py-1.5 px-2">
+            <select data-field="subject" class="w-full px-2 py-1 ${isDraft ? 'bg-white font-bold' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs font-semibold text-slate-800 transition">
+              ${subjects.map(s => `<option value="${s}" ${s === item.subject ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </td>
+
+          <!-- 카테고리 드롭다운 (표준 4종) -->
+          <td class="py-1.5 px-2">
+            <select data-field="category" class="w-full px-2 py-1 ${isDraft ? 'bg-white font-bold' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs font-medium text-slate-700 transition">
+              ${CATEGORY_OPTIONS.map(c => `<option value="${c}" ${c === normalizedCat ? 'selected' : ''}>${c}</option>`).join('')}
+            </select>
+          </td>
+
+          <!-- 제목 -->
+          <td class="py-1.5 px-2">
+            <input type="text" data-field="title" value="${escapeHtml(item.title || '')}" placeholder="단원 / 학원명 (필수)" 
+              class="w-full px-2 py-1 ${isDraft ? 'bg-white border-amber-300 ring-1 ring-amber-300 focus:ring-indigo-500' : 'bg-transparent hover:bg-white border-transparent hover:border-slate-300'} focus:bg-white border focus:border-indigo-500 rounded text-xs font-bold text-slate-800 ${item.completed ? 'line-through text-slate-400' : ''} transition">
+          </td>
+
+          <!-- 상세 (detail) -->
+          <td class="py-1.5 px-2">
+            <input type="text" data-field="detail" value="${escapeHtml(item.detail || '')}" placeholder="상세 내용" 
+              class="w-full px-2 py-1 ${isDraft ? 'bg-white' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs text-slate-600 transition">
+          </td>
+
+          <!-- 진행률 (Progress) -->
+          <td class="py-1.5 px-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <input type="number" data-field="progress" min="0" max="100" value="${item.progress ?? 50}" 
+                class="w-12 px-1.5 py-1 text-center ${isDraft ? 'bg-white' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs font-semibold text-indigo-700 transition">
+              <span class="text-[10px] text-slate-400">%</span>
+            </div>
+          </td>
+
+          <!-- 점수 (Score) -->
+          <td class="py-1.5 px-2 text-center">
+            <input type="number" data-field="score" min="0" value="${item.score ?? 0}" 
+              class="w-12 px-1.5 py-1 text-center ${isDraft ? 'bg-white' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs font-medium text-slate-700 transition">
+          </td>
+
+          <!-- duration_sec (초 & 가독성 표시) -->
+          <td class="py-1.5 px-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <input type="number" data-field="durationSec" min="0" step="300" value="${item.durationSec ?? 0}" 
+                class="w-16 px-1.5 py-1 text-right ${isDraft ? 'bg-white' : 'bg-transparent hover:bg-white'} focus:bg-white border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded text-xs font-mono text-slate-800 transition">
+              <span class="text-[10px] text-slate-400" title="${formatDuration(item.durationSec)}">(${formatDuration(item.durationSec)})</span>
+            </div>
+          </td>
+
+          <!-- 관리 열 (저장 또는 삭제) -->
+          <td class="py-1.5 px-2 text-center">
+            ${actionButtonHtml}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+
+        if (isDraft) {
+          setTimeout(() => {
+            const titleInput = tr.querySelector('[data-field="title"]');
+            if (titleInput) titleInput.focus();
+          }, 50);
+        }
+      });
+    }
+
+    // B. 모바일 카드 뷰 렌더링 (날짜별 틴트 교차)
+    function renderCards(list) {
+      const cardContainer = document.getElementById('cardViewContainer');
+      cardContainer.innerHTML = '';
+
+      if (list.length === 0) {
+        cardContainer.innerHTML = `
+          <div class="py-8 text-center text-slate-400 text-xs font-medium">
+            선택한 기간 내에 일정이 없습니다.
+          </div>
+        `;
+        return;
+      }
+
+      let lastDate = null;
+      let dateGroupIndex = 0;
+
+      list.forEach(item => {
+        const isDraft = Boolean(item.isDraft);
+
+        if (!isDraft && item.date !== lastDate) {
+          if (lastDate !== null) dateGroupIndex++;
+          lastDate = item.date;
+        }
+
+        const isEven = (dateGroupIndex % 2 === 0);
+        const normalizedCat = normalizeCategory(item.category);
+
+        const card = document.createElement('div');
+        let cardBgClass = isEven ? 'bg-white border-slate-200' : 'bg-rose-50/70 border-rose-200';
+        if (isDraft) {
+          cardBgClass = 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-300';
+        } else if (item.completed) {
+          cardBgClass += ' opacity-80';
+        }
+
+        card.className = `p-4 rounded-xl border shadow-sm space-y-3 ${cardBgClass}`;
+        card.dataset.id = item.id;
+        if (isDraft) card.dataset.draft = 'true';
+
+        const actionButtons = isDraft
+          ? `
+            <div class="flex items-center gap-1.5">
+              <button type="button" data-action="save-draft" class="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm flex items-center gap-1">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span>저장</span>
+              </button>
+              <button type="button" data-action="cancel-draft" class="p-1.5 text-slate-400 hover:text-slate-700">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          `
+          : `
+            <button type="button" data-action="delete" class="p-1.5 text-slate-400 hover:text-rose-600 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" data-field="completed" ${item.completed ? 'checked' : ''} 
+                class="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+              <div class="flex items-center gap-1.5">
+                <select data-field="subject" class="text-xs font-bold bg-indigo-50 text-indigo-700 border-none rounded py-0.5 px-1.5">
+                  ${state.subjects.map(s => `<option value="${s}" ${s === item.subject ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+                <select data-field="category" class="text-[10px] font-medium bg-slate-200 text-slate-700 border-none rounded py-0.5 px-1.5">
+                  ${CATEGORY_OPTIONS.map(c => `<option value="${c}" ${c === normalizedCat ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            ${actionButtons}
+          </div>
+
+          <div>
+            <input type="text" data-field="title" value="${escapeHtml(item.title || '')}" placeholder="단원 / 학원명 입력 (필수)" 
+              class="w-full text-sm font-bold text-slate-900 border-b ${isDraft ? 'border-amber-400 bg-white px-2 py-1 rounded' : 'border-transparent'} focus:border-indigo-500 bg-transparent py-0.5 ${item.completed ? 'line-through text-slate-400' : ''}">
+            <input type="text" data-field="detail" value="${escapeHtml(item.detail || '')}" placeholder="상세 메모" 
+              class="w-full text-xs text-slate-500 border-b ${isDraft ? 'border-slate-200 bg-white px-2 py-1 rounded mt-1' : 'border-transparent'} focus:border-indigo-500 bg-transparent py-0.5 mt-0.5">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100 text-slate-600">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+              <input type="date" data-field="date" value="${item.date || ''}" class="bg-transparent text-xs font-semibold text-slate-700">
+            </div>
+            <div class="flex items-center justify-end gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span class="font-mono">${formatDuration(item.durationSec)}</span>
+              <input type="number" data-field="durationSec" value="${item.durationSec ?? 0}" step="300" class="w-14 text-right bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[11px]">
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400">진행:</span>
+              <input type="number" data-field="progress" min="0" max="100" value="${item.progress ?? 50}" class="w-12 text-center bg-slate-50 border border-slate-200 rounded px-1 py-0.5 font-bold text-indigo-700 text-xs">
+              <span>%</span>
+            </div>
+            <div class="flex items-center justify-end gap-1.5">
+              <span class="text-slate-400">점수:</span>
+              <input type="number" data-field="score" min="0" value="${item.score ?? 0}" class="w-12 text-center bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs">
+            </div>
+          </div>
+        `;
+
+        cardContainer.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // 7. 인라인 수정 이벤트 핸들러 (완료 체크 & 자동화 포함)
+    async function handleInlineChange(e) {
+      const field = e.target.dataset.field;
+      if (!field) return;
+
+      const container = e.target.closest('[data-id]');
+      if (!container) return;
+      const id = container.dataset.id;
+
+      const targetItem = state.schedules.find(s => String(s.id) === String(id));
+      if (!targetItem) return;
+
+      // A. 완료(completed) 체크박스 변경 인터랙션
+      if (field === 'completed') {
+        const isChecked = e.target.checked;
+        targetItem.completed = isChecked;
+
+        if (isChecked) {
+          // 1) 진행률 100% 자동 세팅
+          targetItem.progress = 100;
+          const progInput = container.querySelector('[data-field="progress"]');
+          if (progInput) progInput.value = 100;
+
+          // 2) 카테고리 판별 (학원 일정인 경우 vs 그 외)
+          const normalizedCat = normalizeCategory(targetItem.category);
+          if (normalizedCat === '학원 일정') {
+            // 학원 일정: 점수 100 자동 반영
+            targetItem.score = '100';
+            const scoreInput = container.querySelector('[data-field="score"]');
+            if (scoreInput) scoreInput.value = 100;
+
+            // 실시간 DB 즉시 저장
+            await saveSingleItemToServer(targetItem);
+            renderSchedules();
+            showToast(`'${targetItem.title}' 학원 일정이 완료 처리되었습니다. (점수 100점)`);
+          } else {
+            // 그 외(진도 계획, 테스트 등): 점수 입력 모달 팝업 오픈
+            openScorePromptModal(targetItem, container);
+          }
+        } else {
+          // 체크 해제 시 즉시 DB 업데이트
+          await saveSingleItemToServer(targetItem);
+          renderSchedules();
+          showToast('완료 상태가 해제되었습니다.');
+        }
+        return;
+      }
+
+      // B. 일반 필드 변경 (progress, score, title, detail 등)
+      let val;
+      if (e.target.type === 'number') {
+        val = Number(e.target.value) || 0;
+      } else {
+        val = e.target.value;
+      }
+
+      if (field === 'category') {
+        val = normalizeCategory(val);
+      }
+
+      targetItem[field] = val;
+
+      if (targetItem.isDraft) return;
+
+      await saveSchedulesToServer();
+    }
+
+    // 단일 항목 즉시 DB 저장
+    async function saveSingleItemToServer(item) {
+      try {
+        if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+          await window.SupabaseService.saveSchedules([item]);
+        }
+        localStorage.setItem('local_schedules', JSON.stringify(state.schedules.filter(s => !s.isDraft)));
+        flashSaveIndicator();
+      } catch (err) {
+        console.error('단일 저장 오류:', err);
+        showToast('저장 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 점수 입력 모달 오픈
+    function openScorePromptModal(item, containerEl) {
+      state.pendingScoreItem = { item, containerEl };
+
+      const modal = document.getElementById('scorePromptModal');
+      const titleEl = document.getElementById('scorePromptTitle');
+      const inputEl = document.getElementById('promptScoreInput');
+
+      titleEl.textContent = `[${item.subject} - ${item.title || '일정'}] 학습을 완료했습니다.`;
+      inputEl.value = item.score && item.score !== '0' ? item.score : '100';
+
+      modal.classList.remove('hidden');
+      inputEl.focus();
+      inputEl.select();
+    }
+
+    function setupScorePromptModal() {
+      const modal = document.getElementById('scorePromptModal');
+      const closeBtn = document.getElementById('closeScoreModalBtn');
+      const cancelBtn = document.getElementById('scorePromptCancelBtn');
+      const confirmBtn = document.getElementById('scorePromptConfirmBtn');
+      const inputEl = document.getElementById('promptScoreInput');
+
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        state.pendingScoreItem = null;
+      };
+
+      // 취소 클릭 시: 완료 체크를 다시 false로 롤백
+      const handleCancel = () => {
+        if (state.pendingScoreItem) {
+          const { item, containerEl } = state.pendingScoreItem;
+          item.completed = false;
+          const chk = containerEl.querySelector('[data-field="completed"]');
+          if (chk) chk.checked = false;
+        }
+        closeModal();
+      };
+
+      // 확인 클릭 시: 점수 반영 및 DB 즉시 저장
+      const handleConfirm = async () => {
+        if (!state.pendingScoreItem) return;
+        const { item, containerEl } = state.pendingScoreItem;
+
+        const scoreVal = inputEl.value.trim() || '0';
+        item.score = scoreVal;
+
+        const scoreInput = containerEl.querySelector('[data-field="score"]');
+        if (scoreInput) scoreInput.value = scoreVal;
+
+        await saveSingleItemToServer(item);
+        closeModal();
+        renderSchedules();
+        showToast(`'${item.title}' 일정이 완료 처리되었습니다. (점수: ${scoreVal}점)`);
+      };
+
+      closeBtn.addEventListener('click', handleCancel);
+      cancelBtn.addEventListener('click', handleCancel);
+      confirmBtn.addEventListener('click', handleConfirm);
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleConfirm();
+        if (e.key === 'Escape') handleCancel();
+      });
+    }
+
+    // 8. 새 행 추가 버튼 클릭 (+ 새 일정 추가)
+    function handleAddNewInlineRow() {
+      const existingDraft = state.schedules.find(s => s.isDraft);
+      if (existingDraft) {
+        showToast('작성 중인 신규 일정이 있습니다. 먼저 저장해주세요.');
+        const el = document.querySelector(`[data-id="${existingDraft.id}"] [data-field="title"]`);
+        if (el) el.focus();
+        return;
+      }
+
+      const todayStr = formatDate(new Date());
+      const defaultSub = state.subjects[0] || '국어';
+
+      const newDraftItem = {
+        id: 'draft_' + Math.random().toString(36).substr(2, 9),
+        date: todayStr,
+        subject: defaultSub,
+        category: '진도 계획',
+        title: '',
+        detail: '',
+        progress: 50,
+        score: '0',
+        durationSec: 0,
+        completed: false,
+        isDraft: true
+      };
+
+      state.schedules.push(newDraftItem);
+      renderSchedules();
+
+      const container = document.getElementById('tableViewContainer');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // 9. Draft 행 저장 버튼 클릭 처리
+    async function handleSaveDraft(container, id) {
+      const targetItem = state.schedules.find(s => String(s.id) === String(id));
+      if (!targetItem) return;
+
+      const titleInput = container.querySelector('[data-field="title"]');
+      const subjectInput = container.querySelector('[data-field="subject"]');
+      const categoryInput = container.querySelector('[data-field="category"]');
+      const dateInput = container.querySelector('[data-field="date"]');
+      const detailInput = container.querySelector('[data-field="detail"]');
+      const progressInput = container.querySelector('[data-field="progress"]');
+      const scoreInput = container.querySelector('[data-field="score"]');
+      const durationInput = container.querySelector('[data-field="durationSec"]');
+
+      const title = (titleInput ? titleInput.value : targetItem.title || '').trim();
+      if (!title) {
+        alert('제목(학원명/단원명)을 입력해주세요.');
+        if (titleInput) titleInput.focus();
+        return;
+      }
+
+      targetItem.title = title;
+      if (subjectInput) targetItem.subject = subjectInput.value;
+      if (categoryInput) targetItem.category = normalizeCategory(categoryInput.value);
+      if (dateInput) targetItem.date = dateInput.value;
+      if (detailInput) targetItem.detail = detailInput.value;
+      if (progressInput) targetItem.progress = Number(progressInput.value) || 50;
+      if (scoreInput) targetItem.score = scoreInput.value || '0';
+      if (durationInput) targetItem.durationSec = Number(durationInput.value) || 0;
+
+      targetItem.id = 'sch_' + Math.random().toString(36).substr(2, 9);
+      targetItem.isDraft = false;
+
+      try {
+        if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+          await window.SupabaseService.insertSchedules([targetItem]);
+        }
+        localStorage.setItem('local_schedules', JSON.stringify(state.schedules.filter(s => !s.isDraft)));
+
+        renderSchedules();
+        showToast(`'${targetItem.title}' 일정이 데이터베이스에 저장되었습니다.`);
+      } catch (err) {
+        console.error('일정 저장 오류:', err);
+        targetItem.isDraft = true;
+        alert('저장 중 오류가 발생했습니다: ' + err.message);
+      }
+    }
+
+    // 10. Draft 행 취소 버튼 처리
+    function handleCancelDraft(id) {
+      state.schedules = state.schedules.filter(s => String(s.id) !== String(id));
+      renderSchedules();
+    }
+
+    // 11. 삭제 및 액션 위임 핸들러
+    async function handleDeleteClick(e) {
+      const saveBtn = e.target.closest('[data-action="save-draft"]');
+      if (saveBtn) {
+        const container = saveBtn.closest('[data-id]');
+        if (container) handleSaveDraft(container, container.dataset.id);
+        return;
+      }
+
+      const cancelBtn = e.target.closest('[data-action="cancel-draft"]');
+      if (cancelBtn) {
+        const container = cancelBtn.closest('[data-id]');
+        if (container) handleCancelDraft(container.dataset.id);
+        return;
+      }
+
+      const delBtn = e.target.closest('[data-action="delete"]');
+      if (!delBtn) return;
+
+      const container = delBtn.closest('[data-id]');
+      if (!container) return;
+      const id = container.dataset.id;
+
+      if (!confirm('이 일정을 삭제하시겠습니까?')) return;
+
+      try {
+        if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+          const ok = await window.SupabaseService.deleteSchedule(id);
+          if (!ok) throw new Error('Supabase 삭제 실패');
+        }
+
+        state.schedules = state.schedules.filter(s => String(s.id) !== String(id));
+        localStorage.setItem('local_schedules', JSON.stringify(state.schedules.filter(s => !s.isDraft)));
+
+        renderSchedules();
+        showToast('일정이 삭제되었습니다.');
+      } catch (err) {
+        console.error('삭제 오류:', err);
+        showToast('일정 삭제 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 12. 전체 변경 일괄 저장
+    let saveDebounceTimer = null;
+    async function saveSchedulesToServer() {
+      clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = setTimeout(async () => {
+        try {
+          const toSave = state.schedules.filter(s => !s.isDraft);
+          if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+            await window.SupabaseService.saveSchedules(toSave);
+          } else {
+            localStorage.setItem('local_schedules', JSON.stringify(toSave));
+          }
+          flashSaveIndicator();
+        } catch (e) {
+          console.error('저장 오류:', e);
+          showToast('저장 중 오류가 발생했습니다.');
+        }
+      }, 400);
+    }
+
+    // 13. 빠른 일정 추가 (Quick Add Form)
+    async function handleQuickAddSubmit(e) {
+      e.preventDefault();
+
+      const date = document.getElementById('qaDate').value;
+      const category = normalizeCategory(document.getElementById('qaCategory').value);
+      const subject = document.getElementById('qaSubject').value;
+      const title = document.getElementById('qaTitle').value.trim();
+      
+      const hh = document.getElementById('qaStartHour').value || '09';
+      const mm = document.getElementById('qaStartMinute').value || '00';
+      const startTime = `${hh}:${mm}`;
+
+      let durationSec = 0;
+      const durationPreset = document.getElementById('qaDurationPreset').value;
+      if (durationPreset === 'custom') {
+        durationSec = Number(document.getElementById('qaDurationCustom').value) || 0;
+      } else {
+        durationSec = Number(durationPreset) || 0;
+      }
+
+      if (!title) {
+        alert('제목(학원명/단원명)을 입력해주세요.');
+        return;
+      }
+
+      // detail 형식: "시작 시간:" 문구 제외하고 "09:00 (1시간 30분)" 형태로 저장
+      const detail = durationSec > 0 ? `${startTime} (${formatDurationKorean(durationSec)})` : startTime;
+      const newSch = {
+        id: 'sch_' + Math.random().toString(36).substr(2, 9),
+        date: date || formatDate(new Date()),
+        subject: subject || (state.subjects[0] || '국어'),
+        category: category,
+        title: title,
+        detail: detail,
+        progress: 50,
+        score: '0',
+        durationSec: durationSec || 0,
+        completed: false,
+        isDraft: false
+      };
+
+      try {
+        if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+          await window.SupabaseService.insertSchedules([newSch]);
+        }
+        state.schedules.unshift(newSch);
+        localStorage.setItem('local_schedules', JSON.stringify(state.schedules.filter(s => !s.isDraft)));
+
+        renderSchedules();
+        showToast(`'${title}' 일정이 등록되었습니다.`);
+        document.getElementById('qaTitle').focus();
+      } catch (err) {
+        console.error('빠른 추가 오류:', err);
+        showToast('일정 추가 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 14. 프리셋 관리 모달
+    function setupPresetModal() {
+      const modal = document.getElementById('presetManageModal');
+      const openBtn = document.getElementById('openPresetManageBtn');
+      const closeBtn = document.getElementById('closePresetModalBtn');
+      const addBtn = document.getElementById('addNewPresetBtn');
+
+      openBtn.addEventListener('click', () => {
+        renderPresetModalList();
+        modal.classList.remove('hidden');
+      });
+
+      const closeModal = () => modal.classList.add('hidden');
+      closeBtn.addEventListener('click', closeModal);
+
+      addBtn.addEventListener('click', () => {
+        const sub = document.getElementById('newPresetSubject').value;
+        const cat = normalizeCategory(document.getElementById('newPresetCategory').value);
+        const title = document.getElementById('newPresetTitle').value.trim();
+        const hh = document.getElementById('newPresetHour').value || '09';
+        const mm = document.getElementById('newPresetMinute').value || '00';
+        const time = `${hh}:${mm}`;
+        const dur = Number(document.getElementById('newPresetDuration').value) || 5400;
+
+        if (!title) {
+          alert('프리셋 제목(학원명/단원명)을 입력해주세요.');
+          return;
+        }
+
+        const newPreset = {
+          id: 'preset_' + Date.now(),
+          title: title,
+          subject: sub,
+          category: cat,
+          startTime: time,
+          durationSec: dur
+        };
+
+        state.quickPresets.push(newPreset);
+        saveQuickPresets();
+        document.getElementById('newPresetTitle').value = '';
+        showToast(`'${title}' 프리셋이 등록되었습니다.`);
+      });
+
+      document.getElementById('presetListContainer').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-preset]');
+        if (!delBtn) return;
+        const pId = delBtn.dataset.delPreset;
+        state.quickPresets = state.quickPresets.filter(p => p.id !== pId);
+        saveQuickPresets();
+        showToast('프리셋이 삭제되었습니다.');
+      });
+    }
+
+    // 15. Supabase 설정 모달
+    function setupConfigModal() {
+      const modal = document.getElementById('configModal');
+      const openBtn = document.getElementById('openConfigBtn');
+      const closeBtn = document.getElementById('closeConfigModalBtn');
+      const cancelBtn = document.getElementById('cfgCancelBtn');
+      const form = document.getElementById('configForm');
+      const testBtn = document.getElementById('cfgTestBtn');
+      const alertBox = document.getElementById('cfgTestAlert');
+
+      const urlInput = document.getElementById('cfgUrl');
+      const keyInput = document.getElementById('cfgKey');
+
+      openBtn.addEventListener('click', () => {
+        if (window.SupabaseService) {
+          const cfg = window.SupabaseService.getConfig();
+          urlInput.value = cfg.url || '';
+          keyInput.value = cfg.anonKey || '';
+        }
+        alertBox.className = 'hidden';
+        modal.classList.remove('hidden');
+      });
+
+      const closeModal = () => modal.classList.add('hidden');
+      closeBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+
+      testBtn.addEventListener('click', async () => {
+        const u = urlInput.value.trim();
+        const k = keyInput.value.trim();
+        if (!u || !k) {
+          alertBox.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 block';
+          alertBox.textContent = 'URL과 Key를 모두 입력해주세요.';
+          return;
+        }
+
+        alertBox.className = 'p-2.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 block';
+        alertBox.textContent = '연결 상태를 테스트하고 있습니다...';
+
+        if (window.SupabaseService) {
+          window.SupabaseService.saveConfig(u, k);
+          const ok = await window.SupabaseService.testConnection();
+          if (ok) {
+            alertBox.className = 'p-2.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+            alertBox.textContent = '성공: Supabase 서버에 정상 연결되었습니다!';
+          } else {
+            alertBox.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 block';
+            alertBox.textContent = '실패: URL 및 Anon Key 또는 테이블 권한을 확인해주세요.';
+          }
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const u = urlInput.value.trim();
+        const k = keyInput.value.trim();
+
+        if (window.SupabaseService) {
+          window.SupabaseService.saveConfig(u, k);
+        }
+        closeModal();
+        showToast('Supabase 설정이 저장되었습니다. 데이터를 동기화합니다.');
+        await loadData();
+      });
+    }
+
+    // 16. 뷰 전환 모드
+    function checkViewportAndToggleView() {
+      const isMobile = window.innerWidth < 768;
+      const tableWrap = document.getElementById('tableViewContainer');
+      const cardWrap = document.getElementById('cardViewContainer');
+
+      if (state.viewMode === 'table') {
+        tableWrap.classList.remove('hidden');
+        cardWrap.classList.add('hidden');
+      } else if (state.viewMode === 'card') {
+        tableWrap.classList.add('hidden');
+        cardWrap.classList.remove('hidden');
+      } else {
+        if (isMobile) {
+          tableWrap.classList.add('hidden');
+          cardWrap.classList.remove('hidden');
+        } else {
+          tableWrap.classList.remove('hidden');
+          cardWrap.classList.add('hidden');
+        }
+      }
+    }
+
+    // 17. 이벤트 리스너 바인딩
+    function setupEventListeners() {
+      document.getElementById('applyFilterBtn').addEventListener('click', () => {
+        state.filter.startDate = document.getElementById('filterStartDate').value;
+        state.filter.endDate = document.getElementById('filterEndDate').value;
+        renderSchedules();
+      });
+
+      document.querySelectorAll('.range-preset-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const type = e.currentTarget.dataset.range;
+          const today = new Date();
+
+          if (type === 'default') {
+            state.filter.startDate = formatDate(addDays(today, -3));
+            state.filter.endDate = formatDate(addDays(today, 7));
+          } else if (type === 'today') {
+            state.filter.startDate = formatDate(today);
+            state.filter.endDate = formatDate(today);
+          } else if (type === 'week') {
+            const dayOfWeek = today.getDay();
+            const monday = addDays(today, -(dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+            const sunday = addDays(monday, 6);
+            state.filter.startDate = formatDate(monday);
+            state.filter.endDate = formatDate(sunday);
+          } else if (type === 'month') {
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            state.filter.startDate = formatDate(firstDay);
+            state.filter.endDate = formatDate(lastDay);
+          }
+
+          document.getElementById('filterStartDate').value = state.filter.startDate;
+          document.getElementById('filterEndDate').value = state.filter.endDate;
+          renderSchedules();
+        });
+      });
+
+      document.getElementById('filterSubject').addEventListener('change', (e) => {
+        state.filter.subject = e.target.value;
+        renderSchedules();
+      });
+      document.getElementById('filterCategory').addEventListener('change', (e) => {
+        state.filter.category = e.target.value;
+        renderSchedules();
+      });
+      document.getElementById('filterCompleted').addEventListener('change', (e) => {
+        state.filter.completed = e.target.value;
+        renderSchedules();
+      });
+
+      const durationPreset = document.getElementById('qaDurationPreset');
+      const durationCustom = document.getElementById('qaDurationCustom');
+      const durationLabel = document.getElementById('qaDurationLabel');
+      durationPreset.addEventListener('change', (e) => {
+        if (e.target.value === 'custom') {
+          durationCustom.classList.remove('hidden');
+          durationLabel.textContent = '(직접 입력)';
+        } else {
+          durationCustom.classList.add('hidden');
+          durationLabel.textContent = `(${e.target.value}초)`;
+        }
+      });
+      durationCustom.addEventListener('input', (e) => {
+        durationLabel.textContent = `(${e.target.value || 0}초)`;
+      });
+
+      document.getElementById('quickAddForm').addEventListener('submit', handleQuickAddSubmit);
+
+      const qaHeader = document.getElementById('quickAddHeader');
+      const qaBody = document.getElementById('quickAddBody');
+      const qaIcon = document.getElementById('quickAddToggleIcon');
+      qaHeader.addEventListener('click', () => {
+        qaBody.classList.toggle('hidden');
+        qaIcon.classList.toggle('rotate-180');
+      });
+
+      document.getElementById('addInlineRowBtnTop').addEventListener('click', handleAddNewInlineRow);
+      document.getElementById('addInlineRowBtnBottom').addEventListener('click', handleAddNewInlineRow);
+      document.getElementById('mobileFabBtn').addEventListener('click', handleAddNewInlineRow);
+
+      document.getElementById('refreshBtn').addEventListener('click', async () => {
+        showToast('일정 목록을 새로고침합니다...');
+        await loadData();
+      });
+
+      const mainContainer = document.querySelector('main');
+      mainContainer.addEventListener('change', handleInlineChange);
+      mainContainer.addEventListener('click', handleDeleteClick);
+
+      const tableBtn = document.getElementById('viewModeTableBtn');
+      const cardBtn = document.getElementById('viewModeCardBtn');
+      tableBtn.addEventListener('click', () => {
+        state.viewMode = 'table';
+        tableBtn.className = 'px-2 py-0.5 rounded text-xs font-medium bg-white text-slate-800 shadow-sm';
+        cardBtn.className = 'px-2 py-0.5 rounded text-xs font-medium text-slate-600 hover:text-slate-900';
+        checkViewportAndToggleView();
+      });
+      cardBtn.addEventListener('click', () => {
+        state.viewMode = 'card';
+        cardBtn.className = 'px-2 py-0.5 rounded text-xs font-medium bg-white text-slate-800 shadow-sm';
+        tableBtn.className = 'px-2 py-0.5 rounded text-xs font-medium text-slate-600 hover:text-slate-900';
+        checkViewportAndToggleView();
+      });
+
+      window.addEventListener('resize', checkViewportAndToggleView);
+    }
+
+    // ======================= 초기 실행 =======================
+    document.addEventListener('DOMContentLoaded', async () => {
+      populateTimeSelects();
+      initDefaultDateRange();
+      setupEventListeners();
+      setupScorePromptModal();
+      setupPresetModal();
+      setupConfigModal();
+      checkViewportAndToggleView();
+      await loadData();
+    });
+  </script>
+</body>
+</html>
