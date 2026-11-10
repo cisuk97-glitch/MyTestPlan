@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SubjectPlan - 일정 관리 어드민</title>
+  <title>SubjectPlan - ADMIN</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#4f46e5">
   <link rel="apple-touch-icon" href="./icon-192.png">
@@ -18,7 +19,8 @@
   <script src="./supabaseClient.js"></script>
 
   <!-- Pretendard Font -->
-  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
   <style>
     body {
@@ -26,37 +28,48 @@
       background-color: #F8FAFC;
       color: #0F172A;
     }
-    input, select, textarea {
+
+    input,
+    select,
+    textarea {
       font-family: inherit;
     }
+
     /* 커스텀 스크롤바 */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+
     ::-webkit-scrollbar-track {
       background: #F1F5F9;
     }
+
     ::-webkit-scrollbar-thumb {
       background: #CBD5E1;
       border-radius: 9999px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: #94A3B8;
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col pb-16">
 
   <!-- ======================= 상단 네비게이션 헤더 ======================= -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <a href="./index.html" class="p-2 -ml-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition" title="메인 화면으로">
+        <a href="./index.html"
+          class="p-2 -ml-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition"
+          title="메인 화면으로">
           <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
         <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+          <div
+            class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
             <i data-lucide="calendar-range" class="w-5 h-5"></i>
           </div>
           <div>
@@ -68,19 +81,23 @@
 
       <div class="flex items-center gap-2">
         <!-- 동기화 상태 뱃지 -->
-        <span id="syncStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 transition">
+        <span id="syncStatusBadge"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 transition">
           <span class="w-2 h-2 rounded-full bg-slate-400"></span>
           <span id="syncStatusText">확인 중...</span>
         </span>
 
         <!-- Supabase 설정 버튼 -->
-        <button id="openConfigBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-200 transition">
+        <button id="openConfigBtn"
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-200 transition">
           <i data-lucide="settings" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Supabase 설정</span>
         </button>
 
         <!-- 새로고침 버튼 -->
-        <button id="refreshBtn" class="p-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition" title="새로고침">
+        <button id="refreshBtn"
+          class="p-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+          title="새로고침">
           <i data-lucide="rotate-cw" class="w-4 h-4"></i>
         </button>
       </div>
@@ -93,54 +110,64 @@
     <!-- 1. 기간 설정 및 필터 툴바 -->
     <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        
+
         <!-- 날짜 선택 영역 -->
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
           <div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
             <span>조회 기간:</span>
           </div>
-          
+
           <div class="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
-            <input type="date" id="filterStartDate" class="px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="date" id="filterStartDate"
+              class="px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <span class="text-slate-400 font-bold">~</span>
-            <input type="date" id="filterEndDate" class="px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="date" id="filterEndDate"
+              class="px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-lg text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
           </div>
 
-          <button id="applyFilterBtn" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">
+          <button id="applyFilterBtn"
+            class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">
             조회
           </button>
         </div>
 
         <!-- 기간 퀵 프리셋 버튼들 -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <button data-range="default" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
+          <button data-range="default"
+            class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
             앞 3일 ~ 뒤 7일 (기본)
           </button>
-          <button data-range="today" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          <button data-range="today"
+            class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
             오늘
           </button>
-          <button data-range="week" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          <button data-range="week"
+            class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
             이번 주
           </button>
-          <button data-range="month" class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          <button data-range="month"
+            class="range-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
             이번 달
           </button>
         </div>
       </div>
 
       <!-- 과목 및 완료 상태 부가 필터 -->
-      <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+      <div
+        class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
         <div class="flex flex-wrap items-center gap-3">
           <div class="flex items-center gap-1.5">
             <span>과목:</span>
-            <select id="filterSubject" class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <select id="filterSubject"
+              class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
               <option value="ALL">전체 과목</option>
             </select>
           </div>
           <div class="flex items-center gap-1.5">
             <span>카테고리:</span>
-            <select id="filterCategory" class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <select id="filterCategory"
+              class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
               <option value="ALL">전체 카테고리</option>
               <option value="진도 계획">진도 계획</option>
               <option value="단원 테스트">단원 테스트</option>
@@ -150,7 +177,8 @@
           </div>
           <div class="flex items-center gap-1.5">
             <span>상태:</span>
-            <select id="filterCompleted" class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <select id="filterCompleted"
+              class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
               <option value="ALL">전체 일정</option>
               <option value="INCOMPLETE">미완료만</option>
               <option value="COMPLETED">완료만</option>
@@ -162,8 +190,10 @@
           <span id="scheduleCountText" class="font-semibold text-slate-800">조회된 일정: 0건</span>
           <!-- PC / 모바일 뷰 전환 토글 (태블릿/PC에서 확인용) -->
           <div class="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-            <button id="viewModeTableBtn" class="px-2 py-0.5 rounded text-xs font-medium bg-white text-slate-800 shadow-sm">표</button>
-            <button id="viewModeCardBtn" class="px-2 py-0.5 rounded text-xs font-medium text-slate-600 hover:text-slate-900">카드</button>
+            <button id="viewModeTableBtn"
+              class="px-2 py-0.5 rounded text-xs font-medium bg-white text-slate-800 shadow-sm">표</button>
+            <button id="viewModeCardBtn"
+              class="px-2 py-0.5 rounded text-xs font-medium text-slate-600 hover:text-slate-900">카드</button>
           </div>
         </div>
       </div>
@@ -172,7 +202,8 @@
     <!-- 2. 빠른 일정 추가 위젯 (프리셋 선택 & 커스텀 추가) -->
     <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       <!-- 위젯 헤더 -->
-      <div id="quickAddHeader" class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer select-none">
+      <div id="quickAddHeader"
+        class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer select-none">
         <div class="flex items-center gap-2">
           <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
             <i data-lucide="zap" class="w-3.5 h-3.5"></i>
@@ -187,7 +218,7 @@
 
       <!-- 위젯 본문 -->
       <div id="quickAddBody" class="p-4 sm:p-5 transition-all space-y-4">
-        
+
         <!-- 자주 쓰는 빠른 일정 프리셋 칩 바 -->
         <div>
           <div class="flex items-center justify-between mb-2">
@@ -195,7 +226,8 @@
               <i data-lucide="bookmark" class="w-3.5 h-3.5 text-indigo-600"></i>
               <span>자주 쓰는 빠른 일정 프리셋 (클릭하여 채우기)</span>
             </span>
-            <button type="button" id="openPresetManageBtn" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+            <button type="button" id="openPresetManageBtn"
+              class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
               <i data-lucide="sliders" class="w-3 h-3"></i>
               <span>프리셋 관리 / 새 프리셋 등록</span>
             </button>
@@ -206,18 +238,21 @@
         </div>
 
         <!-- 빠른 일정 입력 폼 -->
-        <form id="quickAddForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 pt-3 border-t border-slate-100">
-          
+        <form id="quickAddForm"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 pt-3 border-t border-slate-100">
+
           <!-- 날짜 -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">날짜</label>
-            <input type="date" id="qaDate" required class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+            <input type="date" id="qaDate" required
+              class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
           </div>
 
           <!-- 카테고리 (표준 4종) -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">카테고리</label>
-            <select id="qaCategory" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
+            <select id="qaCategory"
+              class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
               <option value="학원 일정" selected>학원 일정</option>
               <option value="진도 계획">진도 계획</option>
               <option value="단원 테스트">단원 테스트</option>
@@ -229,7 +264,8 @@
           <!-- 과목 -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">과목</label>
-            <select id="qaSubject" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
+            <select id="qaSubject"
+              class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
               <option value="국어" selected>국어</option>
               <option value="수학">수학</option>
               <option value="영어">영어</option>
@@ -242,17 +278,20 @@
           <!-- title (학원명 / 단원명) -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">학원명 / 제목</label>
-            <input type="text" id="qaTitle" placeholder="예: 큰뜻국어" value="큰뜻국어" required class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+            <input type="text" id="qaTitle" placeholder="예: 큰뜻국어" value="큰뜻국어" required
+              class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
           </div>
 
           <!-- 시작시간 (시/분 드롭다운 - 5분 단위 고정) -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">시작 시간 (5분 단위)</label>
             <div class="grid grid-cols-2 gap-1">
-              <select id="qaStartHour" class="w-full px-1.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-mono">
+              <select id="qaStartHour"
+                class="w-full px-1.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-mono">
                 <!-- 06시 ~ 23시 -->
               </select>
-              <select id="qaStartMinute" class="w-full px-1.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-mono">
+              <select id="qaStartMinute"
+                class="w-full px-1.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-mono">
                 <!-- 00, 05, 10, ... 55분 -->
               </select>
             </div>
@@ -263,7 +302,8 @@
             <label class="block text-xs font-semibold text-slate-600 mb-1">
               소요시간 <span id="qaDurationLabel" class="text-indigo-600 font-bold">(5400초)</span>
             </label>
-            <select id="qaDurationPreset" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
+            <select id="qaDurationPreset"
+              class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
               <option value="1800">30분 (1,800초)</option>
               <option value="3600">1시간 (3,600초)</option>
               <option value="5400" selected>1시간 30분 (5,400초)</option>
@@ -274,12 +314,14 @@
               <option value="14400">4시간 (14,400초)</option>
               <option value="custom">직접 입력...</option>
             </select>
-            <input type="number" id="qaDurationCustom" placeholder="초 단위" class="hidden mt-1 w-full px-2.5 py-1 text-xs bg-white border border-slate-200 rounded-lg">
+            <input type="number" id="qaDurationCustom" placeholder="초 단위"
+              class="hidden mt-1 w-full px-2.5 py-1 text-xs bg-white border border-slate-200 rounded-lg">
           </div>
 
           <!-- 추가 버튼 -->
           <div class="flex items-end">
-            <button type="submit" id="qaSubmitBtn" class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+            <button type="submit" id="qaSubmitBtn"
+              class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
               <i data-lucide="plus" class="w-4 h-4"></i>
               <span>일정 추가</span>
             </button>
@@ -290,7 +332,7 @@
 
     <!-- 3. 메인 일정 테이블 (PC/태블릿) & 카드 목록 (모바일) -->
     <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      
+
       <!-- 상단 컨트롤 바 -->
       <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -298,11 +340,13 @@
           <span class="text-[11px] text-slate-500">· 날짜별로 행 색상이 구분됩니다(흰색/분홍색 교차). 수정 즉시 DB에 실시간 저장됩니다.</span>
         </div>
         <div class="flex items-center gap-2">
-          <span id="saveStatusIndicator" class="text-xs text-emerald-600 font-semibold opacity-0 transition-opacity flex items-center gap-1">
+          <span id="saveStatusIndicator"
+            class="text-xs text-emerald-600 font-semibold opacity-0 transition-opacity flex items-center gap-1">
             <i data-lucide="check" class="w-3.5 h-3.5"></i>
             <span>저장됨</span>
           </span>
-          <button id="addInlineRowBtnTop" class="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition">
+          <button id="addInlineRowBtnTop"
+            class="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span>새 일정 추가</span>
           </button>
@@ -333,7 +377,8 @@
             <!-- 마지막 행: + 버튼으로 새 일정 인라인 추가 행 생성 -->
             <tr class="bg-slate-50/50 hover:bg-indigo-50/40 transition">
               <td colspan="10" class="py-3 px-3 text-center">
-                <button id="addInlineRowBtnBottom" class="w-full py-2 flex items-center justify-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold border-2 border-dashed border-indigo-200 rounded-xl hover:border-indigo-400 bg-white/70 transition">
+                <button id="addInlineRowBtnBottom"
+                  class="w-full py-2 flex items-center justify-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold border-2 border-dashed border-indigo-200 rounded-xl hover:border-indigo-400 bg-white/70 transition">
                   <i data-lucide="plus-circle" class="w-4 h-4"></i>
                   <span>새 일정 추가 (+)</span>
                 </button>
@@ -351,13 +396,17 @@
   </main>
 
   <!-- ======================= 모바일 하단 플로팅 추가 버튼 (FAB) ======================= -->
-  <button id="mobileFabBtn" class="sm:hidden fixed bottom-5 right-5 w-13 h-13 rounded-full bg-indigo-600 text-white shadow-xl flex items-center justify-center p-3.5 active:scale-95 transition z-20" title="새 일정 추가">
+  <button id="mobileFabBtn"
+    class="sm:hidden fixed bottom-5 right-5 w-13 h-13 rounded-full bg-indigo-600 text-white shadow-xl flex items-center justify-center p-3.5 active:scale-95 transition z-20"
+    title="새 일정 추가">
     <i data-lucide="plus" class="w-6 h-6"></i>
   </button>
 
   <!-- ======================= 완료 점수 입력 모달 ======================= -->
-  <div id="scorePromptModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+  <div id="scorePromptModal"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
         <div class="flex items-center gap-2">
           <i data-lucide="award" class="w-5 h-5 text-indigo-600"></i>
@@ -380,14 +429,17 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">달성 점수 (0 ~ 100)</label>
-          <input type="number" id="promptScoreInput" min="0" max="100" value="100" class="w-full px-3 py-2 text-sm font-bold text-indigo-700 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-center">
+          <input type="number" id="promptScoreInput" min="0" max="100" value="100"
+            class="w-full px-3 py-2 text-sm font-bold text-indigo-700 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-center">
         </div>
 
         <div class="flex gap-2 pt-2">
-          <button type="button" id="scorePromptCancelBtn" class="w-1/2 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition">
+          <button type="button" id="scorePromptCancelBtn"
+            class="w-1/2 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition">
             취소
           </button>
-          <button type="button" id="scorePromptConfirmBtn" class="w-1/2 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
+          <button type="button" id="scorePromptConfirmBtn"
+            class="w-1/2 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
             완료 및 저장
           </button>
         </div>
@@ -396,8 +448,10 @@
   </div>
 
   <!-- ======================= 빠른 일정 프리셋 관리 모달 ======================= -->
-  <div id="presetManageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+  <div id="presetManageModal"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
         <div class="flex items-center gap-2">
           <i data-lucide="bookmark-plus" class="w-5 h-5 text-indigo-600"></i>
@@ -409,17 +463,23 @@
       </div>
 
       <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-        <!-- 새 프리셋 등록 카드 -->
-        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-          <span class="text-xs font-bold text-slate-800">새 프리셋 등록</span>
+        <!-- 새 프리셋 등록 / 수정 카드 -->
+        <div id="presetFormCard" class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3 transition">
+          <div class="flex items-center justify-between">
+            <span id="presetFormTitle" class="text-xs font-bold text-slate-800">새 프리셋 등록</span>
+            <span id="presetEditingBadge"
+              class="hidden px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">수정 모드</span>
+          </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
               <label class="block text-[11px] text-slate-600 mb-0.5">과목</label>
-              <select id="newPresetSubject" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs"></select>
+              <select id="newPresetSubject"
+                class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs"></select>
             </div>
             <div>
               <label class="block text-[11px] text-slate-600 mb-0.5">카테고리</label>
-              <select id="newPresetCategory" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium">
+              <select id="newPresetCategory"
+                class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium">
                 <option value="학원 일정" selected>학원 일정</option>
                 <option value="진도 계획">진도 계획</option>
                 <option value="단원 테스트">단원 테스트</option>
@@ -429,18 +489,22 @@
             </div>
             <div class="col-span-2">
               <label class="block text-[11px] text-slate-600 mb-0.5">학원명 / 단원 제목</label>
-              <input type="text" id="newPresetTitle" placeholder="예: 큰뜻국어 또는 수학과외" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+              <input type="text" id="newPresetTitle" placeholder="예: 큰뜻국어 또는 수학과외"
+                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
             </div>
             <div>
               <label class="block text-[11px] text-slate-600 mb-0.5">기본 시작시간 (5분 단위)</label>
               <div class="grid grid-cols-2 gap-1">
-                <select id="newPresetHour" class="w-full px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono"></select>
-                <select id="newPresetMinute" class="w-full px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono"></select>
+                <select id="newPresetHour"
+                  class="w-full px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono"></select>
+                <select id="newPresetMinute"
+                  class="w-full px-1 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono"></select>
               </div>
             </div>
             <div>
               <label class="block text-[11px] text-slate-600 mb-0.5">기본 소요시간</label>
-              <select id="newPresetDuration" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs">
+              <select id="newPresetDuration"
+                class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs">
                 <option value="1800">30분</option>
                 <option value="3600">1시간</option>
                 <option value="5400" selected>1시간 30분</option>
@@ -452,9 +516,17 @@
               </select>
             </div>
           </div>
-          <button type="button" id="addNewPresetBtn" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition">
-            프리셋 목록에 추가
-          </button>
+          <div class="flex gap-2 pt-1">
+            <button type="button" id="addNewPresetBtn"
+              class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+              <i data-lucide="plus" id="presetSubmitIcon" class="w-3.5 h-3.5"></i>
+              <span id="presetSubmitText">프리셋 목록에 추가</span>
+            </button>
+            <button type="button" id="cancelEditPresetBtn"
+              class="hidden px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition">
+              수정 취소
+            </button>
+          </div>
         </div>
 
         <!-- 등록된 프리셋 리스트 -->
@@ -469,8 +541,10 @@
   </div>
 
   <!-- ======================= Supabase 설정 모달 ======================= -->
-  <div id="configModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+  <div id="configModal"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
         <div class="flex items-center gap-2">
           <i data-lucide="database" class="w-5 h-5 text-indigo-600"></i>
@@ -484,26 +558,31 @@
       <form id="configForm" class="p-5 space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Supabase URL</label>
-          <input type="url" id="cfgUrl" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500">
+          <input type="url" id="cfgUrl" placeholder="https://xyzcompany.supabase.co"
+            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Supabase Anon Key</label>
-          <input type="password" id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500">
+          <input type="password" id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500">
           <p class="mt-1 text-[11px] text-slate-500">설정 값은 브라우저(localStorage)에 안전하게 보관됩니다.</p>
         </div>
 
         <div id="cfgTestAlert" class="hidden p-2.5 rounded-lg text-xs font-medium"></div>
 
         <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-          <button type="button" id="cfgTestBtn" class="px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+          <button type="button" id="cfgTestBtn"
+            class="px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
             연결 테스트
           </button>
           <div class="flex gap-2">
-            <button type="button" id="cfgCancelBtn" class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-800">
+            <button type="button" id="cfgCancelBtn"
+              class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-800">
               취소
             </button>
-            <button type="submit" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
+            <button type="submit"
+              class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition">
               저장 및 재연결
             </button>
           </div>
@@ -513,7 +592,8 @@
   </div>
 
   <!-- ======================= Toast 알림 ======================= -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+  <div id="toast"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
     <span id="toastMsg">알림 메시지</span>
   </div>
 
@@ -533,7 +613,8 @@
       viewMode: 'auto',    // 'auto', 'table', 'card'
       isSaving: false,
       quickPresets: [],    // 빠른 일정 프리셋 목록
-      pendingScoreItem: null // 점수 입력 대기 중인 항목
+      pendingScoreItem: null, // 점수 입력 대기 중인 항목
+      editingPresetId: null   // 수정 중인 프리셋 ID
     };
 
     // 표준 4종 카테고리 + 기타
@@ -842,7 +923,7 @@
         btn.type = 'button';
         btn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-white hover:bg-indigo-50 hover:border-indigo-300 text-slate-800 border border-slate-200 shadow-sm transition active:scale-95';
         btn.title = `클릭 시 폼에 적용: [${preset.subject}] ${preset.title ? preset.title + ' / ' : ''}${preset.startTime || '09:00'} (${formatDuration(preset.durationSec)})`;
-        
+
         btn.innerHTML = `
           <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">${escapeHtml(preset.subject || '공통')}</span>
           <span class="inline-flex items-center gap-1 text-[11px] text-slate-600 font-mono font-semibold">
@@ -904,18 +985,28 @@
       }
 
       state.quickPresets.forEach((p) => {
+        const isEditing = (state.editingPresetId === p.id);
         const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs';
+        item.className = `flex items-center justify-between p-2.5 rounded-lg border text-xs transition ${isEditing
+            ? 'bg-indigo-50/70 border-indigo-400 ring-1 ring-indigo-400'
+            : 'bg-slate-50 border-slate-200 hover:bg-slate-100/70'
+          }`;
+
         item.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">${escapeHtml(p.subject)}</span>
-            <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 text-slate-600 font-medium">${escapeHtml(p.category)}</span>
-            <span class="font-bold text-slate-800">${escapeHtml(p.title)}</span>
-            <span class="text-slate-400 font-mono text-[11px]">${p.startTime || '09:00'} (${formatDuration(p.durationSec)})</span>
+          <div class="flex items-center gap-2 overflow-hidden">
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 whitespace-nowrap">${escapeHtml(p.subject)}</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 text-slate-600 font-medium whitespace-nowrap">${escapeHtml(p.category)}</span>
+            <span class="font-bold text-slate-800 truncate" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</span>
+            <span class="text-slate-400 font-mono text-[11px] whitespace-nowrap">${p.startTime || '09:00'} (${formatDuration(p.durationSec)})</span>
           </div>
-          <button type="button" data-del-preset="${p.id}" class="text-slate-400 hover:text-rose-600 p-1 transition" title="삭제">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          </button>
+          <div class="flex items-center gap-1 shrink-0 ml-2">
+            <button type="button" data-edit-preset="${p.id}" class="p-1.5 rounded-md ${isEditing ? 'text-indigo-600 bg-indigo-100 font-bold' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'} transition" title="수정">
+              <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            </button>
+            <button type="button" data-del-preset="${p.id}" class="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="삭제">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         `;
         list.appendChild(item);
       });
@@ -991,7 +1082,7 @@
         const isDateGroupStart = (!isDraft && lastDate === item.date && list.findIndex(x => x.date === item.date) === list.indexOf(item));
 
         const tr = document.createElement('tr');
-        
+
         // 날짜별 교차 배경색 (흰색 vs 분홍색 계열) + 날짜 시작 구분선
         let bgClass = isEvenDateGroup ? 'bg-white' : 'bg-rose-50/70';
         let borderTopClass = isDateGroupStart ? 'border-t-2 border-rose-300' : 'border-t border-slate-100';
@@ -1524,7 +1615,7 @@
       const category = normalizeCategory(document.getElementById('qaCategory').value);
       const subject = document.getElementById('qaSubject').value;
       const title = document.getElementById('qaTitle').value.trim();
-      
+
       const hh = document.getElementById('qaStartHour').value || '09';
       const mm = document.getElementById('qaStartMinute').value || '00';
       const startTime = `${hh}:${mm}`;
@@ -1580,51 +1671,139 @@
       const openBtn = document.getElementById('openPresetManageBtn');
       const closeBtn = document.getElementById('closePresetModalBtn');
       const addBtn = document.getElementById('addNewPresetBtn');
+      const cancelBtn = document.getElementById('cancelEditPresetBtn');
+      const titleInput = document.getElementById('newPresetTitle');
+      const subSelect = document.getElementById('newPresetSubject');
+      const catSelect = document.getElementById('newPresetCategory');
+      const hourSelect = document.getElementById('newPresetHour');
+      const minSelect = document.getElementById('newPresetMinute');
+      const durSelect = document.getElementById('newPresetDuration');
+
+      const formTitle = document.getElementById('presetFormTitle');
+      const editingBadge = document.getElementById('presetEditingBadge');
+      const submitText = document.getElementById('presetSubmitText');
+      const submitIcon = document.getElementById('presetSubmitIcon');
+
+      function resetPresetForm() {
+        state.editingPresetId = null;
+        titleInput.value = '';
+        formTitle.textContent = '새 프리셋 등록';
+        editingBadge.classList.add('hidden');
+        submitText.textContent = '프리셋 목록에 추가';
+        if (submitIcon) submitIcon.setAttribute('data-lucide', 'plus');
+        cancelBtn.classList.add('hidden');
+        renderPresetModalList();
+        lucide.createIcons();
+      }
+
+      function startEditPreset(preset) {
+        state.editingPresetId = preset.id;
+        subSelect.value = preset.subject || (state.subjects[0] || '국어');
+        catSelect.value = normalizeCategory(preset.category);
+        titleInput.value = preset.title || '';
+
+        const timeStr = preset.startTime || '09:00';
+        const [hh, mm] = timeStr.split(':');
+        if (hh) hourSelect.value = hh;
+        if (mm) minSelect.value = mm;
+
+        durSelect.value = String(preset.durationSec || 5400);
+
+        formTitle.textContent = `프리셋 수정: ${preset.title}`;
+        editingBadge.classList.remove('hidden');
+        submitText.textContent = '수정사항 저장';
+        if (submitIcon) submitIcon.setAttribute('data-lucide', 'check');
+        cancelBtn.classList.remove('hidden');
+
+        renderPresetModalList();
+        titleInput.focus();
+        lucide.createIcons();
+      }
 
       openBtn.addEventListener('click', () => {
-        renderPresetModalList();
+        resetPresetForm();
         modal.classList.remove('hidden');
       });
 
-      const closeModal = () => modal.classList.add('hidden');
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        resetPresetForm();
+      };
       closeBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', resetPresetForm);
 
       addBtn.addEventListener('click', () => {
-        const sub = document.getElementById('newPresetSubject').value;
-        const cat = normalizeCategory(document.getElementById('newPresetCategory').value);
-        const title = document.getElementById('newPresetTitle').value.trim();
-        const hh = document.getElementById('newPresetHour').value || '09';
-        const mm = document.getElementById('newPresetMinute').value || '00';
+        const sub = subSelect.value;
+        const cat = normalizeCategory(catSelect.value);
+        const title = titleInput.value.trim();
+        const hh = hourSelect.value || '09';
+        const mm = minSelect.value || '00';
         const time = `${hh}:${mm}`;
-        const dur = Number(document.getElementById('newPresetDuration').value) || 5400;
+        const dur = Number(durSelect.value) || 5400;
 
         if (!title) {
           alert('프리셋 제목(학원명/단원명)을 입력해주세요.');
+          titleInput.focus();
           return;
         }
 
-        const newPreset = {
-          id: 'preset_' + Date.now(),
-          title: title,
-          subject: sub,
-          category: cat,
-          startTime: time,
-          durationSec: dur
-        };
+        if (state.editingPresetId) {
+          // 수정 모드
+          const target = state.quickPresets.find(p => p.id === state.editingPresetId);
+          if (target) {
+            target.subject = sub;
+            target.category = cat;
+            target.title = title;
+            target.startTime = time;
+            target.durationSec = dur;
+            saveQuickPresets();
+            showToast(`'${title}' 프리셋이 수정되었습니다.`);
+          }
+          resetPresetForm();
+        } else {
+          // 신규 추가 모드
+          const newPreset = {
+            id: 'preset_' + Date.now(),
+            title: title,
+            subject: sub,
+            category: cat,
+            startTime: time,
+            durationSec: dur
+          };
 
-        state.quickPresets.push(newPreset);
-        saveQuickPresets();
-        document.getElementById('newPresetTitle').value = '';
-        showToast(`'${title}' 프리셋이 등록되었습니다.`);
+          state.quickPresets.push(newPreset);
+          saveQuickPresets();
+          titleInput.value = '';
+          showToast(`'${title}' 프리셋이 등록되었습니다.`);
+        }
       });
 
+      // 리스트 내 수정/삭제 클릭 위임
       document.getElementById('presetListContainer').addEventListener('click', (e) => {
+        // 수정 버튼
+        const editBtn = e.target.closest('[data-edit-preset]');
+        if (editBtn) {
+          const pId = editBtn.dataset.editPreset;
+          const target = state.quickPresets.find(p => p.id === pId);
+          if (target) {
+            startEditPreset(target);
+          }
+          return;
+        }
+
+        // 삭제 버튼
         const delBtn = e.target.closest('[data-del-preset]');
-        if (!delBtn) return;
-        const pId = delBtn.dataset.delPreset;
-        state.quickPresets = state.quickPresets.filter(p => p.id !== pId);
-        saveQuickPresets();
-        showToast('프리셋이 삭제되었습니다.');
+        if (delBtn) {
+          const pId = delBtn.dataset.delPreset;
+          if (!confirm('이 프리셋을 삭제하시겠습니까?')) return;
+          state.quickPresets = state.quickPresets.filter(p => p.id !== pId);
+          if (state.editingPresetId === pId) {
+            resetPresetForm();
+          } else {
+            saveQuickPresets();
+          }
+          showToast('프리셋이 삭제되었습니다.');
+        }
       });
     }
 
@@ -1838,4 +2017,5 @@
     });
   </script>
 </body>
+
 </html>
