@@ -169,10 +169,11 @@
             <select id="filterCategory"
               class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500">
               <option value="ALL">전체 카테고리</option>
-              <option value="진도 계획">진도 계획</option>
-              <option value="단원 테스트">단원 테스트</option>
-              <option value="학원 일정">학원 일정</option>
-              <option value="과목별 전체 테스트">과목별 전체 테스트</option>
+              <option value="진도계획">진도계획</option>
+              <option value="학원일정">학원일정</option>
+              <option value="단원테스트">단원테스트</option>
+              <option value="전체테스트">전체테스트</option>
+              <option value="기타">기타</option>
             </select>
           </div>
           <div class="flex items-center gap-1.5">
@@ -253,10 +254,10 @@
             <label class="block text-xs font-semibold text-slate-600 mb-1">카테고리</label>
             <select id="qaCategory"
               class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500 font-medium">
-              <option value="학원 일정" selected>학원 일정</option>
-              <option value="진도 계획">진도 계획</option>
-              <option value="단원 테스트">단원 테스트</option>
-              <option value="과목별 전체 테스트">과목별 전체 테스트</option>
+              <option value="진도계획" selected>진도계획</option>
+              <option value="학원일정">학원일정</option>
+              <option value="단원테스트">단원테스트</option>
+              <option value="전체테스트">전체테스트</option>
               <option value="기타">기타</option>
             </select>
           </div>
@@ -275,15 +276,28 @@
             </select>
           </div>
 
-          <!-- title (학원명 / 단원명) -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">학원명 / 제목</label>
-            <input type="text" id="qaTitle" placeholder="예: 큰뜻국어" value="큰뜻국어" required
+          <!-- 단원 선택 (진도계획/단원테스트 시 노출) -->
+          <div id="qaUnitContainer" class="transition-all">
+            <label class="block text-xs font-bold text-indigo-700 mb-1 flex items-center gap-1">
+              <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>단원 선택</span>
+              <span class="text-rose-500">*</span>
+            </label>
+            <select id="qaUnit"
+              class="w-full px-2.5 py-1.5 text-xs bg-white border border-indigo-300 ring-1 ring-indigo-200 rounded-lg text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 truncate shadow-sm">
+              <option value="">단원을 선택하세요</option>
+            </select>
+          </div>
+
+          <!-- title (학원명 / 단원명 / 일정제목) -->
+          <div id="qaTitleContainer">
+            <label id="qaTitleLabel" class="block text-xs font-semibold text-slate-600 mb-1">상세 내용 / 제목</label>
+            <input type="text" id="qaTitle" placeholder="단원명 또는 제목" required
               class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
           </div>
 
-          <!-- 시작시간 (시/분 드롭다운 - 5분 단위 고정) -->
-          <div>
+          <!-- 시작시간 (학원일정 시 노출) -->
+          <div id="qaStartTimeContainer" class="hidden">
             <label class="block text-xs font-semibold text-slate-600 mb-1">시작 시간 (5분 단위)</label>
             <div class="grid grid-cols-2 gap-1">
               <select id="qaStartHour"
@@ -298,15 +312,15 @@
           </div>
 
           <!-- 소요시간 프리셋 & duration_sec -->
-          <div>
+          <div id="qaDurationContainer">
             <label class="block text-xs font-semibold text-slate-600 mb-1">
-              소요시간 <span id="qaDurationLabel" class="text-indigo-600 font-bold">(5400초)</span>
+              <span id="qaDurationTitleLabel">기본소요시간</span> <span id="qaDurationLabel" class="text-indigo-600 font-bold">(3600초)</span>
             </label>
             <select id="qaDurationPreset"
               class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:ring-1 focus:ring-indigo-500">
               <option value="1800">30분 (1,800초)</option>
-              <option value="3600">1시간 (3,600초)</option>
-              <option value="5400" selected>1시간 30분 (5,400초)</option>
+              <option value="3600" selected>1시간 (3,600초)</option>
+              <option value="5400">1시간 30분 (5,400초)</option>
               <option value="7200">2시간 (7,200초)</option>
               <option value="9000">2시간 30분 (9,000초)</option>
               <option value="10800">3시간 (10,800초)</option>
@@ -480,10 +494,10 @@
               <label class="block text-[11px] text-slate-600 mb-0.5">카테고리</label>
               <select id="newPresetCategory"
                 class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium">
-                <option value="학원 일정" selected>학원 일정</option>
-                <option value="진도 계획">진도 계획</option>
-                <option value="단원 테스트">단원 테스트</option>
-                <option value="과목별 전체 테스트">과목별 전체 테스트</option>
+                <option value="진도계획">진도계획</option>
+                <option value="학원일정" selected>학원일정</option>
+                <option value="단원테스트">단원테스트</option>
+                <option value="전체테스트">전체테스트</option>
                 <option value="기타">기타</option>
               </select>
             </div>
@@ -602,7 +616,8 @@
     // 상태 관리
     const state = {
       schedules: [],       // 전체 로드된 일정 배열
-      subjects: [],        // 과목 목록
+      subjects: [],        // 과목 목록 (이름 배열)
+      subjectDetails: [],  // 과목 상세 및 단원(chapters/lessons) 메타데이터
       filter: {
         startDate: '',
         endDate: '',
@@ -617,33 +632,33 @@
       editingPresetId: null   // 수정 중인 프리셋 ID
     };
 
-    // 표준 4종 카테고리 + 기타
+    // 표준 4종 카테고리 + 기타 (DB 및 index.html 표준 포맷과 일치)
     const CATEGORY_OPTIONS = [
-      '학원 일정',
-      '진도 계획',
-      '단원 테스트',
-      '과목별 전체 테스트',
+      '진도계획',
+      '학원일정',
+      '단원테스트',
+      '전체테스트',
       '기타'
     ];
 
-    // 카테고리 정규화 함수 (DB의 다양한 표기 호환)
+    // 카테고리 정규화 함수 (DB 및 다양한 표기 호환, 공백 제거 표준 카테고리 반환)
     function normalizeCategory(cat) {
-      if (!cat) return '진도 계획';
-      const c = String(cat).trim();
-      if (c === '학원' || c === '학원일정' || c === '학원 일정') return '학원 일정';
-      if (c === '진도계획' || c === '진도 계획') return '진도 계획';
-      if (c === '단원테스트' || c === '소단원테스트' || c === '단원 테스트') return '단원 테스트';
-      if (c === '전체테스트' || c === '과목별전체테스트' || c === '과목별 전체 테스트') return '과목별 전체 테스트';
-      return c;
+      if (!cat) return '진도계획';
+      const c = String(cat).replace(/\s+/g, '').trim();
+      if (c === '학원' || c === '학원일정') return '학원일정';
+      if (c === '진도계획' || c === '진도') return '진도계획';
+      if (c === '단원테스트' || c === '소단원테스트') return '단원테스트';
+      if (c === '전체테스트' || c === '과목별전체테스트' || c === '모의고사') return '전체테스트';
+      return c || '진도계획';
     }
 
     // 기본 빠른 일정 프리셋 (표준 카테고리 적용)
     const DEFAULT_PRESETS = [
-      { id: 'p_1', title: '큰뜻국어', subject: '국어', category: '학원 일정', startTime: '09:00', durationSec: 5400 },
-      { id: 'p_2', title: '수학과외', subject: '수학', category: '학원 일정', startTime: '19:00', durationSec: 7200 },
-      { id: 'p_3', title: '영어 단어 테스트', subject: '영어', category: '단원 테스트', startTime: '21:00', durationSec: 1800 },
-      { id: 'p_4', title: '수학 기출 모의고사', subject: '수학', category: '과목별 전체 테스트', startTime: '14:00', durationSec: 7200 },
-      { id: 'p_5', title: '국어 비문학 독서', subject: '국어', category: '진도 계획', startTime: '16:00', durationSec: 3600 }
+      { id: 'p_1', title: '큰뜻국어', subject: '국어', category: '학원일정', startTime: '09:00', durationSec: 5400 },
+      { id: 'p_2', title: '수학과외', subject: '수학', category: '학원일정', startTime: '19:00', durationSec: 7200 },
+      { id: 'p_3', title: '영어 단어 테스트', subject: '영어', category: '단원테스트', startTime: '21:00', durationSec: 1800 },
+      { id: 'p_4', title: '수학 기출 모의고사', subject: '수학', category: '전체테스트', startTime: '14:00', durationSec: 7200 },
+      { id: 'p_5', title: '국어 비문학 독서', subject: '국어', category: '진도계획', startTime: '16:00', durationSec: 3600 }
     ];
 
     // 5분 단위 분 목록
@@ -777,12 +792,20 @@
             category: normalizeCategory(s.category),
             isDraft: false
           }));
+          state.subjectDetails = plannerState.subjects || [];
           state.subjects = (plannerState.subjects || []).map(s => s.name || s);
         } else {
           // 로컬 스토리지 Fallback
           const savedSchedules = localStorage.getItem('local_schedules');
           state.schedules = savedSchedules ? JSON.parse(savedSchedules) : generateMockSchedules();
           state.schedules = state.schedules.map(s => ({ ...s, category: normalizeCategory(s.category), isDraft: false }));
+          state.subjectDetails = [
+            { name: '국어', chapters: [{ id: '1', title: '1. 문학의 갈래' }, { id: '2', title: '2. 국어의 역사와 한글 맞춤법' }] },
+            { name: '수학', chapters: [{ id: '3', title: '1. 다항식의 연산' }, { id: '4', title: '2. 방정식과 부등식' }] },
+            { name: '영어', chapters: [{ id: '5', title: 'Lesson 1. Cultural Diversity' }, { id: '6', title: 'Lesson 2.' }] },
+            { name: '사회', chapters: [{ id: '7', title: 'I. 인권 보장과 헌법' }, { id: '8', title: 'II. 사회 정의와 불평등' }] },
+            { name: '과학', chapters: [{ id: '9', title: '1. 물질의 규칙성' }] }
+          ];
           state.subjects = ['국어', '수학', '영어', '사회', '과학', '기타'];
         }
 
@@ -792,6 +815,7 @@
 
         loadQuickPresets();
         populateSubjectDropdowns();
+        updateQaFormByCategory(document.getElementById('qaCategory').value);
         renderQuickPresetChips();
         renderSchedules();
         updateSyncBadge();
@@ -810,7 +834,7 @@
           id: 'mock_1',
           date: formatDate(today),
           subject: '국어',
-          category: '학원 일정',
+          category: '학원일정',
           title: '큰뜻국어',
           detail: '수능특강 독서 3강 복습',
           progress: 50,
@@ -823,7 +847,7 @@
           id: 'mock_2',
           date: formatDate(today),
           subject: '영어',
-          category: '단원 테스트',
+          category: '단원테스트',
           title: '단원 어휘 40문항 테스트',
           detail: '틀린 단어 오답노트 작성',
           progress: 50,
@@ -836,7 +860,7 @@
           id: 'mock_3',
           date: formatDate(addDays(today, 1)),
           subject: '수학',
-          category: '진도 계획',
+          category: '진도계획',
           title: '수학II 미분계수와 도함수',
           detail: 'RPM 120p~135p 풀기',
           progress: 70,
@@ -885,6 +909,168 @@
       filterSub.value = currentFilterVal || 'ALL';
       if (uniqueSubjects.includes(currentQaVal)) {
         qaSub.value = currentQaVal;
+      }
+
+      populateUnitDropdown(qaSub.value);
+    }
+
+    // 과목별 단원 목록 추출 (Supabase / localApp / Fallback 통합 조회)
+    function getChaptersForSubject(selectedSubjName) {
+      if (!selectedSubjName) return [];
+
+      // 1. state.subjectDetails 검사 (chapters 또는 lessons)
+      const subjObj = (state.subjectDetails || []).find(s => s.name === selectedSubjName || s.subjectName === selectedSubjName);
+      if (subjObj) {
+        if (Array.isArray(subjObj.chapters) && subjObj.chapters.length > 0) {
+          return subjObj.chapters.map(c => ({ id: String(c.id || ''), title: c.title || c.unitName || '' })).filter(c => c.title);
+        }
+        if (Array.isArray(subjObj.lessons) && subjObj.lessons.length > 0) {
+          return subjObj.lessons.map(l => ({ id: String(l.id || ''), title: l.unitName || l.unit_name || l.title || '' })).filter(c => c.title);
+        }
+      }
+
+      // 2. localStorage study_planner_pro_db_v6 fallback
+      try {
+        const rawLocal = localStorage.getItem('study_planner_pro_db_v6');
+        if (rawLocal) {
+          const parsed = JSON.parse(rawLocal);
+          if (Array.isArray(parsed.subjects)) {
+            const lSubj = parsed.subjects.find(s => s.name === selectedSubjName);
+            if (lSubj && Array.isArray(lSubj.chapters) && lSubj.chapters.length > 0) {
+              return lSubj.chapters.map(c => ({ id: String(c.id || ''), title: c.title || '' })).filter(c => c.title);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('로컬 플래너 DB 파싱 예외:', err);
+      }
+
+      // 3. 과목별 기본 목차 Fallback
+      const FALLBACK_CHAPTERS = {
+        '국어': [
+          { id: 'ch-k1', title: '1. 한국 문학의 흐름' },
+          { id: 'ch-k2', title: '3. 국어의 역사와 한글 맞춤법' },
+          { id: 'ch-k3', title: '4. 문제를 해결하는 말과 글' }
+        ],
+        '수학': [
+          { id: 'ch-m1', title: '1. 다항식의 연산' },
+          { id: 'ch-m2', title: '2. 방정식과 부등식' }
+        ],
+        '영어': [
+          { id: 'ch-e1', title: 'Lesson 1. Cultural Diversity' },
+          { id: 'ch-e2', title: 'Lesson 2.' }
+        ],
+        '통합사회': [
+          { id: 'ch-s1', title: 'I. 인권 보장과 헌법' },
+          { id: 'ch-s2', title: 'II. 사회 정의와 불평등' },
+          { id: 'ch-s3', title: 'IV. 세계화와 평화' }
+        ],
+        '사회': [
+          { id: 'ch-s1', title: 'I. 인권 보장과 헌법' },
+          { id: 'ch-s2', title: 'II. 사회 정의와 불평등' },
+          { id: 'ch-s3', title: 'IV. 세계화와 평화' }
+        ],
+        '과학': [
+          { id: 'ch-sc1', title: '1. 물질의 규칙성' },
+          { id: 'ch-sc2', title: '2. 시스템과 상호작용' }
+        ]
+      };
+
+      return FALLBACK_CHAPTERS[selectedSubjName] || [
+        { id: `ch-${encodeURIComponent(selectedSubjName)}-1`, title: `${selectedSubjName} 1단원 기본 학습` },
+        { id: `ch-${encodeURIComponent(selectedSubjName)}-2`, title: `${selectedSubjName} 2단원 심화 학습` },
+        { id: `ch-${encodeURIComponent(selectedSubjName)}-3`, title: `${selectedSubjName} 실전 문제풀이` }
+      ];
+    }
+
+    // 과목별 단원 목록 드롭다운 채우기
+    function populateUnitDropdown(selectedSubjName) {
+      const qaUnit = document.getElementById('qaUnit');
+      if (!qaUnit) return;
+      const currentVal = qaUnit.value;
+      qaUnit.innerHTML = '';
+
+      const chapters = getChaptersForSubject(selectedSubjName);
+
+      if (chapters.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '(등록된 단원 없음 - 직접 입력)';
+        qaUnit.appendChild(opt);
+        return;
+      }
+
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = '단원을 선택하세요';
+      qaUnit.appendChild(defaultOpt);
+
+      chapters.forEach(ch => {
+        const opt = document.createElement('option');
+        opt.value = ch.title || '';
+        opt.dataset.lessonId = ch.id || '';
+        opt.textContent = ch.title || '';
+        if (currentVal && ch.title === currentVal) opt.selected = true;
+        qaUnit.appendChild(opt);
+      });
+    }
+
+    // 카테고리별 빠른 추가 폼 UI 동적 전환 (진도계획: 과목, 단원, 기본소요시간 노출)
+    function updateQaFormByCategory(cat) {
+      const normCat = normalizeCategory(cat);
+      const isProgressPlan = (normCat === '진도계획' || normCat === '단원테스트');
+      const isAcademy = (normCat === '학원일정');
+
+      const unitContainer = document.getElementById('qaUnitContainer');
+      const startContainer = document.getElementById('qaStartTimeContainer');
+      const titleLabel = document.getElementById('qaTitleLabel');
+      const durationTitleLabel = document.getElementById('qaDurationTitleLabel');
+      const durationPreset = document.getElementById('qaDurationPreset');
+      const qaTitle = document.getElementById('qaTitle');
+
+      if (unitContainer) {
+        if (isProgressPlan) {
+          unitContainer.classList.remove('hidden');
+          unitContainer.style.setProperty('display', 'block', 'important');
+          const qaSub = document.getElementById('qaSubject');
+          populateUnitDropdown(qaSub ? qaSub.value : '국어');
+        } else {
+          unitContainer.classList.add('hidden');
+          unitContainer.style.setProperty('display', 'none', 'important');
+        }
+      }
+
+      if (startContainer) {
+        if (isAcademy) {
+          startContainer.classList.remove('hidden');
+          startContainer.style.setProperty('display', 'block', 'important');
+        } else {
+          startContainer.classList.add('hidden');
+          startContainer.style.setProperty('display', 'none', 'important');
+        }
+      }
+
+      if (titleLabel) {
+        if (isProgressPlan) {
+          titleLabel.textContent = '상세 내용 / 제목';
+          if (qaTitle) qaTitle.placeholder = '단원명 또는 세부계획';
+        } else if (isAcademy) {
+          titleLabel.textContent = '학원명';
+          if (qaTitle) qaTitle.placeholder = '예: 큰뜻국어';
+        } else {
+          titleLabel.textContent = '일정 제목';
+          if (qaTitle) qaTitle.placeholder = '일정 제목을 입력하세요';
+        }
+      }
+
+      if (durationTitleLabel) {
+        durationTitleLabel.textContent = isProgressPlan ? '기본소요시간' : '소요시간';
+      }
+
+      if (isProgressPlan && durationPreset && (durationPreset.value === '5400' || !durationPreset.value)) {
+        durationPreset.value = '3600';
+        const label = document.getElementById('qaDurationLabel');
+        if (label) label.textContent = '(3600초)';
       }
     }
 
@@ -946,7 +1132,9 @@
 
     function applyPresetToForm(preset) {
       document.getElementById('qaSubject').value = preset.subject || '국어';
-      document.getElementById('qaCategory').value = normalizeCategory(preset.category);
+      const normCat = normalizeCategory(preset.category);
+      document.getElementById('qaCategory').value = normCat;
+      updateQaFormByCategory(normCat);
       document.getElementById('qaTitle').value = preset.title || '';
 
       const timeStr = preset.startTime || '09:00';
@@ -1118,6 +1306,8 @@
           `;
 
         const normalizedCat = normalizeCategory(item.category);
+        const isProgressRow = (normalizedCat === '진도계획' || normalizedCat === '단원테스트');
+        const rowChapters = isProgressRow ? getChaptersForSubject(item.subject) : [];
 
         tr.innerHTML = `
           <!-- 완료 체크 -->
@@ -1146,10 +1336,21 @@
             </select>
           </td>
 
-          <!-- 제목 -->
+          <!-- 제목 (진도계획/단원테스트 시 단원 선택 드롭다운 + 직접 입력 제공) -->
           <td class="py-1.5 px-2">
-            <input type="text" data-field="title" value="${escapeHtml(item.title || '')}" placeholder="단원 / 학원명 (필수)" 
-              class="w-full px-2 py-1 ${isDraft ? 'bg-white border-amber-300 ring-1 ring-amber-300 focus:ring-indigo-500' : 'bg-transparent hover:bg-white border-transparent hover:border-slate-300'} focus:bg-white border focus:border-indigo-500 rounded text-xs font-bold text-slate-800 ${item.completed ? 'line-through text-slate-400' : ''} transition">
+            ${isProgressRow && rowChapters.length > 0 ? `
+              <div class="flex flex-col gap-1">
+                <select data-field="unitSelect" class="w-full px-1.5 py-0.5 bg-white border border-slate-200 focus:border-indigo-500 rounded text-[11px] font-semibold text-indigo-700 truncate">
+                  <option value="">단원 선택...</option>
+                  ${rowChapters.map(ch => `<option value="${escapeHtml(ch.title)}" data-lesson-id="${ch.id || ''}" ${ch.title === item.title ? 'selected' : ''}>${escapeHtml(ch.title)}</option>`).join('')}
+                </select>
+                <input type="text" data-field="title" value="${escapeHtml(item.title || '')}" placeholder="단원명 직접 입력" 
+                  class="w-full px-2 py-0.5 ${isDraft ? 'bg-white border-amber-300 ring-1 ring-amber-300 focus:ring-indigo-500' : 'bg-transparent hover:bg-white border-transparent hover:border-slate-300'} focus:bg-white border focus:border-indigo-500 rounded text-xs font-bold text-slate-800 ${item.completed ? 'line-through text-slate-400' : ''} transition">
+              </div>
+            ` : `
+              <input type="text" data-field="title" value="${escapeHtml(item.title || '')}" placeholder="단원 / 학원명 (필수)" 
+                class="w-full px-2 py-1 ${isDraft ? 'bg-white border-amber-300 ring-1 ring-amber-300 focus:ring-indigo-500' : 'bg-transparent hover:bg-white border-transparent hover:border-slate-300'} focus:bg-white border focus:border-indigo-500 rounded text-xs font-bold text-slate-800 ${item.completed ? 'line-through text-slate-400' : ''} transition">
+            `}
           </td>
 
           <!-- 상세 (detail) -->
@@ -1334,9 +1535,9 @@
           const progInput = container.querySelector('[data-field="progress"]');
           if (progInput) progInput.value = 100;
 
-          // 2) 카테고리 판별 (학원 일정인 경우 vs 그 외)
+          // 2) 카테고리 판별 (학원일정인 경우 vs 그 외)
           const normalizedCat = normalizeCategory(targetItem.category);
-          if (normalizedCat === '학원 일정') {
+          if (normalizedCat === '학원일정' || normalizedCat === '학원 일정') {
             // 학원 일정: 점수 100 자동 반영
             targetItem.score = '100';
             const scoreInput = container.querySelector('[data-field="score"]');
@@ -1359,7 +1560,25 @@
         return;
       }
 
-      // B. 일반 필드 변경 (progress, score, title, detail 등)
+      // B. 단원 선택 드롭다운(unitSelect) 변경
+      if (field === 'unitSelect') {
+        const selectedVal = e.target.value;
+        if (selectedVal) {
+          targetItem.title = selectedVal;
+          const selectedOpt = e.target.selectedOptions && e.target.selectedOptions[0];
+          if (selectedOpt && selectedOpt.dataset.lessonId) {
+            targetItem.lessonId = selectedOpt.dataset.lessonId;
+          }
+          const titleInput = container.querySelector('[data-field="title"]');
+          if (titleInput) titleInput.value = selectedVal;
+
+          if (targetItem.isDraft) return;
+          await saveSchedulesToServer();
+        }
+        return;
+      }
+
+      // C. 일반 필드 변경 (progress, score, title, detail 등)
       let val;
       if (e.target.type === 'number') {
         val = Number(e.target.value) || 0;
@@ -1372,6 +1591,11 @@
       }
 
       targetItem[field] = val;
+
+      // 카테고리나 과목 변경 시 단원 드롭다운 다시 렌더링
+      if (field === 'category' || field === 'subject') {
+        renderTable(getFilteredSchedules());
+      }
 
       if (targetItem.isDraft) return;
 
@@ -1474,12 +1698,12 @@
         id: 'draft_' + Math.random().toString(36).substr(2, 9),
         date: todayStr,
         subject: defaultSub,
-        category: '진도 계획',
+        category: '진도계획',
         title: '',
         detail: '',
         progress: 50,
         score: '0',
-        durationSec: 0,
+        durationSec: 3600,
         completed: false,
         isDraft: true
       };
@@ -1497,6 +1721,7 @@
       if (!targetItem) return;
 
       const titleInput = container.querySelector('[data-field="title"]');
+      const unitSelect = container.querySelector('[data-field="unitSelect"]');
       const subjectInput = container.querySelector('[data-field="subject"]');
       const categoryInput = container.querySelector('[data-field="category"]');
       const dateInput = container.querySelector('[data-field="date"]');
@@ -1505,11 +1730,19 @@
       const scoreInput = container.querySelector('[data-field="score"]');
       const durationInput = container.querySelector('[data-field="durationSec"]');
 
-      const title = (titleInput ? titleInput.value : targetItem.title || '').trim();
+      let title = (titleInput ? titleInput.value : targetItem.title || '').trim();
+      if (!title && unitSelect && unitSelect.value) {
+        title = unitSelect.value.trim();
+      }
       if (!title) {
         alert('제목(학원명/단원명)을 입력해주세요.');
         if (titleInput) titleInput.focus();
         return;
+      }
+
+      if (unitSelect && unitSelect.selectedOptions && unitSelect.selectedOptions[0]) {
+        const lid = unitSelect.selectedOptions[0].dataset.lessonId;
+        if (lid) targetItem.lessonId = lid;
       }
 
       targetItem.title = title;
@@ -1614,7 +1847,11 @@
       const date = document.getElementById('qaDate').value;
       const category = normalizeCategory(document.getElementById('qaCategory').value);
       const subject = document.getElementById('qaSubject').value;
-      const title = document.getElementById('qaTitle').value.trim();
+      let title = document.getElementById('qaTitle').value.trim();
+      const qaUnit = document.getElementById('qaUnit');
+      if (!title && qaUnit && qaUnit.value) {
+        title = qaUnit.value;
+      }
 
       const hh = document.getElementById('qaStartHour').value || '09';
       const mm = document.getElementById('qaStartMinute').value || '00';
@@ -1633,10 +1870,18 @@
         return;
       }
 
-      // detail 형식: "시작 시간:" 문구 제외하고 "09:00 (1시간 30분)" 형태로 저장
-      const detail = durationSec > 0 ? `${startTime} (${formatDurationKorean(durationSec)})` : startTime;
+      const isAcad = (category === '학원일정');
+      const detail = isAcad ? (durationSec > 0 ? `${startTime} (${formatDurationKorean(durationSec)})` : startTime) : '';
+
+      let lessonId = null;
+      if (qaUnit && qaUnit.selectedOptions && qaUnit.selectedOptions[0]) {
+        const lid = qaUnit.selectedOptions[0].dataset.lessonId;
+        if (lid && !isNaN(Number(lid))) lessonId = Number(lid);
+      }
+
       const newSch = {
         id: 'sch_' + Math.random().toString(36).substr(2, 9),
+        lessonId: lessonId || null,
         date: date || formatDate(new Date()),
         subject: subject || (state.subjects[0] || '국어'),
         category: category,
@@ -1657,11 +1902,11 @@
         localStorage.setItem('local_schedules', JSON.stringify(state.schedules.filter(s => !s.isDraft)));
 
         renderSchedules();
-        showToast(`'${title}' 일정이 등록되었습니다.`);
+        showToast(`[${category}] '${title}' 일정이 등록되었습니다.`);
         document.getElementById('qaTitle').focus();
       } catch (err) {
         console.error('빠른 추가 오류:', err);
-        showToast('일정 추가 중 오류가 발생했습니다.');
+        showToast('일정 추가 중 오류가 발생했습니다: ' + (err.message || ''));
       }
     }
 
@@ -1947,6 +2192,31 @@
         renderSchedules();
       });
 
+      // 빠른 일정 폼 카테고리/과목/단원 이벤트
+      const qaCatEl = document.getElementById('qaCategory');
+      if (qaCatEl) {
+        qaCatEl.addEventListener('change', (e) => {
+          updateQaFormByCategory(e.target.value);
+        });
+        qaCatEl.addEventListener('click', (e) => {
+          updateQaFormByCategory(e.target.value);
+        });
+        qaCatEl.addEventListener('input', (e) => {
+          updateQaFormByCategory(e.target.value);
+        });
+      }
+      document.getElementById('qaSubject').addEventListener('change', (e) => {
+        populateUnitDropdown(e.target.value);
+      });
+      const qaUnit = document.getElementById('qaUnit');
+      if (qaUnit) {
+        qaUnit.addEventListener('change', (e) => {
+          if (e.target.value) {
+            document.getElementById('qaTitle').value = e.target.value;
+          }
+        });
+      }
+
       const durationPreset = document.getElementById('qaDurationPreset');
       const durationCustom = document.getElementById('qaDurationCustom');
       const durationLabel = document.getElementById('qaDurationLabel');
@@ -2013,7 +2283,9 @@
       setupPresetModal();
       setupConfigModal();
       checkViewportAndToggleView();
+      updateQaFormByCategory(document.getElementById('qaCategory').value);
       await loadData();
+      updateQaFormByCategory(document.getElementById('qaCategory').value);
     });
   </script>
 </body>
