@@ -1,0 +1,3513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>체육계열 정시 대시보드 (모바일)</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #94a3b8;
+      --sidebar-active: #38bdf8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --highlight-bg: #fef08a;
+      --highlight-border: #facc15;
+      --highlight-text: #854d0e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 사이드바 */
+    aside {
+      width: 240px;
+      background-color: var(--sidebar-bg);
+      color: #fff;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .brand {
+      padding: 24px 20px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      background: #38bdf8;
+      color: #0f172a;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-size: 14.5px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .nav-item a:hover {
+      background-color: #1e293b;
+      color: #fff;
+    }
+
+    .nav-item.active a {
+      background-color: #1e293b;
+      color: var(--sidebar-active);
+      font-weight: 600;
+    }
+
+    .sub-menu {
+      list-style: none;
+      padding-left: 36px;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sub-menu a {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .sub-menu a:hover { color: #e2e8f0; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 16px;
+      border-top: 1px solid #1e293b;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* 메인 컨텐츠 */
+    main {
+      flex: 1;
+      padding: 36px 40px;
+      max-width: 1320px;
+      overflow-x: hidden;
+    }
+
+    header { margin-bottom: 24px; }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    /* 섹션 제어 */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 카드 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Sticky Table Header */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      max-height: 75vh;
+      position: relative;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: #f1f5f9;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr:hover { background-color: #fafafa; }
+
+    .col-label {
+      font-weight: 600;
+      background-color: #f8fafc;
+      color: #334155;
+      white-space: nowrap;
+      width: 17%;
+    }
+
+    .col-event-label {
+      font-weight: 600;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      white-space: nowrap;
+    }
+
+    .empty-cell {
+      color: #94a3b8;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .score-fmt { font-weight: 600; color: #0f172a; }
+    .score-conv { color: var(--primary); font-weight: 700; font-size: 12.5px; }
+
+    /* 제일 작은 만점 기록 강조 박스 */
+    .min-record-box {
+      border: 2px solid #16a34a;
+      background: #f0fdf4;
+      color: #14532d;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      display: inline-block;
+      margin-top: 3px;
+      box-shadow: 0 1px 2px rgba(22, 163, 74, 0.15);
+    }
+    
+    .min-record-badge {
+      display: block;
+      font-size: 10px;
+      color: #15803d;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 1px;
+    }
+
+    /* 한 줄로 표현되는 입력 카드 그리드 */
+    .sim-grid-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .sim-grid-row {
+        grid-template-columns: repeat(5, minmax(180px, 1fr));
+        overflow-x: auto;
+      }
+    }
+
+    .sim-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .sim-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .event-name { font-size: 13.5px; font-weight: 700; color: #1e293b; }
+    .event-unit { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; }
+
+    .current-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .current-label { font-size: 11px; color: #64748b; font-weight: 500; }
+    .current-val { font-size: 13px; font-weight: 700; color: #334155; }
+
+    .target-box { display: flex; flex-direction: column; gap: 4px; }
+    .target-label { font-size: 11px; font-weight: 600; color: #0f172a; display: flex; justify-content: space-between; }
+    .target-input-wrap { position: relative; display: flex; align-items: center; }
+
+    .target-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1.5px solid #2563eb;
+      background: #eff6ff;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e3a8a;
+      outline: none;
+      transition: all 0.15s;
+    }
+
+    .target-input:focus {
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .target-unit-tag { position: absolute; right: 8px; font-size: 11.5px; color: #64748b; pointer-events: none; }
+
+    /* 실시간 계산 결과 그리드 */
+    .res-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .res-card {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .res-card.active-res {
+      border-color: #2563eb;
+      background: #f8fafc;
+    }
+
+    .res-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+
+    .res-univ { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .res-score-row { display: flex; justify-content: space-between; font-size: 13.5px; }
+    .res-total { font-size: 18px; font-weight: 800; color: var(--primary); }
+
+    /* 배점표 전용 */
+    .highlight-row {
+      background-color: var(--highlight-bg) !important;
+      font-weight: 700;
+      color: var(--highlight-text);
+      box-shadow: inset 3px 0 0 #eab308;
+    }
+
+    .user-tag {
+      display: inline-block;
+      background: #fef08a;
+      color: #854d0e;
+      border: 1px solid #facc15;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+
+    .pill-group {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 8px;
+      gap: 2px;
+      margin-bottom: 16px;
+    }
+
+    .pill-btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .pill-btn.active {
+      background: #fff;
+      color: #0f172a;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .univ-view { display: none; }
+    .univ-view.active { display: block; }
+
+    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+
+    .tag-ga { background: #fee2e2; color: #991b1b; padding: 2px 5px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .tag-na { background: #e0e7ff; color: #3730a3; padding: 2px 5px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+
+    /* Modal Styles */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+    }
+
+    .modal-title { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .modal-close { background: none; border: none; font-size: 20px; color: #64748b; cursor: pointer; }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+
+    .modal-univ-block {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    .modal-univ-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .modal-field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .modal-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .modal-field input {
+      padding: 8px 10px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .modal-field input:focus {
+      border-color: #2563eb;
+      outline: none;
+      background: #fff;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      aside { width: 100%; height: auto; position: static; }
+      main { padding: 20px 16px; }
+      .nav-menu { flex-direction: row; flex-wrap: wrap; }
+    }
+  
+    /* ============================================================
+       MOBILE DEDICATED STYLES
+       ============================================================ */
+    @media screen {
+      body {
+        flex-direction: column !important;
+        background-color: #f1f5f9;
+        font-size: 13.5px;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* 상단 네비게이션 바로 전환 */
+      aside {
+        width: 100% !important;
+        height: auto !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      .brand {
+        padding: 10px 14px !important;
+        font-size: 15px !important;
+        justify-content: space-between;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .nav-menu {
+        flex-direction: row !important;
+        padding: 5px 8px !important;
+        gap: 4px !important;
+        background: #1e293b;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .nav-menu::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        flex: 1 0 auto;
+      }
+
+      .nav-item a {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        justify-content: center;
+        gap: 5px !important;
+        border-radius: 6px;
+      }
+
+      .nav-item svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .sub-menu {
+        display: none !important;
+      }
+
+      /* 메인 컨텐츠 영역 */
+      main {
+        padding: 12px 8px 40px 8px !important;
+        max-width: 100vw !important;
+        overflow-x: hidden;
+      }
+
+      header {
+        margin-bottom: 12px !important;
+      }
+
+      header h1 {
+        font-size: 18px !important;
+        line-height: 1.35;
+      }
+
+      header p {
+        font-size: 12px !important;
+      }
+
+      .card {
+        padding: 12px 10px !important;
+        border-radius: 12px !important;
+        margin-bottom: 12px !important;
+      }
+
+      .card-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .card-title {
+        font-size: 15.5px !important;
+      }
+
+      .card-desc {
+        font-size: 11px !important;
+      }
+
+      /* 점수 수정 버튼 모바일 최적화 */
+      .card-header button {
+        width: 100%;
+        justify-content: center;
+        padding: 9px !important;
+        font-size: 13px !important;
+      }
+
+      /* 테이블 컨테이너 모바일 터치 스크롤 */
+      .table-responsive {
+        border-radius: 8px;
+        max-height: 70vh !important;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 580px;
+      }
+
+      th, td {
+        padding: 8px 5px !important;
+        font-size: 11.5px !important;
+      }
+
+      .scroll-hint {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        font-size: 10.5px;
+        color: #64748b;
+        margin-bottom: 4px;
+      }
+
+      /* 배점표 대학 선택 탭 */
+      .pill-nav {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        gap: 6px !important;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .pill-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .pill-btn {
+        padding: 7px 11px !important;
+        font-size: 12px !important;
+        flex-shrink: 0;
+      }
+
+      /* 시뮬레이터 입력창 카드 모바일 반응형 (2열 그리드 배치) */
+      .sim-inputs-container {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+
+      .sim-input-box {
+        padding: 10px 8px !important;
+      }
+
+      .sim-input-box:last-child {
+        grid-column: span 2;
+      }
+
+      .target-input {
+        font-size: 16px !important; /* iOS 자동 확대 방지 */
+        padding: 8px 6px !important;
+      }
+
+      /* 대학별 시뮬레이션 결과 카드 그리드 (모바일 1열) */
+      .sim-results-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      /* 모달 팝업 모바일 최적화 */
+      .modal-card {
+        width: 95% !important;
+        max-height: 90vh !important;
+        border-radius: 12px !important;
+      }
+
+      .modal-header {
+        padding: 12px 14px !important;
+      }
+
+      .modal-body {
+        padding: 12px 14px !important;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      .modal-footer {
+        padding: 10px 14px !important;
+      }
+    }
+
+  
+    #section-comparison table th:nth-child(1),
+    #section-comparison table td:nth-child(1) {
+      border-right: 2px solid #cbd5e1 !important;
+    }
+
+    /* 로드맵 및 예상점수 표의 대학별 가로 구분선 강조 */
+    #section-management table tbody tr.univ-divider {
+      border-top: 2.5px solid #64748b !important;
+    }
+
+  
+    /* ============================================================
+       학교별 구분선 강조 (세로 및 가로 경계)
+       ============================================================ */
+    /* 대학비교 표 학교별 세로 구분선 진하게 */
+    #section-comparison table th:nth-child(2),
+    #section-comparison table td:nth-child(2),
+    #section-comparison table th:nth-child(3),
+    #section-comparison table td:nth-child(3),
+    #section-comparison table th:nth-child(4),
+    #section-comparison table td:nth-child(4) {
+      border-right: 2.5px solid #94a3b8 !important;
+    }
+
+    #section-comparison table th:nth-child(1),
+    #section-comparison table td:nth-child(1) {
+      border-right: 2px solid #cbd5e1 !important;
+    }
+
+    /* 로드맵 및 예상점수 표의 대학별 가로 구분선 진하게 */
+    .univ-divider {
+      border-top: 3px solid #64748b !important;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- 좌측 사이드바 -->
+  <aside>
+    <div class="brand">
+      <span>체대입시 대시보드</span>
+      <span class="brand-badge">2027</span>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item active" id="menu-comparison">
+        <a onclick="showTab('comparison')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          대학비교
+        </a>
+      </li>
+      <li class="nav-item" id="menu-management">
+        <a onclick="showTab('management')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+          기록 관리
+        </a>
+      </li>
+      <li class="nav-item" id="menu-scoring">
+        <a onclick="showTab('scoring')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+          배점표
+        </a>
+        <ul class="sub-menu">
+          <li><a onclick="showUniv('knsu')">• 한국체육대 (여)</a></li>
+          <li><a onclick="showUniv('dongduk')">• 동덕여자대</a></li>
+          <li><a onclick="showUniv('swu')">• 서울여자대</a></li>
+          <li><a onclick="showUniv('sungshin')">• 성신여자대</a></li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div>지원자: <strong>유연주</strong></div>
+      <div style="margin-top: 4px; font-size: 11px;">데이터 소스: 진학사 모의지원</div>
+    </div>
+  </aside>
+
+  <!-- 메인 영역 -->
+  <main>
+    <header>
+      <h1 id="page-title">체육계열 4개 대학 환산점수 및 실기 비교</h1>
+      <p style="color: #64748b; font-size: 14px; margin-top: 4px;">한국체대 · 동덕여대 · 서울여대 · 성신여대 정시 종합 분석 (모바일 최적화)</p>
+    </header>
+
+    <!-- [섹션 1: 대학비교] -->
+    <div id="section-comparison" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">4개 대학 정시 환산점수 및 실기 비교표</h2>
+            <div class="card-desc">실기 배점 표기: <strong>취득점수/만점 (환산점수/만점)</strong> | 종목별 동일 행 정렬</div>
+          </div>
+          <button onclick="openScoreModal()" style="display:flex; align-items:center; gap:6px; background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer; box-shadow:0 1px 3px rgba(37,99,235,0.3);">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            수능 및 학생부 점수 수정
+          </button>
+        </div>
+        <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 17%;">구분</th>
+                <th style="width: 20.75%;"><span class="tag-ga">가군</span> 한국체육대<br><small style="color:#64748b;">운동건강관리</small></th>
+                <th style="width: 20.75%;"><span class="tag-na">나군</span> 동덕여자대<br><small style="color:#64748b;">체육학과</small></th>
+                <th style="width: 20.75%;"><span class="tag-na">나군</span> 서울여자대<br><small style="color:#64748b;">스포츠운동과학</small></th>
+                <th style="width: 20.75%;"><span class="tag-ga">가군</span> 성신여자대<br><small style="color:#64748b;">운동재활전공</small></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-label">전형 반영비율</td>
+                <td>수능 70 + 학생부 10 + 실기 20</td>
+                <td>수능 80 + 실기 20</td>
+                <td>수능 60 + 실기 40</td>
+                <td>수능 60 + 실기 40</td>
+              </tr>
+              <tr>
+                <td class="col-label">전형 총점</td>
+                <td>1,000점 만점</td>
+                <td>1,000점 만점</td>
+                <td>100점 만점</td>
+                <td>500점 만점</td>
+              </tr>
+              <tr>
+                <td class="col-label">내 환산점수 구성</td>
+                <td>
+                  • 수능: <strong>617.47</strong> / 700<br>
+                  • 학생부: <strong>88.83</strong> / 100<br>
+                  • 실기: <strong>114.04</strong> / 200
+                </td>
+                <td>
+                  • 수능: <strong>677.6667</strong> / 800<br>
+                  • 실기: <strong>82.00</strong> / 200
+                </td>
+                <td>
+                  • 수능: <strong>56.84</strong> / 60<br>
+                  • 실기: <strong>16.40</strong> / 40
+                </td>
+                <td>
+                  • 수능: <strong>246.50</strong> / 300<br>
+                  • 실기: <strong>32.00</strong> / 200
+                </td>
+              </tr>
+              <tr>
+                <td class="col-label">내 총 환산점수</td>
+                <td><strong style="color:var(--primary); font-size:15px;">820.34점</strong></td>
+                <td><strong style="color:var(--primary); font-size:15px;">759.6667점</strong></td>
+                <td><strong style="color:var(--primary); font-size:15px;">73.24점</strong></td>
+                <td><strong style="color:var(--primary); font-size:15px;">278.50점</strong></td>
+              </tr>
+              <tr>
+                <td class="col-label">합격자 평균점</td>
+                <td><strong>911.08점</strong></td>
+                <td><strong>872.35점</strong></td>
+                <td><strong>94.56점</strong></td>
+                <td><strong>429.96점</strong></td>
+              </tr>
+              <tr>
+                <td class="col-label">합격자 최저점</td>
+                <td>898.22점</td>
+                <td>853.67점</td>
+                <td>92.55점</td>
+                <td>420.83점</td>
+              </tr>
+              <tr>
+                <td class="col-label">합격자 최고점</td>
+                <td>946.13점</td>
+                <td>907.00점</td>
+                <td>97.15점</td>
+                <td>451.83점</td>
+              </tr>
+              <tr style="background:#fff1f2;">
+                <td class="col-label" style="color:var(--accent-red);">올려야 할 점수<br><small>(합격평균 기준)</small></td>
+                <td><strong style="color:var(--accent-red); font-size:15px;">+90.74점</strong></td>
+                <td><strong style="color:var(--accent-red); font-size:15px;">+112.6833점</strong></td>
+                <td><strong style="color:var(--accent-red); font-size:15px;">+21.32점</strong></td>
+                <td><strong style="color:var(--accent-red); font-size:15px;">+151.46점</strong></td>
+              </tr>
+              <tr style="background:#fff7ed;">
+                <td class="col-label" style="color:#c2410c;">최저합격선 격차<br><small>(합격최저 기준)</small></td>
+                <td><strong style="color:#c2410c;">+77.88점</strong></td>
+                <td><strong style="color:#c2410c;">+94.0033점</strong></td>
+                <td><strong style="color:#c2410c;">+19.31점</strong></td>
+                <td><strong style="color:#c2410c;">+142.33점</strong></td>
+              </tr>
+
+              <!-- 종목별 동일 줄 정렬 -->
+              <tr style="border-top: 2px solid #cbd5e1;">
+                <td class="col-event-label">
+                  <strong>1. 제자리멀리뛰기</strong><br>
+                  <small style="color:#64748b; font-weight:normal;">내 기록: 180cm</small>
+                </td>
+                <td>
+                  <span class="score-fmt">27 / 38</span><br>
+                  <span class="score-conv">(47.36 / 66.66)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">11 / 35</span><br>
+                  <span class="score-conv">(22 / 70)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">0 / 100</span><br>
+                  <span class="score-conv">(0 / 13.33)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">0 / 100</span><br>
+                  <span class="score-conv">(0 / 66.66)</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="col-event-label">
+                  <strong>2. 10m 왕복달리기</strong><br>
+                  <small style="color:#64748b; font-weight:normal;">내 기록: 12.0초</small>
+                </td>
+                <td>
+                  <span class="score-fmt">19 / 38</span><br>
+                  <span class="score-conv">(33.33 / 66.66)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">14 / 35</span><br>
+                  <span class="score-conv">(28 / 70)</span>
+                </td>
+                <td class="empty-cell">-</td>
+                <td>
+                  <span class="score-fmt">48 / 100</span><br>
+                  <span class="score-conv">(32 / 66.66)</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="col-event-label">
+                  <strong>3. 앉아윗몸앞으로굽히기</strong><br>
+                  <small style="color:#64748b; font-weight:normal;">내 기록: 18cm</small>
+                </td>
+                <td class="empty-cell">-</td>
+                <td>
+                  <span class="score-fmt">16 / 30</span><br>
+                  <span class="score-conv">(32 / 60)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">58 / 100</span><br>
+                  <span class="score-conv">(7.73 / 13.33)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">0 / 100</span><br>
+                  <span class="score-conv">(0 / 66.66)</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="col-event-label">
+                  <strong>4. 특수 종목 (마지막 줄)</strong><br>
+                  <small style="color:#64748b; font-weight:normal;">메디신볼 / 매달리기</small>
+                </td>
+                <td>
+                  <div style="font-size:12px; color:#475569; font-weight:600;">메디신볼 (4.5m)</div>
+                  <span class="score-fmt">19 / 38</span><br>
+                  <span class="score-conv">(33.33 / 66.66)</span>
+                </td>
+                <td class="empty-cell">-</td>
+                <td>
+                  <div style="font-size:12px; color:#475569; font-weight:600;">매달리기 (10초)</div>
+                  <span class="score-fmt">65 / 100</span><br>
+                  <span class="score-conv">(8.66 / 13.33)</span>
+                </td>
+                <td class="empty-cell">-</td>
+              </tr>
+
+              <tr style="background:#f8fafc; font-weight:700;">
+                <td class="col-label" style="color:var(--primary);">실기 총점 합계</td>
+                <td>
+                  <span class="score-fmt">65 / 114</span><br>
+                  <span class="score-conv" style="font-size:13.5px;">(184.2 / 200)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">41 / 100</span><br>
+                  <span class="score-conv" style="font-size:13.5px;">(82 / 200)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">123 / 300</span><br>
+                  <span class="score-conv" style="font-size:13.5px;">(16.4 / 40)</span>
+                </td>
+                <td>
+                  <span class="score-fmt">48 / 300</span><br>
+                  <span class="score-conv" style="font-size:13.5px;">(32 / 200)</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 이화여대 참고 카드 -->
+      <div class="card" style="border: 1px dashed #cbd5e1; background: #fafafa;">
+        <div class="card-header" style="background: transparent;">
+          <h3 style="font-size: 15px; color:#475569; font-weight: 600;">📌 [참고] 편집 폴더 내 추가 대학: 이화여자대학교 체육과학부 (나군)</h3>
+        </div>
+        <div style="padding: 14px 24px; font-size: 13.5px; color:#475569;">
+          • <strong>전형</strong>: 수능 60% + 실기 40%<br>
+          • <strong>내 수능 환산점수</strong>: <strong>513.89854점</strong> (600점 만점 / 수학 244.29, 영어 가산 5, 사탐 264.61)<br>
+          • <strong>합격자 점수분포</strong>: 최고 564.50점 · <strong>평균 543.26점</strong> · <strong>최저 523.14점</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- [섹션 2: 배점표] -->
+    <div id="section-scoring" class="tab-content">
+      
+      <!-- 대학 선택 탭 버튼 -->
+      <div class="pill-group">
+        <button class="pill-btn active" id="btn-knsu" onclick="showUniv('knsu')">한국체육대 (여)</button>
+        <button class="pill-btn" id="btn-dongduk" onclick="showUniv('dongduk')">동덕여자대</button>
+        <button class="pill-btn" id="btn-swu" onclick="showUniv('swu')">서울여자대</button>
+        <button class="pill-btn" id="btn-sungshin" onclick="showUniv('sungshin')">성신여자대</button>
+      </div>
+
+      <div id="univ-knsu" class="univ-view active">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">한국체육대학교 운동건강관리학과 실기고사 평가 기준표 (여자)</h2>
+              <div class="card-desc">종목별 38점 만점 (3종목 총점 114점) → 대학 환산 200점 만점 적용</div>
+            </div>
+            <span class="badge badge-blue">여학생 전용 배점</span>
+          </div>
+          <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 15%;">등급/배점</th>
+                  <th style="width: 28%;">10m 왕복달리기 (초)</th>
+                  <th style="width: 28%;">제자리멀리뛰기 (cm)</th>
+                  <th style="width: 28%;">메디신볼던지기 (m)</th>
+                </tr>
+              </thead>
+              <tbody>
+    
+                <tr>
+                  <td style="font-weight:700;">38점</td>
+                  <td class="">9.19 이하</td>
+                  <td class="">231 이상</td>
+                  <td class="">10.0 이상</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">37점</td>
+                  <td class="">9.20 ~ 9.44</td>
+                  <td class="">222 ~ 230</td>
+                  <td class="">9.7 ~ 9.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">35점</td>
+                  <td class="">9.45 ~ 9.70</td>
+                  <td class="">212 ~ 221</td>
+                  <td class="">9.4 ~ 9.6</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">33점</td>
+                  <td class="">9.71 ~ 9.95</td>
+                  <td class="">203 ~ 211</td>
+                  <td class="">9.1 ~ 9.3</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">31점</td>
+                  <td class="">9.96 ~ 10.21</td>
+                  <td class="">193 ~ 202</td>
+                  <td class="">8.7 ~ 9.0</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">29점</td>
+                  <td class="">10.22 ~ 10.46</td>
+                  <td class="">184 ~ 192</td>
+                  <td class="">8.4 ~ 8.6</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">27점</td>
+                  <td class="">10.47 ~ 10.72</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (180cm)</span> 174 ~ 183</td>
+                  <td class="">8.1 ~ 8.3</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">25점</td>
+                  <td class="">10.73 ~ 10.97</td>
+                  <td class="">165 ~ 173</td>
+                  <td class="">7.8 ~ 8.0</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">23점</td>
+                  <td class="">10.98 ~ 11.23</td>
+                  <td class="">155 ~ 164</td>
+                  <td class="">7.5 ~ 7.7</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">21점</td>
+                  <td class="">11.24 ~ 11.48</td>
+                  <td class="">146 ~ 154</td>
+                  <td class="">7.1 ~ 7.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">19점</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (12초)</span> 11.49 이상</td>
+                  <td class="">145 이하</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (4.5m)</span> 7.1 미만</td>
+                </tr>
+        
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+      <div id="univ-dongduk" class="univ-view">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">동덕여자대학교 체육학과 각 종목별 채점 기준표</h2>
+              <div class="card-desc">3개 종목 계측총점(100점 만점: 제멀 35점, 좌전굴 30점, 10m왕복 35점) → 정시 200점 만점 환산</div>
+            </div>
+            <span class="badge badge-amber">총 25개 배점구간</span>
+          </div>
+          <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 33%;">제자리멀리뛰기 (cm)<br><small style="font-weight:normal;color:#64748b;">(만점 35점 / 환산 70점)</small></th>
+                  <th style="width: 33%;">앉아윗몸앞으로굽히기 (cm)<br><small style="font-weight:normal;color:#64748b;">(만점 30점 / 환산 60점)</small></th>
+                  <th style="width: 33%;">10m 왕복달리기 (초)<br><small style="font-weight:normal;color:#64748b;">(만점 35점 / 환산 70점)</small></th>
+                </tr>
+              </thead>
+              <tbody>
+    
+                <tr>
+                  <td class=""><strong>35점</strong>: 237 이상</td>
+                  <td class=""><strong>30점</strong>: 32 이상</td>
+                  <td class=""><strong>35점</strong>: 09.95 이하</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>34점</strong>: 235 ~ 236</td>
+                  <td class=""><strong>29점</strong>: 31</td>
+                  <td class=""><strong>34점</strong>: 09.96 ~ 10.05</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>33점</strong>: 233 ~ 234</td>
+                  <td class=""><strong>28점</strong>: 30</td>
+                  <td class=""><strong>33점</strong>: 10.06 ~ 10.15</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>32점</strong>: 231 ~ 232</td>
+                  <td class=""><strong>27점</strong>: 29</td>
+                  <td class=""><strong>32점</strong>: 10.16 ~ 10.25</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>31점</strong>: 229 ~ 230</td>
+                  <td class=""><strong>26점</strong>: 28</td>
+                  <td class=""><strong>31점</strong>: 10.26 ~ 10.35</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>30점</strong>: 227 ~ 228</td>
+                  <td class=""><strong>25점</strong>: 27</td>
+                  <td class=""><strong>30점</strong>: 10.36 ~ 10.45</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>29점</strong>: 225 ~ 226</td>
+                  <td class=""><strong>24점</strong>: 26</td>
+                  <td class=""><strong>29점</strong>: 10.46 ~ 10.55</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>28점</strong>: 223 ~ 224</td>
+                  <td class=""><strong>23점</strong>: 25</td>
+                  <td class=""><strong>28점</strong>: 10.56 ~ 10.65</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>27점</strong>: 221 ~ 222</td>
+                  <td class=""><strong>22점</strong>: 24</td>
+                  <td class=""><strong>27점</strong>: 10.66 ~ 10.75</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>26점</strong>: 219 ~ 220</td>
+                  <td class=""><strong>21점</strong>: 23</td>
+                  <td class=""><strong>26점</strong>: 10.76 ~ 10.85</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>25점</strong>: 217 ~ 218</td>
+                  <td class=""><strong>20점</strong>: 22</td>
+                  <td class=""><strong>25점</strong>: 10.86 ~ 10.95</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>24점</strong>: 215 ~ 216</td>
+                  <td class=""><strong>19점</strong>: 21</td>
+                  <td class=""><strong>24점</strong>: 10.96 ~ 11.05</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>23점</strong>: 213 ~ 214</td>
+                  <td class=""><strong>18점</strong>: 20</td>
+                  <td class=""><strong>23점</strong>: 11.06 ~ 11.15</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>22점</strong>: 211 ~ 212</td>
+                  <td class=""><strong>17점</strong>: 19</td>
+                  <td class=""><strong>22점</strong>: 11.16 ~ 11.25</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>21점</strong>: 209 ~ 210</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (18cm)</span> <strong>16점</strong>: 18</td>
+                  <td class=""><strong>21점</strong>: 11.26 ~ 11.35</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>20점</strong>: 207 ~ 208</td>
+                  <td class=""><strong>15점</strong>: 17</td>
+                  <td class=""><strong>20점</strong>: 11.36 ~ 11.45</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>19점</strong>: 205 ~ 206</td>
+                  <td class=""><strong>14점</strong>: 16</td>
+                  <td class=""><strong>19점</strong>: 11.46 ~ 11.55</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>18점</strong>: 203 ~ 204</td>
+                  <td class=""><strong>13점</strong>: 15</td>
+                  <td class=""><strong>18점</strong>: 11.56 ~ 11.65</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>17점</strong>: 201 ~ 202</td>
+                  <td class=""><strong>12점</strong>: 14</td>
+                  <td class=""><strong>17점</strong>: 11.66 ~ 11.75</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>16점</strong>: 199 ~ 200</td>
+                  <td class=""><strong>11점</strong>: 13</td>
+                  <td class=""><strong>16점</strong>: 11.76 ~ 11.85</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>15점</strong>: 197 ~ 198</td>
+                  <td class=""><strong>10점</strong>: 12</td>
+                  <td class=""><strong>15점</strong>: 11.86 ~ 11.95</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>14점</strong>: 195 ~ 196</td>
+                  <td class=""><strong>9점</strong>: 11</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (12초)</span> <strong>14점</strong>: 11.96 ~ 12.05</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>13점</strong>: 193 ~ 194</td>
+                  <td class=""><strong>8점</strong>: 10</td>
+                  <td class=""><strong>13점</strong>: 12.06 ~ 12.15</td>
+                </tr>
+        
+                <tr>
+                  <td class=""><strong>12점</strong>: 191 ~ 192</td>
+                  <td class=""><strong>7점</strong>: 9</td>
+                  <td class=""><strong>12점</strong>: 12.16 ~ 12.25</td>
+                </tr>
+        
+                <tr>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (180cm)</span> <strong>11점</strong>: 190 이하</td>
+                  <td class=""><strong>6점</strong>: 8 이하</td>
+                  <td class=""><strong>11점</strong>: 12.26 이상</td>
+                </tr>
+        
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+      <div id="univ-swu" class="univ-view">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">서울여자대학교 스포츠운동과학과 실기 평가등급표</h2>
+              <div class="card-desc">1등급~25등급 (100점~0점 만점) → 실질반영점수 40점 만점 환산</div>
+            </div>
+            <span class="badge badge-purple">1~25 등급제</span>
+          </div>
+          <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 10%;">등급</th>
+                  <th style="width: 12%;">배점</th>
+                  <th style="width: 26%;">앉아 윗몸 앞으로 굽히기 (cm)</th>
+                  <th style="width: 26%;">제자리멀리뛰기 (cm)</th>
+                  <th style="width: 26%;">팔굽혀 매달리기 (초)</th>
+                </tr>
+              </thead>
+              <tbody>
+    
+                <tr>
+                  <td style="font-weight:700;">1등급</td>
+                  <td style="font-weight:600; color:#475569;">100점</td>
+                  <td class="">30.1 이상</td>
+                  <td class="">235 이상</td>
+                  <td class="">24 이상</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">2등급</td>
+                  <td style="font-weight:600; color:#475569;">98점</td>
+                  <td class="">29.4 ~ 30.0</td>
+                  <td class="">233 ~ 234</td>
+                  <td class="">23</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">3등급</td>
+                  <td style="font-weight:600; color:#475569;">96점</td>
+                  <td class="">28.7 ~ 29.3</td>
+                  <td class="">231 ~ 232</td>
+                  <td class="">22</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">4등급</td>
+                  <td style="font-weight:600; color:#475569;">94점</td>
+                  <td class="">28.0 ~ 28.6</td>
+                  <td class="">229 ~ 230</td>
+                  <td class="">21</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">5등급</td>
+                  <td style="font-weight:600; color:#475569;">92점</td>
+                  <td class="">27.3 ~ 27.9</td>
+                  <td class="">227 ~ 228</td>
+                  <td class="">20</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">6등급</td>
+                  <td style="font-weight:600; color:#475569;">90점</td>
+                  <td class="">26.6 ~ 27.2</td>
+                  <td class="">225 ~ 226</td>
+                  <td class="">19</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">7등급</td>
+                  <td style="font-weight:600; color:#475569;">88점</td>
+                  <td class="">25.9 ~ 26.5</td>
+                  <td class="">223 ~ 224</td>
+                  <td class="">18</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">8등급</td>
+                  <td style="font-weight:600; color:#475569;">86점</td>
+                  <td class="">25.2 ~ 25.8</td>
+                  <td class="">221 ~ 222</td>
+                  <td class="">17</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">9등급</td>
+                  <td style="font-weight:600; color:#475569;">83점</td>
+                  <td class="">24.4 ~ 25.1</td>
+                  <td class="">219 ~ 220</td>
+                  <td class="">16</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">10등급</td>
+                  <td style="font-weight:600; color:#475569;">80점</td>
+                  <td class="">23.6 ~ 24.3</td>
+                  <td class="">217 ~ 218</td>
+                  <td class="">15</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">11등급</td>
+                  <td style="font-weight:600; color:#475569;">77점</td>
+                  <td class="">22.8 ~ 23.5</td>
+                  <td class="">215 ~ 216</td>
+                  <td class="">14</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">12등급</td>
+                  <td style="font-weight:600; color:#475569;">74점</td>
+                  <td class="">22.0 ~ 22.7</td>
+                  <td class="">213 ~ 214</td>
+                  <td class="">13</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">13등급</td>
+                  <td style="font-weight:600; color:#475569;">71점</td>
+                  <td class="">21.2 ~ 21.9</td>
+                  <td class="">211 ~ 212</td>
+                  <td class="">12</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">14등급</td>
+                  <td style="font-weight:600; color:#475569;">68점</td>
+                  <td class="">20.4 ~ 21.1</td>
+                  <td class="">209 ~ 210</td>
+                  <td class="">11</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">15등급</td>
+                  <td style="font-weight:600; color:#475569;">65점</td>
+                  <td class="">19.6 ~ 20.3</td>
+                  <td class="">207 ~ 208</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (10초)</span> 10</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">16등급</td>
+                  <td style="font-weight:600; color:#475569;">62점</td>
+                  <td class="">18.8 ~ 19.5</td>
+                  <td class="">205 ~ 206</td>
+                  <td class="">9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">17등급</td>
+                  <td style="font-weight:600; color:#475569;">58점</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (18cm)</span> 17.9 ~ 18.7</td>
+                  <td class="">203 ~ 204</td>
+                  <td class="">8</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">18등급</td>
+                  <td style="font-weight:600; color:#475569;">54점</td>
+                  <td class="">17.0 ~ 17.8</td>
+                  <td class="">201 ~ 202</td>
+                  <td class="">7</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">19등급</td>
+                  <td style="font-weight:600; color:#475569;">50점</td>
+                  <td class="">16.1 ~ 16.9</td>
+                  <td class="">199 ~ 200</td>
+                  <td class="">6</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">20등급</td>
+                  <td style="font-weight:600; color:#475569;">46점</td>
+                  <td class="">15.2 ~ 16.0</td>
+                  <td class="">197 ~ 198</td>
+                  <td class="">5</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">21등급</td>
+                  <td style="font-weight:600; color:#475569;">42점</td>
+                  <td class="">14.3 ~ 15.1</td>
+                  <td class="">195 ~ 196</td>
+                  <td class="">4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">22등급</td>
+                  <td style="font-weight:600; color:#475569;">38점</td>
+                  <td class="">13.4 ~ 14.2</td>
+                  <td class="">193 ~ 194</td>
+                  <td class="">3</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">23등급</td>
+                  <td style="font-weight:600; color:#475569;">34점</td>
+                  <td class="">12.5 ~ 13.3</td>
+                  <td class="">191 ~ 192</td>
+                  <td class="">2</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">24등급</td>
+                  <td style="font-weight:600; color:#475569;">30점</td>
+                  <td class="">11.6 ~ 12.4</td>
+                  <td class="">189 ~ 190</td>
+                  <td class="">1</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">25등급</td>
+                  <td style="font-weight:600; color:#475569;">0점</td>
+                  <td class="">11.5 이하</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (180cm)</span> 188 이하</td>
+                  <td class="">1 미만</td>
+                </tr>
+        
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+      <div id="univ-sungshin" class="univ-view">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">성신여자대학교 운동재활전공 실기고사 배점기준표</h2>
+              <div class="card-desc">종목별 100점 만점 (3종목 총 300점) → 정시 200점 만점(40%) 환산</div>
+            </div>
+            <span class="badge badge-green">현재점수 → 1단계(+10%) → 2단계(+20%) → … → 9단계(+90%) → 10단계(만점)</span>
+          </div>
+          <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 12%;">종목 배점</th>
+                  <th style="width: 29%;">제자리멀리뛰기 (cm)</th>
+                  <th style="width: 29%;">10m 왕복달리기 (초)</th>
+                  <th style="width: 29%;">윗몸 앞으로 굽히기 (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+    
+                <tr>
+                  <td style="font-weight:700;">100점</td>
+                  <td class="">235 이상</td>
+                  <td class="">9.5 이하</td>
+                  <td class="">33.0 이상</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">96점</td>
+                  <td class="">233 ~ 234</td>
+                  <td class="">9.6 ~ 9.7</td>
+                  <td class="">32.5 ~ 32.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">92점</td>
+                  <td class="">231 ~ 232</td>
+                  <td class="">9.8 ~ 9.9</td>
+                  <td class="">32.0 ~ 32.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">88점</td>
+                  <td class="">229 ~ 230</td>
+                  <td class="">10.0 ~ 10.1</td>
+                  <td class="">31.5 ~ 31.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">84점</td>
+                  <td class="">227 ~ 228</td>
+                  <td class="">10.2 ~ 10.3</td>
+                  <td class="">31.0 ~ 31.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">80점</td>
+                  <td class="">225 ~ 226</td>
+                  <td class="">10.4 ~ 10.5</td>
+                  <td class="">30.5 ~ 30.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">76점</td>
+                  <td class="">223 ~ 224</td>
+                  <td class="">10.6 ~ 10.7</td>
+                  <td class="">30.0 ~ 30.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">72점</td>
+                  <td class="">221 ~ 222</td>
+                  <td class="">10.8 ~ 10.9</td>
+                  <td class="">29.5 ~ 29.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">68점</td>
+                  <td class="">219 ~ 220</td>
+                  <td class="">11.0 ~ 11.1</td>
+                  <td class="">29.0 ~ 29.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">64점</td>
+                  <td class="">217 ~ 218</td>
+                  <td class="">11.2 ~ 11.3</td>
+                  <td class="">28.5 ~ 28.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">60점</td>
+                  <td class="">215 ~ 216</td>
+                  <td class="">11.4 ~ 11.5</td>
+                  <td class="">28.0 ~ 28.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">56점</td>
+                  <td class="">213 ~ 214</td>
+                  <td class="">11.6 ~ 11.7</td>
+                  <td class="">27.5 ~ 27.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">52점</td>
+                  <td class="">211 ~ 212</td>
+                  <td class="">11.8 ~ 11.9</td>
+                  <td class="">27.0 ~ 27.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">48점</td>
+                  <td class="">209 ~ 210</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (12초)</span> 12.0 ~ 12.1</td>
+                  <td class="">26.5 ~ 26.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">44점</td>
+                  <td class="">207 ~ 208</td>
+                  <td class="">12.2 ~ 12.3</td>
+                  <td class="">26.0 ~ 26.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">40점</td>
+                  <td class="">205 ~ 206</td>
+                  <td class="">12.4 ~ 12.5</td>
+                  <td class="">25.5 ~ 25.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">36점</td>
+                  <td class="">203 ~ 204</td>
+                  <td class="">12.6 ~ 12.7</td>
+                  <td class="">25.0 ~ 25.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">32점</td>
+                  <td class="">201 ~ 202</td>
+                  <td class="">12.8 ~ 12.9</td>
+                  <td class="">24.5 ~ 24.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">28점</td>
+                  <td class="">199 ~ 200</td>
+                  <td class="">13.0 ~ 13.1</td>
+                  <td class="">24.0 ~ 24.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">24점</td>
+                  <td class="">197 ~ 198</td>
+                  <td class="">13.2 ~ 13.3</td>
+                  <td class="">23.5 ~ 23.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">20점</td>
+                  <td class="">195 ~ 196</td>
+                  <td class="">13.4 ~ 13.5</td>
+                  <td class="">23.0 ~ 23.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">16점</td>
+                  <td class="">193 ~ 194</td>
+                  <td class="">13.6 ~ 13.7</td>
+                  <td class="">22.5 ~ 22.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">12점</td>
+                  <td class="">191 ~ 192</td>
+                  <td class="">13.8 ~ 13.9</td>
+                  <td class="">22.0 ~ 22.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">8점</td>
+                  <td class="">189 ~ 190</td>
+                  <td class="">14.0 ~ 14.1</td>
+                  <td class="">21.5 ~ 21.9</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">4점</td>
+                  <td class="">187 ~ 188</td>
+                  <td class="">14.2 ~ 14.3</td>
+                  <td class="">21.0 ~ 21.4</td>
+                </tr>
+        
+                <tr>
+                  <td style="font-weight:700;">0점</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (180cm)</span> 186 이하</td>
+                  <td class="">14.4 이상</td>
+                  <td class="highlight-row"><span class="user-tag">내 기록 (18cm)</span> 20.9 이하</td>
+                </tr>
+        
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+    </div>
+
+    
+
+    <!-- [섹션 3: 기록 관리] -->
+    <div id="section-management" class="tab-content">
+
+      <!-- 1. 4개 대학 동시 합격을 위한 5대 종목 통합 목표기록 및 진단 -->
+      <div class="card" >
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">1. 4개 대학 동시 합격을 위한 5대 종목 통합 목표기록 및 진단</h2>
+            <div class="card-desc">현재 수능 및 학생부 점수를 기준으로, 4개 대학(한국체대, 동덕여대, 서울여대, 성신여대)의 합격선(최소/평균)을 동시에 통과할 수 있는 5개 실기 종목의 최적 목표 조합입니다.</div>
+          </div>
+          <span class="badge badge-green">올패스(All-Pass) 전략</span>
+        </div>
+
+        <div style="padding: 16px 20px 8px 20px;">
+          <h3 style="font-size:15px; font-weight:700; color:#0f172a; margin-bottom:10px;">🎯 1. 4개 대학 동시 합격 권장 목표 기록 (5개 종목)</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 20%;">실기 종목</th>
+                <th style="width: 22%;">반영 대학</th>
+                <th style="width: 22%; background:#dcfce7; color:#14532d;">통합 권장 목표기록</th>
+                <th style="width: 36%;">대학별 획득 배점 수준</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:700; color:#0f172a;">1. 제자리멀리뛰기</td>
+                <td>4개교 공통</td>
+                <td style="background:#f0fdf4;">
+                  <strong style="color:#15803d; font-size:15px;">233 cm 이상</strong>
+                </td>
+                <td style="font-size:12.5px; line-height:1.6;">
+                  • <strong>한국체대</strong>: <span style="color:#15803d; font-weight:700;">38점 만점</span> (231 이상)<br>
+                  • <strong>동덕여대</strong>: <strong>33점</strong> / 35점 (233~234)<br>
+                  • <strong>서울여대</strong>: <strong>97점</strong> / 100점 (233~234)<br>
+                  • <strong>성신여대</strong>: <strong>96점</strong> / 100점 (233~234)
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight:700; color:#0f172a;">2. 10m 왕복달리기</td>
+                <td>한체대 · 동덕 · 성신</td>
+                <td style="background:#f0fdf4;">
+                  <strong style="color:#15803d; font-size:15px;">9.40 초 이하</strong>
+                </td>
+                <td style="font-size:12.5px; line-height:1.6;">
+                  • <strong>한국체대</strong>: <strong>37점</strong> / 38점 (9.20~9.44)<br>
+                  • <strong>동덕여대</strong>: <span style="color:#15803d; font-weight:700;">35점 만점</span> (09.95 이하)<br>
+                  • <strong>성신여대</strong>: <span style="color:#15803d; font-weight:700;">100점 만점</span> (9.5 이하)
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight:700; color:#0f172a;">3. 앉아윗몸앞으로굽히기</td>
+                <td>동덕 · 서울여대 · 성신</td>
+                <td style="background:#f0fdf4;">
+                  <strong style="color:#15803d; font-size:15px;">32.0 cm 이상</strong>
+                </td>
+                <td style="font-size:12.5px; line-height:1.6;">
+                  • <strong>동덕여대</strong>: <span style="color:#15803d; font-weight:700;">30점 만점</span> (32 이상)<br>
+                  • <strong>서울여대</strong>: <span style="color:#15803d; font-weight:700;">100점 만점</span> (30.1 이상)<br>
+                  • <strong>성신여대</strong>: <strong>92점</strong> / 100점 (32.0~32.4)
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight:700; color:#0f172a;">4. 메디신볼던지기</td>
+                <td>한국체대 전용</td>
+                <td style="background:#f0fdf4;">
+                  <strong style="color:#15803d; font-size:15px;">9.5 m 이상</strong>
+                </td>
+                <td style="font-size:12.5px; line-height:1.6;">
+                  • <strong>한국체대</strong>: <strong>35점 이상</strong> / 38점 (9.4~9.6m 35점, 10.0m 만점)
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight:700; color:#0f172a;">5. 팔굽혀매달리기</td>
+                <td>서울여대 전용</td>
+                <td style="background:#f0fdf4;">
+                  <strong style="color:#15803d; font-size:15px;">22 초 이상</strong>
+                </td>
+                <td style="font-size:12.5px; line-height:1.6;">
+                  • <strong>서울여대</strong>: <strong>96점</strong> / 100점 (22~23초 96점, 24초 만점)
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="padding: 20px 20px 8px 20px;">
+          <h3 style="font-size:15px; font-weight:700; color:#0f172a; margin-bottom:10px;">📊 2. 위 5종목 달성 시 대학별 최종 환산점수 및 합격 판정</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 18%;">대학명 / 전형</th>
+                <th style="width: 18%;">실기 취득 / 환산</th>
+                <th style="width: 16%;">예상 총 환산점수</th>
+                <th style="width: 18%;">합격최저선 대비 격차</th>
+                <th style="width: 18%;">합격평균선 대비 격차</th>
+                <th style="width: 12%;">최종 판정</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:700;">
+                  한국체육대학교<br>
+                  <small style="color:#64748b; font-weight:normal;">운동건강관리학과 (가군)</small>
+                </td>
+                <td>
+                  <strong>110점 / 114점</strong><br>
+                  <span style="color:var(--primary); font-size:12px; font-weight:700;">(환산 192.98 / 200)</span>
+                </td>
+                <td><strong style="color:var(--primary); font-size:14px;">899.28점</strong></td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+1.06점 초과</td>
+                <td style="color:#dc2626; font-weight:600; font-size:12px;">-11.80점 부족 (만점시 -4.78)</td>
+                <td><span style="background:#ffedd5; color:#9a3412; font-weight:700; font-size:11.5px; padding:3px 7px; border-radius:4px;">최저선 통과 🎯</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">
+                  동덕여자대학교<br>
+                  <small style="color:#64748b; font-weight:normal;">체육학과 (나군)</small>
+                </td>
+                <td>
+                  <strong>98점 / 100점</strong><br>
+                  <span style="color:var(--primary); font-size:12px; font-weight:700;">(환산 196.00 / 200)</span>
+                </td>
+                <td><strong style="color:var(--primary); font-size:14px;">873.67점</strong></td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+20.00점 초과</td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+1.32점 초과</td>
+                <td><span style="background:#dcfce7; color:#15803d; font-weight:700; font-size:11.5px; padding:3px 7px; border-radius:4px;">평균선 돌파 🎉</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">
+                  서울여자대학교<br>
+                  <small style="color:#64748b; font-weight:normal;">스포츠운동과학 (나군)</small>
+                </td>
+                <td>
+                  <strong>293점 / 300점</strong><br>
+                  <span style="color:var(--primary); font-size:12px; font-weight:700;">(환산 39.07 / 40)</span>
+                </td>
+                <td><strong style="color:var(--primary); font-size:14px;">95.91점</strong></td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+3.36점 초과</td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+1.35점 초과</td>
+                <td><span style="background:#dcfce7; color:#15803d; font-weight:700; font-size:11.5px; padding:3px 7px; border-radius:4px;">평균선 돌파 🎉</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">
+                  성신여자대학교<br>
+                  <small style="color:#64748b; font-weight:normal;">운동재활전공 (가군)</small>
+                </td>
+                <td>
+                  <strong>288점 / 300점</strong><br>
+                  <span style="color:var(--primary); font-size:12px; font-weight:700;">(환산 192.00 / 200)</span>
+                </td>
+                <td><strong style="color:var(--primary); font-size:14px;">438.50점</strong></td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+17.67점 초과</td>
+                <td style="background:#f0fdf4; color:#15803d; font-weight:700;">+8.54점 초과</td>
+                <td><span style="background:#dcfce7; color:#15803d; font-weight:700; font-size:11.5px; padding:3px 7px; border-radius:4px;">평균선 돌파 🎉</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. 현재 점수 기준 만점 달성 10단계 로드맵 -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">2. 현재 점수 기준 만점 달성 10단계 로드맵</h2>
+            <div class="card-desc">현재 내 점수에서 만점까지의 격차를 <strong>10단계(10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, 만점)</strong>로 균등 배분하여 산출한 필요 기록 (0점 종목은 최저 기본점수 기준)</div>
+          </div>
+          <span class="badge badge-green">현재점수 → 1단계(+10%) → 2단계(+20%) → … → 9단계(+90%) → 10단계(만점)</span>
+        </div>
+        <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 12%;">대학 / 학과</th>
+                <th style="width: 12%;">실기 종목</th>
+                <th style="width: 12%; background:#fef9c3; color:#713f12;">현재 기록<br><small>(현재 점수)</small></th>
+                <th style="width: 6.5%;">1단계<br><small>(+10%)</small></th><th style="width: 6.5%;">2단계<br><small>(+20%)</small></th><th style="width: 6.5%;">3단계<br><small>(+30%)</small></th><th style="width: 6.5%;">4단계<br><small>(+40%)</small></th><th style="width: 6.5%;">5단계<br><small>(+50%)</small></th><th style="width: 6.5%;">6단계<br><small>(+60%)</small></th><th style="width: 6.5%;">7단계<br><small>(+70%)</small></th><th style="width: 6.5%;">8단계<br><small>(+80%)</small></th><th style="width: 6.5%;">9단계<br><small>(+90%)</small></th>
+                <th style="width: 7.5%; background:#dcfce7; color:#14532d;">10단계 (만점)<br><small>(100% 만점)</small></th>
+              </tr>
+            </thead>
+            <tbody>
+          <tr>
+            <td rowspan="3" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">한국체육대학교<br><small style="font-weight:normal;color:#64748b;">운동건강관리학과</small></td>
+            <td style="font-weight:600; white-space:nowrap;">10m왕복달리기 <small style="color:#64748b;">(초)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">19점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">11.49 이상</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">21점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.24 ~ 11.48</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">23점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.98 ~ 11.23</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">25점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.73 ~ 10.97</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">27점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.47 ~ 10.72</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">29점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.22 ~ 10.46</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">31점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.96 ~ 10.21</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">33점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.71 ~ 9.95</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">35점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.45 ~ 9.70</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">37점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.20 ~ 9.44</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">38점</div>
+              <div class="min-record-box">9.19 이하</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">제자리멀리뛰기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">27점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">174 ~ 183</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">29점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">184 ~ 192</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">29점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">184 ~ 192</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">31점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">193 ~ 202</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">31점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">193 ~ 202</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">33점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">203 ~ 211</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">35점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">212 ~ 221</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">35점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">212 ~ 221</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">37점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">222 ~ 230</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">37점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">222 ~ 230</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">38점</div>
+              <div class="min-record-box">231 이상</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">메디신볼던지기 <small style="color:#64748b;">(m)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">19점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">7.1 미만</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">21점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">7.1 ~ 7.4</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">23점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">7.5 ~ 7.7</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">25점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">7.8 ~ 8.0</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">27점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">8.1 ~ 8.3</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">29점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">8.4 ~ 8.6</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">31점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">8.7 ~ 9.0</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">33점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.1 ~ 9.3</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">35점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.4 ~ 9.6</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">37점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.7 ~ 9.9</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">38점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">10.0 이상</div>
+            </td>
+          </tr>
+          <tr class="univ-divider">
+            <td rowspan="3" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">동덕여자대학교<br><small style="font-weight:normal;color:#64748b;">체육학과</small></td>
+            <td style="font-weight:600; white-space:nowrap;">제자리멀리뛰기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">11점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">190 이하</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">13점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">193 ~ 194</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">16점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">199 ~ 200</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">18점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">203 ~ 204</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">21점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">209 ~ 210</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">23점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">213 ~ 214</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">25점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">217 ~ 218</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">28점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">223 ~ 224</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">30점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">227 ~ 228</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">33점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">233 ~ 234</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">35점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">237 이상</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">앉아윗몸앞으로굽히기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">16점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">18</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">17점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">19</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">19점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">21</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">20점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">22</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">22점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">24</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">23점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">25</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">24점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">26</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">26점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">28</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">27점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">29</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">29점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">31</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">30점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">32 이상</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">10m왕복달리기 <small style="color:#64748b;">(초)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">14점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">11.96 ~ 12.05</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">16점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.76 ~ 11.85</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">18점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.56 ~ 11.65</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">20점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.36 ~ 11.45</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">22점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.16 ~ 11.25</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">25점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.86 ~ 10.95</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">27점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.66 ~ 10.75</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">29점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.46 ~ 10.55</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">31점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.26 ~ 10.35</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">33점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.06 ~ 10.15</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">35점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">09.95 이하</div>
+            </td>
+          </tr>
+          <tr class="univ-divider">
+            <td rowspan="3" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">서울여자대학교<br><small style="font-weight:normal;color:#64748b;">스포츠운동과학과</small></td>
+            <td style="font-weight:600; white-space:nowrap;">앉아윗몸앞으로굽히기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">58점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">17.9 ~ 18.7</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">65점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">19.6 ~ 20.3</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">68점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">20.4 ~ 21.1</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">74점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">22.0 ~ 22.7</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">77점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">22.8 ~ 23.5</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">83점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">24.4 ~ 25.1</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">88점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">25.9 ~ 26.5</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">90점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">26.6 ~ 27.2</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">94점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">28.0 ~ 28.6</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">96점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">28.7 ~ 29.3</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">100점</div>
+              <div class="min-record-box">30.1 이상</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">제자리멀리뛰기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">0점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">188 이하</div><br><small style="font-size:10.5px; color:#a16207;">(0점→최저 30점 기준)</small>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">38점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">193 ~ 194</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">50점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">199 ~ 200</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">58점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">203 ~ 204</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">65점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">207 ~ 208</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">71점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">211 ~ 212</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">80점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">217 ~ 218</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">86점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">221 ~ 222</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">90점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">225 ~ 226</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">96점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">231 ~ 232</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">100점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">235 이상</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">팔굽혀매달리기 <small style="color:#64748b;">(초)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">65점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">10</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">68점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">74점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">13</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">77점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">14</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">83점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">16</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">86점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">17</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">88점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">18</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">92점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">20</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">94점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">21</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">98점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">23</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">100점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">24 이상</div>
+            </td>
+          </tr>
+          <tr class="univ-divider">
+            <td rowspan="3" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">성신여자대학교<br><small style="font-weight:normal;color:#64748b;">운동재활전공</small></td>
+            <td style="font-weight:600; white-space:nowrap;">제자리멀리뛰기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">0점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">186 이하</div><br><small style="font-size:10.5px; color:#a16207;">(0점→최저 4점 기준)</small>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">12점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">191 ~ 192</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">24점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">197 ~ 198</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">32점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">201 ~ 202</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">44점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">207 ~ 208</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">52점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">211 ~ 212</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">60점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">215 ~ 216</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">72점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">221 ~ 222</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">80점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">225 ~ 226</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">92점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">231 ~ 232</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">100점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">235 이상</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">10m왕복달리기 <small style="color:#64748b;">(초)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">48점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">12.0 ~ 12.1</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">52점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.8 ~ 11.9</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">60점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.4 ~ 11.5</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">64점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.2 ~ 11.3</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">68점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">11.0 ~ 11.1</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">76점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.6 ~ 10.7</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">80점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.4 ~ 10.5</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">84점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.2 ~ 10.3</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">88점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">10.0 ~ 10.1</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">96점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">9.6 ~ 9.7</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">100점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">9.5 이하</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; white-space:nowrap;">윗몸앞으로굽히기 <small style="color:#64748b;">(cm)</small></td>
+            <td style="background:#fef08a;">
+              <div style="font-weight:700; color:#854d0e; font-size:13.5px;">0점 (현재)</div>
+              <div style="font-size:11.5px; color:#713f12; margin-top:2px;">20.9 이하</div><br><small style="font-size:10.5px; color:#a16207;">(0점→최저 4점 기준)</small>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">12점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">22.0 ~ 22.4</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">24점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">23.5 ~ 23.9</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">32점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">24.5 ~ 24.9</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">44점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">26.0 ~ 26.4</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">52점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">27.0 ~ 27.4</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">60점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">28.0 ~ 28.4</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">72점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">29.5 ~ 29.9</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">80점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">30.5 ~ 30.9</div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#1e3a8a; font-size:13px;">92점</div>
+              <div style="font-size:11px; color:#334155; margin-top:2px;">32.0 ~ 32.4</div>
+            </td>
+            <td style="background:#f0fdf4;">
+              <div style="font-weight:700; color:#15803d; font-size:13.5px;">100점</div>
+              <div style="font-size:11.5px; color:#14532d; font-weight:700; margin-top:2px;">33.0 이상</div>
+            </td>
+          </tr>
+            </tbody>
+</table>
+        </div>
+      </div>
+
+      <!-- 2. 각 학교별 단계별 예상점수 및 합격평균/최소점수 차이 분석표 -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">3. 대학별 10단계 실기 향상 시 예상 환산점수 및 합격평균 · 최소점수 차이 비교</h2>
+            <div class="card-desc">각 대학의 10단계 실기 목표 달성에 따른 최종 환산점수와 전년도 합격자 평균점 및 최소점수(최저 합격선) 간의 격차 비교</div>
+          </div>
+          <span class="badge badge-blue">실시간 시뮬레이션 기준</span>
+        </div>
+        <div class="scroll-hint"><span>⇄ 좌우로 스크롤하여 전체 표 확인</span></div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 14%;">대학 / 학과</th>
+                <th style="width: 11%;">구분 지표</th>
+                <th style="width: 9%;">현재 점수</th>
+                <th style="width: 6.5%;">1단계 (+10%)</th><th style="width: 6.5%;">2단계 (+20%)</th><th style="width: 6.5%;">3단계 (+30%)</th><th style="width: 6.5%;">4단계 (+40%)</th><th style="width: 6.5%;">5단계 (+50%)</th><th style="width: 6.5%;">6단계 (+60%)</th><th style="width: 6.5%;">7단계 (+70%)</th><th style="width: 6.5%;">8단계 (+80%)</th><th style="width: 6.5%;">9단계 (+90%)</th>
+                <th style="width: 7.5%; background:#dcfce7; color:#14532d;">10단계 (만점)</th>
+              </tr>
+            </thead>
+            <tbody>
+      <tr style="border-top:2px solid #cbd5e1;">
+        <td rowspan="4" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">
+          한국체육대학교<br><small style="color:#64748b; font-weight:normal;">운동건강관리학과</small><br>
+          <div style="margin-top:6px; font-size:11px; color:#fff; background:#b45309; padding:2px 6px; border-radius:4px; display:inline-block; font-weight:700;">
+            미달성 (만점 시 최저선 도달)
+          </div>
+          <div style="font-size:11.5px; color:#64748b; margin-top:4px;">
+            합격평균: <strong>911.08점</strong><br>
+            합격최소: <strong>898.22점</strong>
+          </div>
+        </td>
+        <td style="font-weight:600; background:#f1f5f9;">총 환산점수</td>
+        <td><strong style="color:var(--primary); font-size:13px;">820.34점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">830.86점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">837.88점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">848.41점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">855.42점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">865.95점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">876.48점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">883.49점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">894.02점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">901.04점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">906.30점</strong></td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:600; background:#f1f5f9;">합격평균 차이 <small style="font-weight:normal;color:#64748b;">(평균: 911.08점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-90.74점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-80.22점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-73.20점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-62.67점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-55.66점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-45.13점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-34.60점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-27.59점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-17.06점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-10.04점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-4.78점</td>
+      </tr>
+
+      <tr style="background:#fff7ed;">
+        <td style="font-weight:600; background:#ffedd5; color:#9a3412;">최소점수 차이 <small style="font-weight:normal;color:#9a3412;">(최소: 898.22점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-77.88점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-67.36점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-60.34점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-49.81점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-42.80점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-32.27점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-21.74점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-14.73점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-4.20점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+2.82점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+8.08점</td>
+      </tr>
+
+      <tr style="border-bottom:2px solid #cbd5e1;">
+        <td style="font-weight:600; background:#f1f5f9; color:#475569;">실기 취득(환산)</td>
+        <td><span style="font-weight:600; font-size:12px;">65점</span> <small style="color:#64748b; font-size:10.5px;">(114.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">71점</span> <small style="color:#64748b; font-size:10.5px;">(124.6점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">75점</span> <small style="color:#64748b; font-size:10.5px;">(131.6점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">81점</span> <small style="color:#64748b; font-size:10.5px;">(142.1점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">85점</span> <small style="color:#64748b; font-size:10.5px;">(149.1점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">91점</span> <small style="color:#64748b; font-size:10.5px;">(159.6점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">97점</span> <small style="color:#64748b; font-size:10.5px;">(170.2점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">101점</span> <small style="color:#64748b; font-size:10.5px;">(177.2점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">107점</span> <small style="color:#64748b; font-size:10.5px;">(187.7점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">111점</span> <small style="color:#64748b; font-size:10.5px;">(194.7점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">114점</span> <small style="color:#64748b; font-size:10.5px;">(200.0점)</small></td>
+      </tr>
+      <tr class="univ-divider" style="border-top:2px solid #cbd5e1;">
+        <td rowspan="4" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">
+          동덕여자대학교<br><small style="color:#64748b; font-weight:normal;">체육학과</small><br>
+          <div style="margin-top:6px; font-size:11px; color:#fff; background:#15803d; padding:2px 6px; border-radius:4px; display:inline-block; font-weight:700;">
+            10단계 돌파 🎉
+          </div>
+          <div style="font-size:11.5px; color:#64748b; margin-top:4px;">
+            합격평균: <strong>872.35점</strong><br>
+            합격최소: <strong>853.67점</strong>
+          </div>
+        </td>
+        <td style="font-weight:600; background:#f1f5f9;">총 환산점수</td>
+        <td><strong style="color:var(--primary); font-size:13px;">759.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">769.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">783.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">793.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">807.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">819.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">829.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">843.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">853.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">867.67점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">877.67점</strong></td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:600; background:#f1f5f9;">합격평균 차이 <small style="font-weight:normal;color:#64748b;">(평균: 872.35점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-112.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-102.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-88.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-78.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-64.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-52.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-42.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-28.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-18.68점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-4.68점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12.5px;">+5.32점</td>
+      </tr>
+
+      <tr style="background:#fff7ed;">
+        <td style="font-weight:600; background:#ffedd5; color:#9a3412;">최소점수 차이 <small style="font-weight:normal;color:#9a3412;">(최소: 853.67점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-94.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-84.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-70.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-60.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-46.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-34.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-24.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-10.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-0.00점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+14.00점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+24.00점</td>
+      </tr>
+
+      <tr style="border-bottom:2px solid #cbd5e1;">
+        <td style="font-weight:600; background:#f1f5f9; color:#475569;">실기 취득(환산)</td>
+        <td><span style="font-weight:600; font-size:12px;">41점</span> <small style="color:#64748b; font-size:10.5px;">(82.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">46점</span> <small style="color:#64748b; font-size:10.5px;">(92.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">53점</span> <small style="color:#64748b; font-size:10.5px;">(106.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">58점</span> <small style="color:#64748b; font-size:10.5px;">(116.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">65점</span> <small style="color:#64748b; font-size:10.5px;">(130.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">71점</span> <small style="color:#64748b; font-size:10.5px;">(142.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">76점</span> <small style="color:#64748b; font-size:10.5px;">(152.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">83점</span> <small style="color:#64748b; font-size:10.5px;">(166.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">88점</span> <small style="color:#64748b; font-size:10.5px;">(176.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">95점</span> <small style="color:#64748b; font-size:10.5px;">(190.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">100점</span> <small style="color:#64748b; font-size:10.5px;">(200.0점)</small></td>
+      </tr>
+      <tr class="univ-divider" style="border-top:2px solid #cbd5e1;">
+        <td rowspan="4" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">
+          서울여자대학교<br><small style="color:#64748b; font-weight:normal;">스포츠운동과학과</small><br>
+          <div style="margin-top:6px; font-size:11px; color:#fff; background:#15803d; padding:2px 6px; border-radius:4px; display:inline-block; font-weight:700;">
+            9단계 돌파 🎉
+          </div>
+          <div style="font-size:11.5px; color:#64748b; margin-top:4px;">
+            합격평균: <strong>94.56점</strong><br>
+            합격최소: <strong>92.55점</strong>
+          </div>
+        </td>
+        <td style="font-weight:600; background:#f1f5f9;">총 환산점수</td>
+        <td><strong style="color:var(--primary); font-size:13px;">73.24점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">79.64점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">82.44점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">84.71점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">86.84점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">88.84점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">90.97점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">92.57점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">93.91점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">95.51점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">96.84점</strong></td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:600; background:#f1f5f9;">합격평균 차이 <small style="font-weight:normal;color:#64748b;">(평균: 94.56점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-21.32점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-14.92점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-12.12점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-9.85점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-7.72점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-5.72점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-3.59점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-1.99점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-0.65점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12.5px;">+0.95점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12.5px;">+2.28점</td>
+      </tr>
+
+      <tr style="background:#fff7ed;">
+        <td style="font-weight:600; background:#ffedd5; color:#9a3412;">최소점수 차이 <small style="font-weight:normal;color:#9a3412;">(최소: 92.55점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-19.31점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-12.91점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-10.11점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-7.84점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-5.71점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-3.71점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-1.58점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+0.02점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+1.36점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+2.96점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+4.29점</td>
+      </tr>
+
+      <tr style="border-bottom:2px solid #cbd5e1;">
+        <td style="font-weight:600; background:#f1f5f9; color:#475569;">실기 취득(환산)</td>
+        <td><span style="font-weight:600; font-size:12px;">123점</span> <small style="color:#64748b; font-size:10.5px;">(16.4점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">171점</span> <small style="color:#64748b; font-size:10.5px;">(22.8점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">192점</span> <small style="color:#64748b; font-size:10.5px;">(25.6점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">209점</span> <small style="color:#64748b; font-size:10.5px;">(27.9점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">225점</span> <small style="color:#64748b; font-size:10.5px;">(30.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">240점</span> <small style="color:#64748b; font-size:10.5px;">(32.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">256점</span> <small style="color:#64748b; font-size:10.5px;">(34.1점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">268점</span> <small style="color:#64748b; font-size:10.5px;">(35.7점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">278점</span> <small style="color:#64748b; font-size:10.5px;">(37.1점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">290점</span> <small style="color:#64748b; font-size:10.5px;">(38.7점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">300점</span> <small style="color:#64748b; font-size:10.5px;">(40.0점)</small></td>
+      </tr>
+      <tr class="univ-divider" style="border-top:2px solid #cbd5e1;">
+        <td rowspan="4" style="font-weight:700; background:#f8fafc; vertical-align:middle; border-right:1px solid #e2e8f0;">
+          성신여자대학교<br><small style="color:#64748b; font-weight:normal;">운동재활전공</small><br>
+          <div style="margin-top:6px; font-size:11px; color:#fff; background:#15803d; padding:2px 6px; border-radius:4px; display:inline-block; font-weight:700;">
+            9단계 돌파 🎉
+          </div>
+          <div style="font-size:11.5px; color:#64748b; margin-top:4px;">
+            합격평균: <strong>429.96점</strong><br>
+            합격최소: <strong>420.83점</strong>
+          </div>
+        </td>
+        <td style="font-weight:600; background:#f1f5f9;">총 환산점수</td>
+        <td><strong style="color:var(--primary); font-size:13px;">278.50점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">297.17점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">318.50점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">331.83점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">350.50점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">366.50점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">379.83점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">398.50점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">411.83점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">433.17점</strong></td>
+        <td><strong style="color:var(--primary); font-size:13px;">446.50점</strong></td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:600; background:#f1f5f9;">합격평균 차이 <small style="font-weight:normal;color:#64748b;">(평균: 429.96점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-151.46점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-132.79점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-111.46점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-98.13점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-79.46점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-63.46점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-50.13점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-31.46점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12.5px;">-18.13점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12.5px;">+3.21점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12.5px;">+16.54점</td>
+      </tr>
+
+      <tr style="background:#fff7ed;">
+        <td style="font-weight:600; background:#ffedd5; color:#9a3412;">최소점수 차이 <small style="font-weight:normal;color:#9a3412;">(최소: 420.83점)</small></td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-142.33점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-123.66점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-102.33점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-89.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-70.33점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-54.33점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-41.00점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-22.33점</td>
+        <td style="background:#fef2f2; font-weight:700; color:#dc2626; font-size:12px;">-9.00점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+12.34점</td>
+        <td style="background:#f0fdf4; font-weight:700; color:#15803d; font-size:12px;">+25.67점</td>
+      </tr>
+
+      <tr style="border-bottom:2px solid #cbd5e1;">
+        <td style="font-weight:600; background:#f1f5f9; color:#475569;">실기 취득(환산)</td>
+        <td><span style="font-weight:600; font-size:12px;">48점</span> <small style="color:#64748b; font-size:10.5px;">(32.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">76점</span> <small style="color:#64748b; font-size:10.5px;">(50.7점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">108점</span> <small style="color:#64748b; font-size:10.5px;">(72.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">128점</span> <small style="color:#64748b; font-size:10.5px;">(85.3점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">156점</span> <small style="color:#64748b; font-size:10.5px;">(104.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">180점</span> <small style="color:#64748b; font-size:10.5px;">(120.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">200점</span> <small style="color:#64748b; font-size:10.5px;">(133.3점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">228점</span> <small style="color:#64748b; font-size:10.5px;">(152.0점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">248점</span> <small style="color:#64748b; font-size:10.5px;">(165.3점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">280점</span> <small style="color:#64748b; font-size:10.5px;">(186.7점)</small></td>
+        <td><span style="font-weight:600; font-size:12px;">300점</span> <small style="color:#64748b; font-size:10.5px;">(200.0점)</small></td>
+      </tr>
+            </tbody>
+</table>
+        </div>
+      </div>
+
+      <!-- 4. 실기 예상기록 입력 및 실시간 점수 시뮬레이터 (맨 아래 한 줄 배치) -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">4. 실기 예상기록 입력 및 실시간 대학별 점수 시뮬레이터</h2>
+            <div class="card-desc">예상기록 수치를 수정하면 하단 대학별 예상 실기 환산점수 및 총점이 실시간으로 자동 재계산됩니다.</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button onclick="openRecordModal()" style="display:flex; align-items:center; gap:5px; padding:6px 14px; font-size:12.5px; border-radius:6px; border:none; background:#16a34a; color:#fff; cursor:pointer; font-weight:700; box-shadow:0 1px 2px rgba(22,163,74,0.25);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              현재 실기기록 수정
+            </button>
+            <button onclick="resetSimInputs()" style="padding:6px 12px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-weight:600; color:#475569;">현재 기록으로 리셋</button>
+          </div>
+        </div>
+        <div style="padding: 20px 24px;">
+          <!-- 5개 종목 가로 1열(한 줄) 입력 카드 -->
+          <div class="sim-grid-row">
+            
+            <div class="sim-card">
+              <div class="card-top">
+                <span class="event-name">제자리멀리뛰기</span>
+                <span class="event-unit">순발력</span>
+              </div>
+              <div class="current-box"><span class="current-label">현재 기록</span><span class="current-val" id="disp-cur-bj">180 cm</span></div>
+              <div class="target-box">
+                <label class="target-label" for="sim-bj">
+                  <span>예상/목표 기록</span>
+                  <span id="sim-diff-bj" style="font-size:11px; color:#16a34a; font-weight:700;"></span>
+                </label>
+                <div class="target-input-wrap">
+                  <input type="number" id="sim-bj" class="target-input" value="180" step="1" oninput="runSimulation()">
+                  <span class="target-unit-tag">cm</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="card-top">
+                <span class="event-name">10m 왕복달리기</span>
+                <span class="event-unit">민첩성</span>
+              </div>
+              <div class="current-box"><span class="current-label">현재 기록</span><span class="current-val" id="disp-cur-shuttle">12.00 초</span></div>
+              <div class="target-box">
+                <label class="target-label" for="sim-shuttle">
+                  <span>예상/목표 기록</span>
+                  <span id="sim-diff-shuttle" style="font-size:11px; color:#16a34a; font-weight:700;"></span>
+                </label>
+                <div class="target-input-wrap">
+                  <input type="number" id="sim-shuttle" class="target-input" value="12.00" step="0.01" oninput="runSimulation()">
+                  <span class="target-unit-tag">초</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="card-top">
+                <span class="event-name">앉아윗몸앞으로굽히기</span>
+                <span class="event-unit">유연성</span>
+              </div>
+              <div class="current-box"><span class="current-label">현재 기록</span><span class="current-val" id="disp-cur-sit">18 cm</span></div>
+              <div class="target-box">
+                <label class="target-label" for="sim-sit">
+                  <span>예상/목표 기록</span>
+                  <span id="sim-diff-sit" style="font-size:11px; color:#16a34a; font-weight:700;"></span>
+                </label>
+                <div class="target-input-wrap">
+                  <input type="number" id="sim-sit" class="target-input" value="18" step="0.5" oninput="runSimulation()">
+                  <span class="target-unit-tag">cm</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="card-top">
+                <span class="event-name">메디신볼던지기</span>
+                <span class="event-unit">한체대</span>
+              </div>
+              <div class="current-box"><span class="current-label">현재 기록</span><span class="current-val" id="disp-cur-mb">4.5 m</span></div>
+              <div class="target-box">
+                <label class="target-label" for="sim-mb">
+                  <span>예상/목표 기록</span>
+                  <span id="sim-diff-mb" style="font-size:11px; color:#16a34a; font-weight:700;"></span>
+                </label>
+                <div class="target-input-wrap">
+                  <input type="number" id="sim-mb" class="target-input" value="4.5" step="0.1" oninput="runSimulation()">
+                  <span class="target-unit-tag">m</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="card-top">
+                <span class="event-name">팔굽혀매달리기</span>
+                <span class="event-unit">서울여대</span>
+              </div>
+              <div class="current-box"><span class="current-label">현재 기록</span><span class="current-val" id="disp-cur-hang">10 초</span></div>
+              <div class="target-box">
+                <label class="target-label" for="sim-hang">
+                  <span>예상/목표 기록</span>
+                  <span id="sim-diff-hang" style="font-size:11px; color:#16a34a; font-weight:700;"></span>
+                </label>
+                <div class="target-input-wrap">
+                  <input type="number" id="sim-hang" class="target-input" value="10" step="1" oninput="runSimulation()">
+                  <span class="target-unit-tag">초</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 실시간 대학별 예상 점수 대시보드 -->
+          <h3 style="font-size: 15px; font-weight: 700; color:#0f172a; margin-bottom: 12px;">📊 4개 대학 실시간 예상 환산점수 및 합격선 진단</h3>
+          <div class="res-grid">
+            
+            <!-- 한체대 -->
+            <div class="res-card active-res">
+              <div class="res-header">
+                <span class="res-univ">한국체육대 (가군)</span>
+                <span class="tag-ga">합격평균 911.08점</span>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 취득점수:</span>
+                <strong id="sim-knsu-raw">65 / 114점</strong>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 환산 (200점):</span>
+                <strong id="sim-knsu-conv" style="color:var(--primary);">114.04점</strong>
+              </div>
+              <div class="res-score-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
+                <span style="font-weight:700;">예상 총 환산점수:</span>
+                <span class="res-total" id="sim-knsu-total">820.34점</span>
+              </div>
+              <div id="sim-knsu-diff" style="font-size:12px; font-weight:700; text-align:right;"></div>
+            </div>
+
+            <!-- 동덕여대 -->
+            <div class="res-card active-res">
+              <div class="res-header">
+                <span class="res-univ">동덕여자대 (나군)</span>
+                <span class="tag-na">합격평균 872.35점</span>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 취득점수:</span>
+                <strong id="sim-dongduk-raw">41 / 100점</strong>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 환산 (200점):</span>
+                <strong id="sim-dongduk-conv" style="color:var(--primary);">82.00점</strong>
+              </div>
+              <div class="res-score-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
+                <span style="font-weight:700;">예상 총 환산점수:</span>
+                <span class="res-total" id="sim-dongduk-total">759.67점</span>
+              </div>
+              <div id="sim-dongduk-diff" style="font-size:12px; font-weight:700; text-align:right;"></div>
+            </div>
+
+            <!-- 서울여대 -->
+            <div class="res-card active-res">
+              <div class="res-header">
+                <span class="res-univ">서울여자대 (나군)</span>
+                <span class="tag-na">합격평균 94.56점</span>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 취득점수:</span>
+                <strong id="sim-swu-raw">123 / 300점</strong>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 환산 (40점):</span>
+                <strong id="sim-swu-conv" style="color:var(--primary);">16.40점</strong>
+              </div>
+              <div class="res-score-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
+                <span style="font-weight:700;">예상 총 환산점수:</span>
+                <span class="res-total" id="sim-swu-total">73.24점</span>
+              </div>
+              <div id="sim-swu-diff" style="font-size:12px; font-weight:700; text-align:right;"></div>
+            </div>
+
+            <!-- 성신여대 -->
+            <div class="res-card active-res">
+              <div class="res-header">
+                <span class="res-univ">성신여자대 (가군)</span>
+                <span class="tag-ga">합격평균 429.96점</span>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 취득점수:</span>
+                <strong id="sim-sungshin-raw">48 / 300점</strong>
+              </div>
+              <div class="res-score-row">
+                <span style="color:#64748b;">실기 환산 (200점):</span>
+                <strong id="sim-sungshin-conv" style="color:var(--primary);">32.00점</strong>
+              </div>
+              <div class="res-score-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
+                <span style="font-weight:700;">예상 총 환산점수:</span>
+                <span class="res-total" id="sim-sungshin-total">278.50점</span>
+              </div>
+              <div id="sim-sungshin-diff" style="font-size:12px; font-weight:700; text-align:right;"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  
+  <!-- 현재 실기기록 수정 모달창 -->
+  <div id="record-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">현재 실기기록 수정</h3>
+        <button class="modal-close" onclick="closeRecordModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+          지원자(유연주)의 현재 실기 종목별 기록을 수정합니다. 저장 시 시뮬레이터 기준점과 차이 계산이 즉시 갱신됩니다.
+        </p>
+        <div class="modal-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+          <div class="modal-field">
+            <label style="display:flex; justify-content:space-between; font-weight:600; font-size:13px; margin-bottom:4px;">
+              <span>제자리멀리뛰기 (cm)</span>
+              <span style="font-size:11px; color:#16a34a;">순발력</span>
+            </label>
+            <input type="number" id="inp-rec-bj" value="180" step="1" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; font-size:15px; font-weight:700;">
+          </div>
+          <div class="modal-field">
+            <label style="display:flex; justify-content:space-between; font-weight:600; font-size:13px; margin-bottom:4px;">
+              <span>10m 왕복달리기 (초)</span>
+              <span style="font-size:11px; color:#16a34a;">민첩성</span>
+            </label>
+            <input type="number" id="inp-rec-shuttle" value="12.00" step="0.01" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; font-size:15px; font-weight:700;">
+          </div>
+          <div class="modal-field">
+            <label style="display:flex; justify-content:space-between; font-weight:600; font-size:13px; margin-bottom:4px;">
+              <span>앉아윗몸앞으로굽히기 (cm)</span>
+              <span style="font-size:11px; color:#16a34a;">유연성</span>
+            </label>
+            <input type="number" id="inp-rec-sit" value="18" step="0.5" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; font-size:15px; font-weight:700;">
+          </div>
+          <div class="modal-field">
+            <label style="display:flex; justify-content:space-between; font-weight:600; font-size:13px; margin-bottom:4px;">
+              <span>메디신볼던지기 (m)</span>
+              <span style="font-size:11px; color:#2563eb;">한국체대</span>
+            </label>
+            <input type="number" id="inp-rec-mb" value="4.5" step="0.1" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; font-size:15px; font-weight:700;">
+          </div>
+          <div class="modal-field">
+            <label style="display:flex; justify-content:space-between; font-weight:600; font-size:13px; margin-bottom:4px;">
+              <span>팔굽혀매달리기 (초)</span>
+              <span style="font-size:11px; color:#2563eb;">서울여대</span>
+            </label>
+            <input type="number" id="inp-rec-hang" value="10" step="1" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; font-size:15px; font-weight:700;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="resetDefaultRecords()" style="background:none; border:none; color:#64748b; font-weight:600; font-size:13px; cursor:pointer;">기본 기록 복원</button>
+        <div style="display:flex; gap:8px;">
+          <button onclick="closeRecordModal()" style="background:#fff; border:1px solid #cbd5e1; color:#475569; padding:8px 16px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer;">취소</button>
+          <button onclick="saveRecords()" style="background:#16a34a; border:none; color:#fff; padding:8px 18px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer;">저장 및 적용</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 수능 및 학생부 점수 수정 모달창 -->
+  <div id="score-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">수능 및 학생부 환산점수 수정</h3>
+        <button class="modal-close" onclick="closeScoreModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="modal-univ-block">
+          <div class="modal-univ-name">
+            <span>한국체육대학교 (운동건강관리)</span>
+            <span class="tag-ga">가군 (수능70+학생부10+실기20)</span>
+          </div>
+          <div class="modal-field-group">
+            <div class="modal-field">
+              <label>수능 점수 (만점 700)</label>
+              <input type="number" id="inp-knsu-suneung" value="617.47" step="0.01">
+            </div>
+            <div class="modal-field">
+              <label>학생부 점수 (만점 100)</label>
+              <input type="number" id="inp-knsu-naeshin" value="88.83" step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-univ-block">
+          <div class="modal-univ-name">
+            <span>동덕여자대학교 (체육학과)</span>
+            <span class="tag-na">나군 (수능80+실기20)</span>
+          </div>
+          <div class="modal-field">
+            <label>수능 점수 (만점 800)</label>
+            <input type="number" id="inp-dongduk-suneung" value="677.6667" step="0.0001">
+          </div>
+        </div>
+
+        <div class="modal-univ-block">
+          <div class="modal-univ-name">
+            <span>서울여자대학교 (스포츠운동과학)</span>
+            <span class="tag-na">나군 (수능60+실기40)</span>
+          </div>
+          <div class="modal-field">
+            <label>수능 점수 (만점 60)</label>
+            <input type="number" id="inp-swu-suneung" value="56.84" step="0.01">
+          </div>
+        </div>
+
+        <div class="modal-univ-block">
+          <div class="modal-univ-name">
+            <span>성신여자대학교 (운동재활전공)</span>
+            <span class="tag-ga">가군 (수능60+실기40)</span>
+          </div>
+          <div class="modal-field">
+            <label>수능 점수 (만점 300)</label>
+            <input type="number" id="inp-sungshin-suneung" value="246.50" step="0.1">
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button onclick="resetDefaultScores()" style="background:none; border:none; color:#64748b; font-weight:600; font-size:13px; cursor:pointer;">기본값 복원</button>
+        <div style="display:flex; gap:8px;">
+          <button onclick="closeScoreModal()" style="background:#fff; border:1px solid #cbd5e1; color:#475569; padding:8px 16px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer;">취소</button>
+          <button onclick="saveScores()" style="background:#2563eb; border:none; color:#fff; padding:8px 18px; border-radius:6px; font-weight:600; font-size:13px; cursor:pointer;">저장 및 적용</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DB = {"metadata": {"title": "2025/2027학년도 체육계열 4개 대학 실기고사 배점기준표 데이터", "description": "한국체육대(여), 동덕여대, 서울여대, 성신여대 실기 배점표 데이터베이스", "user_records": {"10m왕복달리기": 12.0, "제자리멀리뛰기": 180.0, "앉아윗몸앞으로굽히기": 18.0, "메디신볼던지기": 4.5, "팔굽혀매달리기": 10.0}}, "universities": [{"univ": "한국체육대학교", "dept": "운동건강관리학과", "gender": "F", "events": {"10m왕복달리기": {"unit": "초", "higher_better": false, "user_record": 12.0, "rows": [{"score": 38, "display": "9.19 이하", "min": null, "max": 9.19}, {"score": 37, "display": "9.20 ~ 9.44", "min": 9.2, "max": 9.44}, {"score": 35, "display": "9.45 ~ 9.70", "min": 9.45, "max": 9.7}, {"score": 33, "display": "9.71 ~ 9.95", "min": 9.71, "max": 9.95}, {"score": 31, "display": "9.96 ~ 10.21", "min": 9.96, "max": 10.21}, {"score": 29, "display": "10.22 ~ 10.46", "min": 10.22, "max": 10.46}, {"score": 27, "display": "10.47 ~ 10.72", "min": 10.47, "max": 10.72}, {"score": 25, "display": "10.73 ~ 10.97", "min": 10.73, "max": 10.97}, {"score": 23, "display": "10.98 ~ 11.23", "min": 10.98, "max": 11.23}, {"score": 21, "display": "11.24 ~ 11.48", "min": 11.24, "max": 11.48}, {"score": 19, "display": "11.49 이상", "min": 11.49, "max": null}]}, "제자리멀리뛰기": {"unit": "cm", "higher_better": true, "user_record": 180.0, "rows": [{"score": 38, "display": "231 이상", "min": 231.0, "max": null}, {"score": 37, "display": "222 ~ 230", "min": 222.0, "max": 230.0}, {"score": 35, "display": "212 ~ 221", "min": 212.0, "max": 221.0}, {"score": 33, "display": "203 ~ 211", "min": 203.0, "max": 211.0}, {"score": 31, "display": "193 ~ 202", "min": 193.0, "max": 202.0}, {"score": 29, "display": "184 ~ 192", "min": 184.0, "max": 192.0}, {"score": 27, "display": "174 ~ 183", "min": 174.0, "max": 183.0}, {"score": 25, "display": "165 ~ 173", "min": 165.0, "max": 173.0}, {"score": 23, "display": "155 ~ 164", "min": 155.0, "max": 164.0}, {"score": 21, "display": "146 ~ 154", "min": 146.0, "max": 154.0}, {"score": 19, "display": "145 이하", "min": null, "max": 145.0}]}, "메디신볼던지기": {"unit": "m", "higher_better": true, "user_record": 4.5, "rows": [{"score": 38, "display": "10.0 이상", "min": 10.0, "max": null}, {"score": 37, "display": "9.7 ~ 9.9", "min": 9.7, "max": 9.9}, {"score": 35, "display": "9.4 ~ 9.6", "min": 9.4, "max": 9.6}, {"score": 33, "display": "9.1 ~ 9.3", "min": 9.1, "max": 9.3}, {"score": 31, "display": "8.7 ~ 9.0", "min": 8.7, "max": 9.0}, {"score": 29, "display": "8.4 ~ 8.6", "min": 8.4, "max": 8.6}, {"score": 27, "display": "8.1 ~ 8.3", "min": 8.1, "max": 8.3}, {"score": 25, "display": "7.8 ~ 8.0", "min": 7.8, "max": 8.0}, {"score": 23, "display": "7.5 ~ 7.7", "min": 7.5, "max": 7.7}, {"score": 21, "display": "7.1 ~ 7.4", "min": 7.1, "max": 7.4}, {"score": 19, "display": "7.1 미만", "min": null, "max": 7.09}]}}}, {"univ": "동덕여자대학교", "dept": "체육학과", "gender": "F", "events": {"제자리멀리뛰기": {"unit": "cm", "higher_better": true, "user_record": 180.0, "rows": [{"score": 35, "display": "237 이상", "min": 237.0, "max": null}, {"score": 34, "display": "235 ~ 236", "min": 235.0, "max": 236.0}, {"score": 33, "display": "233 ~ 234", "min": 233.0, "max": 234.0}, {"score": 32, "display": "231 ~ 232", "min": 231.0, "max": 232.0}, {"score": 31, "display": "229 ~ 230", "min": 229.0, "max": 230.0}, {"score": 30, "display": "227 ~ 228", "min": 227.0, "max": 228.0}, {"score": 29, "display": "225 ~ 226", "min": 225.0, "max": 226.0}, {"score": 28, "display": "223 ~ 224", "min": 223.0, "max": 224.0}, {"score": 27, "display": "221 ~ 222", "min": 221.0, "max": 222.0}, {"score": 26, "display": "219 ~ 220", "min": 219.0, "max": 220.0}, {"score": 25, "display": "217 ~ 218", "min": 217.0, "max": 218.0}, {"score": 24, "display": "215 ~ 216", "min": 215.0, "max": 216.0}, {"score": 23, "display": "213 ~ 214", "min": 213.0, "max": 214.0}, {"score": 22, "display": "211 ~ 212", "min": 211.0, "max": 212.0}, {"score": 21, "display": "209 ~ 210", "min": 209.0, "max": 210.0}, {"score": 20, "display": "207 ~ 208", "min": 207.0, "max": 208.0}, {"score": 19, "display": "205 ~ 206", "min": 205.0, "max": 206.0}, {"score": 18, "display": "203 ~ 204", "min": 203.0, "max": 204.0}, {"score": 17, "display": "201 ~ 202", "min": 201.0, "max": 202.0}, {"score": 16, "display": "199 ~ 200", "min": 199.0, "max": 200.0}, {"score": 15, "display": "197 ~ 198", "min": 197.0, "max": 198.0}, {"score": 14, "display": "195 ~ 196", "min": 195.0, "max": 196.0}, {"score": 13, "display": "193 ~ 194", "min": 193.0, "max": 194.0}, {"score": 12, "display": "191 ~ 192", "min": 191.0, "max": 192.0}, {"score": 11, "display": "190 이하", "min": null, "max": 190.0}]}, "앉아윗몸앞으로굽히기": {"unit": "cm", "higher_better": true, "user_record": 18.0, "rows": [{"score": 30, "display": "32 이상", "min": 32.0, "max": null}, {"score": 29, "display": "31", "min": 31.0, "max": 31.0}, {"score": 28, "display": "30", "min": 30.0, "max": 30.0}, {"score": 27, "display": "29", "min": 29.0, "max": 29.0}, {"score": 26, "display": "28", "min": 28.0, "max": 28.0}, {"score": 25, "display": "27", "min": 27.0, "max": 27.0}, {"score": 24, "display": "26", "min": 26.0, "max": 26.0}, {"score": 23, "display": "25", "min": 25.0, "max": 25.0}, {"score": 22, "display": "24", "min": 24.0, "max": 24.0}, {"score": 21, "display": "23", "min": 23.0, "max": 23.0}, {"score": 20, "display": "22", "min": 22.0, "max": 22.0}, {"score": 19, "display": "21", "min": 21.0, "max": 21.0}, {"score": 18, "display": "20", "min": 20.0, "max": 20.0}, {"score": 17, "display": "19", "min": 19.0, "max": 19.0}, {"score": 16, "display": "18", "min": 18.0, "max": 18.0}, {"score": 15, "display": "17", "min": 17.0, "max": 17.0}, {"score": 14, "display": "16", "min": 16.0, "max": 16.0}, {"score": 13, "display": "15", "min": 15.0, "max": 15.0}, {"score": 12, "display": "14", "min": 14.0, "max": 14.0}, {"score": 11, "display": "13", "min": 13.0, "max": 13.0}, {"score": 10, "display": "12", "min": 12.0, "max": 12.0}, {"score": 9, "display": "11", "min": 11.0, "max": 11.0}, {"score": 8, "display": "10", "min": 10.0, "max": 10.0}, {"score": 7, "display": "9", "min": 9.0, "max": 9.0}, {"score": 6, "display": "8 이하", "min": null, "max": 8.0}]}, "10m왕복달리기": {"unit": "초", "higher_better": false, "user_record": 12.0, "rows": [{"score": 35, "display": "09.95 이하", "min": null, "max": 9.95}, {"score": 34, "display": "09.96 ~ 10.05", "min": 9.96, "max": 10.05}, {"score": 33, "display": "10.06 ~ 10.15", "min": 10.06, "max": 10.15}, {"score": 32, "display": "10.16 ~ 10.25", "min": 10.16, "max": 10.25}, {"score": 31, "display": "10.26 ~ 10.35", "min": 10.26, "max": 10.35}, {"score": 30, "display": "10.36 ~ 10.45", "min": 10.36, "max": 10.45}, {"score": 29, "display": "10.46 ~ 10.55", "min": 10.46, "max": 10.55}, {"score": 28, "display": "10.56 ~ 10.65", "min": 10.56, "max": 10.65}, {"score": 27, "display": "10.66 ~ 10.75", "min": 10.66, "max": 10.75}, {"score": 26, "display": "10.76 ~ 10.85", "min": 10.76, "max": 10.85}, {"score": 25, "display": "10.86 ~ 10.95", "min": 10.86, "max": 10.95}, {"score": 24, "display": "10.96 ~ 11.05", "min": 10.96, "max": 11.05}, {"score": 23, "display": "11.06 ~ 11.15", "min": 11.06, "max": 11.15}, {"score": 22, "display": "11.16 ~ 11.25", "min": 11.16, "max": 11.25}, {"score": 21, "display": "11.26 ~ 11.35", "min": 11.26, "max": 11.35}, {"score": 20, "display": "11.36 ~ 11.45", "min": 11.36, "max": 11.45}, {"score": 19, "display": "11.46 ~ 11.55", "min": 11.46, "max": 11.55}, {"score": 18, "display": "11.56 ~ 11.65", "min": 11.56, "max": 11.65}, {"score": 17, "display": "11.66 ~ 11.75", "min": 11.66, "max": 11.75}, {"score": 16, "display": "11.76 ~ 11.85", "min": 11.76, "max": 11.85}, {"score": 15, "display": "11.86 ~ 11.95", "min": 11.86, "max": 11.95}, {"score": 14, "display": "11.96 ~ 12.05", "min": 11.96, "max": 12.05}, {"score": 13, "display": "12.06 ~ 12.15", "min": 12.06, "max": 12.15}, {"score": 12, "display": "12.16 ~ 12.25", "min": 12.16, "max": 12.25}, {"score": 11, "display": "12.26 이상", "min": 12.26, "max": null}]}}}, {"univ": "서울여자대학교", "dept": "스포츠운동과학과", "gender": "F", "events": {"앉아윗몸앞으로굽히기": {"unit": "cm", "higher_better": true, "user_record": 18.0, "rows": [{"grade": 1, "score": 100, "display": "30.1 이상", "min": 30.1, "max": null}, {"grade": 2, "score": 98, "display": "29.4 ~ 30.0", "min": 29.4, "max": 30.0}, {"grade": 3, "score": 96, "display": "28.7 ~ 29.3", "min": 28.7, "max": 29.3}, {"grade": 4, "score": 94, "display": "28.0 ~ 28.6", "min": 28.0, "max": 28.6}, {"grade": 5, "score": 92, "display": "27.3 ~ 27.9", "min": 27.3, "max": 27.9}, {"grade": 6, "score": 90, "display": "26.6 ~ 27.2", "min": 26.6, "max": 27.2}, {"grade": 7, "score": 88, "display": "25.9 ~ 26.5", "min": 25.9, "max": 26.5}, {"grade": 8, "score": 86, "display": "25.2 ~ 25.8", "min": 25.2, "max": 25.8}, {"grade": 9, "score": 83, "display": "24.4 ~ 25.1", "min": 24.4, "max": 25.1}, {"grade": 10, "score": 80, "display": "23.6 ~ 24.3", "min": 23.6, "max": 24.3}, {"grade": 11, "score": 77, "display": "22.8 ~ 23.5", "min": 22.8, "max": 23.5}, {"grade": 12, "score": 74, "display": "22.0 ~ 22.7", "min": 22.0, "max": 22.7}, {"grade": 13, "score": 71, "display": "21.2 ~ 21.9", "min": 21.2, "max": 21.9}, {"grade": 14, "score": 68, "display": "20.4 ~ 21.1", "min": 20.4, "max": 21.1}, {"grade": 15, "score": 65, "display": "19.6 ~ 20.3", "min": 19.6, "max": 20.3}, {"grade": 16, "score": 62, "display": "18.8 ~ 19.5", "min": 18.8, "max": 19.5}, {"grade": 17, "score": 58, "display": "17.9 ~ 18.7", "min": 17.9, "max": 18.7}, {"grade": 18, "score": 54, "display": "17.0 ~ 17.8", "min": 17.0, "max": 17.8}, {"grade": 19, "score": 50, "display": "16.1 ~ 16.9", "min": 16.1, "max": 16.9}, {"grade": 20, "score": 46, "display": "15.2 ~ 16.0", "min": 15.2, "max": 16.0}, {"grade": 21, "score": 42, "display": "14.3 ~ 15.1", "min": 14.3, "max": 15.1}, {"grade": 22, "score": 38, "display": "13.4 ~ 14.2", "min": 13.4, "max": 14.2}, {"grade": 23, "score": 34, "display": "12.5 ~ 13.3", "min": 12.5, "max": 13.3}, {"grade": 24, "score": 30, "display": "11.6 ~ 12.4", "min": 11.6, "max": 12.4}, {"grade": 25, "score": 0, "display": "11.5 이하", "min": null, "max": 11.5}]}, "제자리멀리뛰기": {"unit": "cm", "higher_better": true, "user_record": 180.0, "rows": [{"grade": 1, "score": 100, "display": "235 이상", "min": 235.0, "max": null}, {"grade": 2, "score": 98, "display": "233 ~ 234", "min": 233.0, "max": 234.0}, {"grade": 3, "score": 96, "display": "231 ~ 232", "min": 231.0, "max": 232.0}, {"grade": 4, "score": 94, "display": "229 ~ 230", "min": 229.0, "max": 230.0}, {"grade": 5, "score": 92, "display": "227 ~ 228", "min": 227.0, "max": 228.0}, {"grade": 6, "score": 90, "display": "225 ~ 226", "min": 225.0, "max": 226.0}, {"grade": 7, "score": 88, "display": "223 ~ 224", "min": 223.0, "max": 224.0}, {"grade": 8, "score": 86, "display": "221 ~ 222", "min": 221.0, "max": 222.0}, {"grade": 9, "score": 83, "display": "219 ~ 220", "min": 219.0, "max": 220.0}, {"grade": 10, "score": 80, "display": "217 ~ 218", "min": 217.0, "max": 218.0}, {"grade": 11, "score": 77, "display": "215 ~ 216", "min": 215.0, "max": 216.0}, {"grade": 12, "score": 74, "display": "213 ~ 214", "min": 213.0, "max": 214.0}, {"grade": 13, "score": 71, "display": "211 ~ 212", "min": 211.0, "max": 212.0}, {"grade": 14, "score": 68, "display": "209 ~ 210", "min": 209.0, "max": 210.0}, {"grade": 15, "score": 65, "display": "207 ~ 208", "min": 207.0, "max": 208.0}, {"grade": 16, "score": 62, "display": "205 ~ 206", "min": 205.0, "max": 206.0}, {"grade": 17, "score": 58, "display": "203 ~ 204", "min": 203.0, "max": 204.0}, {"grade": 18, "score": 54, "display": "201 ~ 202", "min": 201.0, "max": 202.0}, {"grade": 19, "score": 50, "display": "199 ~ 200", "min": 199.0, "max": 200.0}, {"grade": 20, "score": 46, "display": "197 ~ 198", "min": 197.0, "max": 198.0}, {"grade": 21, "score": 42, "display": "195 ~ 196", "min": 195.0, "max": 196.0}, {"grade": 22, "score": 38, "display": "193 ~ 194", "min": 193.0, "max": 194.0}, {"grade": 23, "score": 34, "display": "191 ~ 192", "min": 191.0, "max": 192.0}, {"grade": 24, "score": 30, "display": "189 ~ 190", "min": 189.0, "max": 190.0}, {"grade": 25, "score": 0, "display": "188 이하", "min": null, "max": 188.0}]}, "팔굽혀매달리기": {"unit": "초", "higher_better": true, "user_record": 10.0, "rows": [{"grade": 1, "score": 100, "display": "24 이상", "min": 24.0, "max": null}, {"grade": 2, "score": 98, "display": "23", "min": 23.0, "max": 23.0}, {"grade": 3, "score": 96, "display": "22", "min": 22.0, "max": 22.0}, {"grade": 4, "score": 94, "display": "21", "min": 21.0, "max": 21.0}, {"grade": 5, "score": 92, "display": "20", "min": 20.0, "max": 20.0}, {"grade": 6, "score": 90, "display": "19", "min": 19.0, "max": 19.0}, {"grade": 7, "score": 88, "display": "18", "min": 18.0, "max": 18.0}, {"grade": 8, "score": 86, "display": "17", "min": 17.0, "max": 17.0}, {"grade": 9, "score": 83, "display": "16", "min": 16.0, "max": 16.0}, {"grade": 10, "score": 80, "display": "15", "min": 15.0, "max": 15.0}, {"grade": 11, "score": 77, "display": "14", "min": 14.0, "max": 14.0}, {"grade": 12, "score": 74, "display": "13", "min": 13.0, "max": 13.0}, {"grade": 13, "score": 71, "display": "12", "min": 12.0, "max": 12.0}, {"grade": 14, "score": 68, "display": "11", "min": 11.0, "max": 11.0}, {"grade": 15, "score": 65, "display": "10", "min": 10.0, "max": 10.0}, {"grade": 16, "score": 62, "display": "9", "min": 9.0, "max": 9.0}, {"grade": 17, "score": 58, "display": "8", "min": 8.0, "max": 8.0}, {"grade": 18, "score": 54, "display": "7", "min": 7.0, "max": 7.0}, {"grade": 19, "score": 50, "display": "6", "min": 6.0, "max": 6.0}, {"grade": 20, "score": 46, "display": "5", "min": 5.0, "max": 5.0}, {"grade": 21, "score": 42, "display": "4", "min": 4.0, "max": 4.0}, {"grade": 22, "score": 38, "display": "3", "min": 3.0, "max": 3.0}, {"grade": 23, "score": 34, "display": "2", "min": 2.0, "max": 2.0}, {"grade": 24, "score": 30, "display": "1", "min": 1.0, "max": 1.0}, {"grade": 25, "score": 0, "display": "1 미만", "min": null, "max": 0.99}]}}}, {"univ": "성신여자대학교", "dept": "운동재활전공", "gender": "F", "events": {"제자리멀리뛰기": {"unit": "cm", "higher_better": true, "user_record": 180.0, "rows": [{"score": 100, "display": "235 이상", "min": 235.0, "max": null}, {"score": 96, "display": "233 ~ 234", "min": 233.0, "max": 234.0}, {"score": 92, "display": "231 ~ 232", "min": 231.0, "max": 232.0}, {"score": 88, "display": "229 ~ 230", "min": 229.0, "max": 230.0}, {"score": 84, "display": "227 ~ 228", "min": 227.0, "max": 228.0}, {"score": 80, "display": "225 ~ 226", "min": 225.0, "max": 226.0}, {"score": 76, "display": "223 ~ 224", "min": 223.0, "max": 224.0}, {"score": 72, "display": "221 ~ 222", "min": 221.0, "max": 222.0}, {"score": 68, "display": "219 ~ 220", "min": 219.0, "max": 220.0}, {"score": 64, "display": "217 ~ 218", "min": 217.0, "max": 218.0}, {"score": 60, "display": "215 ~ 216", "min": 215.0, "max": 216.0}, {"score": 56, "display": "213 ~ 214", "min": 213.0, "max": 214.0}, {"score": 52, "display": "211 ~ 212", "min": 211.0, "max": 212.0}, {"score": 48, "display": "209 ~ 210", "min": 209.0, "max": 210.0}, {"score": 44, "display": "207 ~ 208", "min": 207.0, "max": 208.0}, {"score": 40, "display": "205 ~ 206", "min": 205.0, "max": 206.0}, {"score": 36, "display": "203 ~ 204", "min": 203.0, "max": 204.0}, {"score": 32, "display": "201 ~ 202", "min": 201.0, "max": 202.0}, {"score": 28, "display": "199 ~ 200", "min": 199.0, "max": 200.0}, {"score": 24, "display": "197 ~ 198", "min": 197.0, "max": 198.0}, {"score": 20, "display": "195 ~ 196", "min": 195.0, "max": 196.0}, {"score": 16, "display": "193 ~ 194", "min": 193.0, "max": 194.0}, {"score": 12, "display": "191 ~ 192", "min": 191.0, "max": 192.0}, {"score": 8, "display": "189 ~ 190", "min": 189.0, "max": 190.0}, {"score": 4, "display": "187 ~ 188", "min": 187.0, "max": 188.0}, {"score": 0, "display": "186 이하", "min": null, "max": 186.0}]}, "10m왕복달리기": {"unit": "초", "higher_better": false, "user_record": 12.0, "rows": [{"score": 100, "display": "9.5 이하", "min": null, "max": 9.5}, {"score": 96, "display": "9.6 ~ 9.7", "min": 9.6, "max": 9.7}, {"score": 92, "display": "9.8 ~ 9.9", "min": 9.8, "max": 9.9}, {"score": 88, "display": "10.0 ~ 10.1", "min": 10.0, "max": 10.1}, {"score": 84, "display": "10.2 ~ 10.3", "min": 10.2, "max": 10.3}, {"score": 80, "display": "10.4 ~ 10.5", "min": 10.4, "max": 10.5}, {"score": 76, "display": "10.6 ~ 10.7", "min": 10.6, "max": 10.7}, {"score": 72, "display": "10.8 ~ 10.9", "min": 10.8, "max": 10.9}, {"score": 68, "display": "11.0 ~ 11.1", "min": 11.0, "max": 11.1}, {"score": 64, "display": "11.2 ~ 11.3", "min": 11.2, "max": 11.3}, {"score": 60, "display": "11.4 ~ 11.5", "min": 11.4, "max": 11.5}, {"score": 56, "display": "11.6 ~ 11.7", "min": 11.6, "max": 11.7}, {"score": 52, "display": "11.8 ~ 11.9", "min": 11.8, "max": 11.9}, {"score": 48, "display": "12.0 ~ 12.1", "min": 12.0, "max": 12.1}, {"score": 44, "display": "12.2 ~ 12.3", "min": 12.2, "max": 12.3}, {"score": 40, "display": "12.4 ~ 12.5", "min": 12.4, "max": 12.5}, {"score": 36, "display": "12.6 ~ 12.7", "min": 12.6, "max": 12.7}, {"score": 32, "display": "12.8 ~ 12.9", "min": 12.8, "max": 12.9}, {"score": 28, "display": "13.0 ~ 13.1", "min": 13.0, "max": 13.1}, {"score": 24, "display": "13.2 ~ 13.3", "min": 13.2, "max": 13.3}, {"score": 20, "display": "13.4 ~ 13.5", "min": 13.4, "max": 13.5}, {"score": 16, "display": "13.6 ~ 13.7", "min": 13.6, "max": 13.7}, {"score": 12, "display": "13.8 ~ 13.9", "min": 13.8, "max": 13.9}, {"score": 8, "display": "14.0 ~ 14.1", "min": 14.0, "max": 14.1}, {"score": 4, "display": "14.2 ~ 14.3", "min": 14.2, "max": 14.3}, {"score": 0, "display": "14.4 이상", "min": 14.4, "max": null}]}, "윗몸앞으로굽히기": {"unit": "cm", "higher_better": true, "user_record": 18.0, "rows": [{"score": 100, "display": "33.0 이상", "min": 33.0, "max": null}, {"score": 96, "display": "32.5 ~ 32.9", "min": 32.5, "max": 32.9}, {"score": 92, "display": "32.0 ~ 32.4", "min": 32.0, "max": 32.4}, {"score": 88, "display": "31.5 ~ 31.9", "min": 31.5, "max": 31.9}, {"score": 84, "display": "31.0 ~ 31.4", "min": 31.0, "max": 31.4}, {"score": 80, "display": "30.5 ~ 30.9", "min": 30.5, "max": 30.9}, {"score": 76, "display": "30.0 ~ 30.4", "min": 30.0, "max": 30.4}, {"score": 72, "display": "29.5 ~ 29.9", "min": 29.5, "max": 29.9}, {"score": 68, "display": "29.0 ~ 29.4", "min": 29.0, "max": 29.4}, {"score": 64, "display": "28.5 ~ 28.9", "min": 28.5, "max": 28.9}, {"score": 60, "display": "28.0 ~ 28.4", "min": 28.0, "max": 28.4}, {"score": 56, "display": "27.5 ~ 27.9", "min": 27.5, "max": 27.9}, {"score": 52, "display": "27.0 ~ 27.4", "min": 27.0, "max": 27.4}, {"score": 48, "display": "26.5 ~ 26.9", "min": 26.5, "max": 26.9}, {"score": 44, "display": "26.0 ~ 26.4", "min": 26.0, "max": 26.4}, {"score": 40, "display": "25.5 ~ 25.9", "min": 25.5, "max": 25.9}, {"score": 36, "display": "25.0 ~ 25.4", "min": 25.0, "max": 25.4}, {"score": 32, "display": "24.5 ~ 24.9", "min": 24.5, "max": 24.9}, {"score": 28, "display": "24.0 ~ 24.4", "min": 24.0, "max": 24.4}, {"score": 24, "display": "23.5 ~ 23.9", "min": 23.5, "max": 23.9}, {"score": 20, "display": "23.0 ~ 23.4", "min": 23.0, "max": 23.4}, {"score": 16, "display": "22.5 ~ 22.9", "min": 22.5, "max": 22.9}, {"score": 12, "display": "22.0 ~ 22.4", "min": 22.0, "max": 22.4}, {"score": 8, "display": "21.5 ~ 21.9", "min": 21.5, "max": 21.9}, {"score": 4, "display": "21.0 ~ 21.4", "min": 21.0, "max": 21.4}, {"score": 0, "display": "20.9 이하", "min": null, "max": 20.9}]}}}]};
+
+    
+    let currentRecords = {
+      bj: 180,
+      shuttle: 12.00,
+      sit: 18,
+      mb: 4.5,
+      hang: 10
+    };
+
+    function openRecordModal() {
+      document.getElementById('inp-rec-bj').value = currentRecords.bj;
+      document.getElementById('inp-rec-shuttle').value = currentRecords.shuttle;
+      document.getElementById('inp-rec-sit').value = currentRecords.sit;
+      document.getElementById('inp-rec-mb').value = currentRecords.mb;
+      document.getElementById('inp-rec-hang').value = currentRecords.hang;
+      document.getElementById('record-modal').classList.add('open');
+    }
+
+    function closeRecordModal() {
+      document.getElementById('record-modal').classList.remove('open');
+    }
+
+    function resetDefaultRecords() {
+      document.getElementById('inp-rec-bj').value = 180;
+      document.getElementById('inp-rec-shuttle').value = 12.00;
+      document.getElementById('inp-rec-sit').value = 18;
+      document.getElementById('inp-rec-mb').value = 4.5;
+      document.getElementById('inp-rec-hang').value = 10;
+    }
+
+    function saveRecords() {
+      currentRecords.bj = parseFloat(document.getElementById('inp-rec-bj').value) || 0;
+      currentRecords.shuttle = parseFloat(document.getElementById('inp-rec-shuttle').value) || 0;
+      currentRecords.sit = parseFloat(document.getElementById('inp-rec-sit').value) || 0;
+      currentRecords.mb = parseFloat(document.getElementById('inp-rec-mb').value) || 0;
+      currentRecords.hang = parseFloat(document.getElementById('inp-rec-hang').value) || 0;
+
+      applyRecordsToUI();
+      closeRecordModal();
+    }
+
+    function applyRecordsToUI() {
+      const dispBj = document.getElementById('disp-cur-bj');
+      if (dispBj) dispBj.innerText = `${currentRecords.bj} cm`;
+      const dispShuttle = document.getElementById('disp-cur-shuttle');
+      if (dispShuttle) dispShuttle.innerText = `${currentRecords.shuttle.toFixed(2)} 초`;
+      const dispSit = document.getElementById('disp-cur-sit');
+      if (dispSit) dispSit.innerText = `${currentRecords.sit} cm`;
+      const dispMb = document.getElementById('disp-cur-mb');
+      if (dispMb) dispMb.innerText = `${currentRecords.mb} m`;
+      const dispHang = document.getElementById('disp-cur-hang');
+      if (dispHang) dispHang.innerText = `${currentRecords.hang} 초`;
+
+      // Update simulation target inputs if user hasn't diverged or if resetting
+      runSimulation();
+    }
+
+    let userScores = {
+      knsu: { suneung: 617.47, naeshin: 88.83 },
+      dongduk: { suneung: 677.6667, naeshin: 0 },
+      swu: { suneung: 56.84, naeshin: 0 },
+      sungshin: { suneung: 246.50, naeshin: 0 }
+    };
+
+    function showTab(tabName) {
+      document.getElementById('section-comparison').classList.remove('active');
+      document.getElementById('section-scoring').classList.remove('active');
+      document.getElementById('section-management').classList.remove('active');
+
+      document.getElementById('menu-comparison').classList.remove('active');
+      document.getElementById('menu-scoring').classList.remove('active');
+      document.getElementById('menu-management').classList.remove('active');
+
+      if (tabName === 'comparison') {
+        document.getElementById('section-comparison').classList.add('active');
+        document.getElementById('menu-comparison').classList.add('active');
+        document.getElementById('page-title').innerText = '체육계열 4개 대학 환산점수 및 실기 비교';
+      } else if (tabName === 'scoring') {
+        document.getElementById('section-scoring').classList.add('active');
+        document.getElementById('menu-scoring').classList.add('active');
+        document.getElementById('page-title').innerText = '대학별 실기고사 배점기준표';
+      } else if (tabName === 'management') {
+        document.getElementById('section-management').classList.add('active');
+        document.getElementById('menu-management').classList.add('active');
+        document.getElementById('page-title').innerText = '실기 기록 관리 및 목표 역산 시뮬레이션';
+        runSimulation();
+      }
+    }
+
+    function showUniv(univId) {
+      showTab('scoring');
+      const views = document.querySelectorAll('.univ-view');
+      views.forEach(v => v.classList.remove('active'));
+      const btns = document.querySelectorAll('.pill-btn');
+      btns.forEach(b => b.classList.remove('active'));
+
+      const targetView = document.getElementById('univ-' + univId);
+      if (targetView) targetView.classList.add('active');
+      const targetBtn = document.getElementById('btn-' + univId);
+      if (targetBtn) targetBtn.classList.add('active');
+    }
+
+    function openScoreModal() {
+      document.getElementById('inp-knsu-suneung').value = userScores.knsu.suneung;
+      document.getElementById('inp-knsu-naeshin').value = userScores.knsu.naeshin;
+      document.getElementById('inp-dongduk-suneung').value = userScores.dongduk.suneung;
+      document.getElementById('inp-swu-suneung').value = userScores.swu.suneung;
+      document.getElementById('inp-sungshin-suneung').value = userScores.sungshin.suneung;
+      document.getElementById('score-modal').classList.add('open');
+    }
+
+    function closeScoreModal() {
+      document.getElementById('score-modal').classList.remove('open');
+    }
+
+    function resetDefaultScores() {
+      document.getElementById('inp-knsu-suneung').value = 617.47;
+      document.getElementById('inp-knsu-naeshin').value = 88.83;
+      document.getElementById('inp-dongduk-suneung').value = 677.6667;
+      document.getElementById('inp-swu-suneung').value = 56.84;
+      document.getElementById('inp-sungshin-suneung').value = 246.50;
+    }
+
+    function saveScores() {
+      userScores.knsu.suneung = parseFloat(document.getElementById('inp-knsu-suneung').value) || 0;
+      userScores.knsu.naeshin = parseFloat(document.getElementById('inp-knsu-naeshin').value) || 0;
+      userScores.dongduk.suneung = parseFloat(document.getElementById('inp-dongduk-suneung').value) || 0;
+      userScores.swu.suneung = parseFloat(document.getElementById('inp-swu-suneung').value) || 0;
+      userScores.sungshin.suneung = parseFloat(document.getElementById('inp-sungshin-suneung').value) || 0;
+
+      applyScoresToUI();
+      closeScoreModal();
+    }
+
+    function applyScoresToUI() {
+      const knsu_tot = userScores.knsu.suneung + userScores.knsu.naeshin + 114.04;
+      const compTable = document.querySelector('#section-comparison table tbody');
+      if (compTable) {
+        compTable.rows[2].cells[1].innerHTML = `• 수능: <strong>${userScores.knsu.suneung.toFixed(2)}</strong> / 700<br>• 학생부: <strong>${userScores.knsu.naeshin.toFixed(2)}</strong> / 100<br>• 실기: <strong>114.04</strong> / 200`;
+        compTable.rows[2].cells[2].innerHTML = `• 수능: <strong>${userScores.dongduk.suneung.toFixed(4)}</strong> / 800<br>• 실기: <strong>82.00</strong> / 200`;
+        compTable.rows[2].cells[3].innerHTML = `• 수능: <strong>${userScores.swu.suneung.toFixed(2)}</strong> / 60<br>• 실기: <strong>16.40</strong> / 40`;
+        compTable.rows[2].cells[4].innerHTML = `• 수능: <strong>${userScores.sungshin.suneung.toFixed(2)}</strong> / 300<br>• 실기: <strong>32.00</strong> / 200`;
+
+        const d_tot = userScores.dongduk.suneung + 82.00;
+        const swu_tot = userScores.swu.suneung + 16.40;
+        const ss_tot = userScores.sungshin.suneung + 32.00;
+
+        compTable.rows[3].cells[1].innerHTML = `<strong style="color:var(--primary); font-size:15px;">${knsu_tot.toFixed(2)}점</strong>`;
+        compTable.rows[3].cells[2].innerHTML = `<strong style="color:var(--primary); font-size:15px;">${d_tot.toFixed(4)}점</strong>`;
+        compTable.rows[3].cells[3].innerHTML = `<strong style="color:var(--primary); font-size:15px;">${swu_tot.toFixed(2)}점</strong>`;
+        compTable.rows[3].cells[4].innerHTML = `<strong style="color:var(--primary); font-size:15px;">${ss_tot.toFixed(2)}점</strong>`;
+
+        compTable.rows[7].cells[1].innerHTML = formatDiff(knsu_tot - 911.08);
+        compTable.rows[7].cells[2].innerHTML = formatDiff(d_tot - 872.35);
+        compTable.rows[7].cells[3].innerHTML = formatDiff(swu_tot - 94.56);
+        compTable.rows[7].cells[4].innerHTML = formatDiff(ss_tot - 429.96);
+
+        compTable.rows[8].cells[1].innerHTML = formatDiff(knsu_tot - 898.22, '#c2410c');
+        compTable.rows[8].cells[2].innerHTML = formatDiff(d_tot - 853.67, '#c2410c');
+        compTable.rows[8].cells[3].innerHTML = formatDiff(swu_tot - 92.55, '#c2410c');
+        compTable.rows[8].cells[4].innerHTML = formatDiff(ss_tot - 420.83, '#c2410c');
+      }
+
+      if (typeof runSimulation === 'function') runSimulation();
+    }
+
+    function formatDiff(diff, defaultColor = null) {
+      const color = diff >= 0 ? '#15803d' : (defaultColor || '#dc2626');
+      const sign = diff >= 0 ? `+${diff.toFixed(2)}점 🎉` : `${diff.toFixed(2)}점`;
+      return `<strong style="color:${color}; font-size:14.5px;">${sign}</strong>`;
+    }
+
+    function lookupScore(univName, eventName, val) {
+      const u = DB.universities.find(x => x.univ === univName);
+      if (!u || !u.events[eventName]) return 0;
+      const ev = u.events[eventName];
+      const rows = ev.rows;
+      for (let r of rows) {
+        if (r.min !== null && r.max !== null) {
+          if (val >= r.min && val <= r.max) return r.score;
+        } else if (r.min !== null && r.max === null) {
+          if (val >= r.min) return r.score;
+        } else if (r.min === null && r.max !== null) {
+          if (val <= r.max) return r.score;
+        }
+      }
+      return 0;
+    }
+
+    function runSimulation() {
+      const bjElem = document.getElementById('sim-bj');
+      if (!bjElem) return;
+      const bj = parseFloat(bjElem.value) || 0;
+      const shuttle = parseFloat(document.getElementById('sim-shuttle').value) || 0;
+      const sit = parseFloat(document.getElementById('sim-sit').value) || 0;
+      const mb = parseFloat(document.getElementById('sim-mb').value) || 0;
+      const hang = parseFloat(document.getElementById('sim-hang').value) || 0;
+
+      updateSimDiff('bj', currentRecords.bj, bj, 'cm', false);
+      updateSimDiff('shuttle', 12.0, shuttle, '초', true);
+      updateSimDiff('sit', currentRecords.sit, sit, 'cm', false);
+      updateSimDiff('mb', currentRecords.mb, mb, 'm', false);
+      updateSimDiff('hang', currentRecords.hang, hang, '초', false);
+
+      // 한국체육대
+      const knsu_s1 = lookupScore('한국체육대학교', '10m왕복달리기', shuttle);
+      const knsu_s2 = lookupScore('한국체육대학교', '제자리멀리뛰기', bj);
+      const knsu_s3 = lookupScore('한국체육대학교', '메디신볼던지기', mb);
+      const knsu_raw = knsu_s1 + knsu_s2 + knsu_s3;
+      const knsu_conv = (knsu_raw / 114) * 200;
+      const knsu_total = userScores.knsu.suneung + userScores.knsu.naeshin + knsu_conv;
+      document.getElementById('sim-knsu-raw').innerText = `${knsu_raw} / 114점`;
+      document.getElementById('sim-knsu-conv').innerText = `${knsu_conv.toFixed(2)}점`;
+      document.getElementById('sim-knsu-total').innerText = `${knsu_total.toFixed(2)}점`;
+      renderDiffBadge('sim-knsu-diff', knsu_total, 911.08);
+
+      // 동덕여자대
+      const d_s1 = lookupScore('동덕여자대학교', '제자리멀리뛰기', bj);
+      const d_s2 = lookupScore('동덕여자대학교', '앉아윗몸앞으로굽히기', sit);
+      const d_s3 = lookupScore('동덕여자대학교', '10m왕복달리기', shuttle);
+      const d_raw = d_s1 + d_s2 + d_s3;
+      const d_conv = (d_raw / 100) * 200;
+      const d_total = userScores.dongduk.suneung + d_conv;
+      document.getElementById('sim-dongduk-raw').innerText = `${d_raw} / 100점`;
+      document.getElementById('sim-dongduk-conv').innerText = `${d_conv.toFixed(2)}점`;
+      document.getElementById('sim-dongduk-total').innerText = `${d_total.toFixed(2)}점`;
+      renderDiffBadge('sim-dongduk-diff', d_total, 872.35);
+
+      // 서울여자대
+      const swu_s1 = lookupScore('서울여자대학교', '앉아윗몸앞으로굽히기', sit);
+      const swu_s2 = lookupScore('서울여자대학교', '제자리멀리뛰기', bj);
+      const swu_s3 = lookupScore('서울여자대학교', '팔굽혀매달리기', hang);
+      const swu_raw = swu_s1 + swu_s2 + swu_s3;
+      const swu_conv = (swu_raw / 300) * 40;
+      const swu_total = userScores.swu.suneung + swu_conv;
+      document.getElementById('sim-swu-raw').innerText = `${swu_raw} / 300점`;
+      document.getElementById('sim-swu-conv').innerText = `${swu_conv.toFixed(2)}점`;
+      document.getElementById('sim-swu-total').innerText = `${swu_total.toFixed(2)}점`;
+      renderDiffBadge('sim-swu-diff', swu_total, 94.56);
+
+      // 성신여자대
+      const ss_s1 = lookupScore('성신여자대학교', '제자리멀리뛰기', bj);
+      const ss_s2 = lookupScore('성신여자대학교', '10m왕복달리기', shuttle);
+      const ss_s3 = lookupScore('성신여자대학교', '윗몸앞으로굽히기', sit);
+      const ss_raw = ss_s1 + ss_s2 + ss_s3;
+      const ss_conv = (ss_raw / 300) * 200;
+      const ss_total = userScores.sungshin.suneung + ss_conv;
+      document.getElementById('sim-sungshin-raw').innerText = `${ss_raw} / 300점`;
+      document.getElementById('sim-sungshin-conv').innerText = `${ss_conv.toFixed(2)}점`;
+      document.getElementById('sim-sungshin-total').innerText = `${ss_total.toFixed(2)}점`;
+      renderDiffBadge('sim-sungshin-diff', ss_total, 429.96);
+    }
+
+    function renderDiffBadge(elemId, myScore, avgScore) {
+      const elem = document.getElementById(elemId);
+      if (!elem) return;
+      const diff = myScore - avgScore;
+      if (diff >= 0) {
+        elem.innerText = `합격평균 대비 +${diff.toFixed(2)}점 (합격권 초과 🎉)`;
+        elem.style.color = '#15803d';
+      } else {
+        elem.innerText = `합격평균 대비 ${diff.toFixed(2)}점 부족`;
+        elem.style.color = '#dc2626';
+      }
+    }
+
+    function updateSimDiff(id, cur, val, unit, isSmallerBetter) {
+      const elem = document.getElementById('sim-diff-' + id);
+      if (!elem) return;
+      const diff = val - cur;
+      if (Math.abs(diff) < 0.001) {
+        elem.innerText = '현재와 동일';
+        elem.style.color = '#64748b';
+        return;
+      }
+      if (isSmallerBetter) {
+        if (diff < 0) {
+          elem.innerText = `${Math.abs(diff).toFixed(2)}${unit} 단축 🚀`;
+          elem.style.color = '#16a34a';
+        } else {
+          elem.innerText = `+${diff.toFixed(2)}${unit} 지연`;
+          elem.style.color = '#dc2626';
+        }
+      } else {
+        if (diff > 0) {
+          elem.innerText = `+${diff.toFixed(1)}${unit} 향상 🚀`;
+          elem.style.color = '#16a34a';
+        } else {
+          elem.innerText = `${diff.toFixed(1)}${unit} 하락`;
+          elem.style.color = '#dc2626';
+        }
+      }
+    }
+
+    function resetSimInputs() {
+      document.getElementById('sim-bj').value = currentRecords.bj;
+      document.getElementById('sim-shuttle').value = currentRecords.shuttle.toFixed(2);
+      document.getElementById('sim-sit').value = currentRecords.sit;
+      document.getElementById('sim-mb').value = currentRecords.mb;
+      document.getElementById('sim-hang').value = currentRecords.hang;
+      runSimulation();
+    }
+  </script>
+</body>
+</html>
